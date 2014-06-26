@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Locally: 
+      <base href="http://0.0.0.0:4000/">
+    -->
+
+    <!-- On github: -->
+    <base href="http://probmods.github.io/probprog-esslli2014/">
+
+    <title>{{ page.title }}</title>
+
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/assets/vendor/codemirror/lib/codemirror.css">
+    <link rel="stylesheet" href="/assets/vendor/codemirror/theme/neat.css">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="/assets/vendor/codemirror/lib/codemirror.js"></script>
+    <script src="/assets/vendor/codemirror/mode/javascript/javascript.js"></script>
+    <script src="/assets/js/custom.js"></script>
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  </head>
+  <body>
+
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">ProbProg Course</a>
+          <p class="navbar-text navbar-collapse collapse">ESSLLI 2014</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1>{{ page.title }}</h1>
+      </div>
+
+      {{ content }}
+
+    </div><!-- /.container -->
+
+  </body>
+</html>

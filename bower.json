@@ -1,0 +1,17 @@
+{
+  "name": "probprog-esslli2014",
+  "version": "0.0.1",
+  "homepage": "https://github.com/probmods/probprog-esslli2014",
+  "authors": [
+    "Noah Goodman <ngoodman@stanford.edu>",
+    "Andreas Stuhlmueller <andreas@stuhlmueller.org>"
+  ],
+  "main": "index.html",
+  "private": true,
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "codemirror": "~4.3.0"
+  }
+}
