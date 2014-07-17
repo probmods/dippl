@@ -1,0 +1,1453 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html class="   ">
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# object: http://ogp.me/ns/object# article: http://ogp.me/ns/article# profile: http://ogp.me/ns/profile#">
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    
+    <title>BYVoid/continuation · GitHub</title>
+    <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="GitHub" />
+    <link rel="fluid-icon" href="https://github.com/fluidicon.png" title="GitHub" />
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-114.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-144.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144.png" />
+    <meta property="fb:app_id" content="1401488693436528"/>
+
+      <meta content="@github" name="twitter:site" /><meta content="summary" name="twitter:card" /><meta content="BYVoid/continuation" name="twitter:title" /><meta content="continuation - A compiler for JavaScript asynchronous Continuation-Passing Style transformation" name="twitter:description" /><meta content="https://avatars3.githubusercontent.com/u/245270?s=400" name="twitter:image:src" />
+<meta content="GitHub" property="og:site_name" /><meta content="object" property="og:type" /><meta content="https://avatars3.githubusercontent.com/u/245270?s=400" property="og:image" /><meta content="BYVoid/continuation" property="og:title" /><meta content="https://github.com/BYVoid/continuation" property="og:url" /><meta content="continuation - A compiler for JavaScript asynchronous Continuation-Passing Style transformation" property="og:description" />
+
+    <link rel="assets" href="https://assets-cdn.github.com/">
+    <link rel="conduit-xhr" href="https://ghconduit.com:25035">
+    
+
+    <meta name="msapplication-TileImage" content="/windows-tile.png" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="selected-link" value="repo_source" data-pjax-transient />
+      <meta name="google-analytics" content="UA-3769691-2">
+
+    <meta content="collector.githubapp.com" name="octolytics-host" /><meta content="collector-cdn.github.com" name="octolytics-script-host" /><meta content="github" name="octolytics-app-id" /><meta content="62EA6BE6:18CC:EB9EE5E:53C81B6A" name="octolytics-dimension-request_id" />
+    
+
+    
+    
+    <link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico" />
+
+
+    <meta content="authenticity_token" name="csrf-param" />
+<meta content="Rt21vsaXoFi2bkZoV261bOGvUnebqmo4zjWSIgteIPXUGySUcftQcrfgtjm2OwU5jvXHg8vd+AJ9wAGYjNLvuw==" name="csrf-token" />
+
+    <link href="https://assets-cdn.github.com/assets/github-c534ad575b5bb8c3cc3dce9c571df7aa7400dbe9.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="https://assets-cdn.github.com/assets/github2-84a1b6179d461213455892ab983182bc2052a7b5.css" media="all" rel="stylesheet" type="text/css" />
+    
+
+
+    <meta http-equiv="x-pjax-version" content="ef2e8ad48b4c98b3a1a0065370258ac2">
+
+      
+  <meta name="description" content="continuation - A compiler for JavaScript asynchronous Continuation-Passing Style transformation" />
+
+
+  <meta content="245270" name="octolytics-dimension-user_id" /><meta content="BYVoid" name="octolytics-dimension-user_login" /><meta content="5847024" name="octolytics-dimension-repository_id" /><meta content="BYVoid/continuation" name="octolytics-dimension-repository_nwo" /><meta content="true" name="octolytics-dimension-repository_public" /><meta content="false" name="octolytics-dimension-repository_is_fork" /><meta content="5847024" name="octolytics-dimension-repository_network_root_id" /><meta content="BYVoid/continuation" name="octolytics-dimension-repository_network_root_nwo" />
+
+  <link href="https://github.com/BYVoid/continuation/commits/master.atom" rel="alternate" title="Recent Commits to continuation:master" type="application/atom+xml" />
+
+  </head>
+
+
+  <body class="logged_out  env-production  vis-public">
+    <a href="#start-of-content" tabindex="1" class="accessibility-aid js-skip-to-content">Skip to content</a>
+    <div class="wrapper">
+      
+      
+      
+      
+
+
+      
+      <div class="header header-logged-out">
+  <div class="container clearfix">
+
+    <a class="header-logo-wordmark" href="https://github.com/">
+      <span class="mega-octicon octicon-logo-github"></span>
+    </a>
+
+    <div class="header-actions">
+        <a class="button primary" href="/join">Sign up</a>
+      <a class="button signin" href="/login?return_to=%2FBYVoid%2Fcontinuation%2F">Sign in</a>
+    </div>
+
+    <div class="command-bar js-command-bar  in-repository">
+
+      <ul class="top-nav">
+          <li class="explore"><a href="/explore">Explore</a></li>
+          <li class="features"><a href="/features">Features</a></li>
+          <li class="enterprise"><a href="https://enterprise.github.com/">Enterprise</a></li>
+          <li class="blog"><a href="/blog">Blog</a></li>
+      </ul>
+        <form accept-charset="UTF-8" action="/search" class="command-bar-form" id="top_search_form" method="get">
+
+<div class="commandbar">
+  <span class="message"></span>
+  <input type="text" data-hotkey="s, /" name="q" id="js-command-bar-field" placeholder="Search or type a command" tabindex="1" autocapitalize="off"
+    
+    
+    data-repo="BYVoid/continuation"
+  >
+  <div class="display hidden"></div>
+</div>
+
+    <input type="hidden" name="nwo" value="BYVoid/continuation" />
+
+    <div class="select-menu js-menu-container js-select-menu search-context-select-menu">
+      <span class="minibutton select-menu-button js-menu-target" role="button" aria-haspopup="true">
+        <span class="js-select-button">This repository</span>
+      </span>
+
+      <div class="select-menu-modal-holder js-menu-content js-navigation-container" aria-hidden="true">
+        <div class="select-menu-modal">
+
+          <div class="select-menu-item js-navigation-item js-this-repository-navigation-item selected">
+            <span class="select-menu-item-icon octicon octicon-check"></span>
+            <input type="radio" class="js-search-this-repository" name="search_target" value="repository" checked="checked" />
+            <div class="select-menu-item-text js-select-button-text">This repository</div>
+          </div> <!-- /.select-menu-item -->
+
+          <div class="select-menu-item js-navigation-item js-all-repositories-navigation-item">
+            <span class="select-menu-item-icon octicon octicon-check"></span>
+            <input type="radio" name="search_target" value="global" />
+            <div class="select-menu-item-text js-select-button-text">All repositories</div>
+          </div> <!-- /.select-menu-item -->
+
+        </div>
+      </div>
+    </div>
+
+  <span class="help tooltipped tooltipped-s" aria-label="Show command bar help">
+    <span class="octicon octicon-question"></span>
+  </span>
+
+
+  <input type="hidden" name="ref" value="cmdform">
+
+</form>
+    </div>
+
+  </div>
+</div>
+
+
+
+      <div id="start-of-content" class="accessibility-aid"></div>
+          <div class="site" itemscope itemtype="http://schema.org/WebPage">
+    <div id="js-flash-container">
+      
+    </div>
+    <div class="pagehead repohead instapaper_ignore readability-menu">
+      <div class="container">
+        
+<ul class="pagehead-actions">
+
+
+  <li>
+      <a href="/login?return_to=%2FBYVoid%2Fcontinuation"
+    class="minibutton with-count star-button tooltipped tooltipped-n"
+    aria-label="You must be signed in to star a repository" rel="nofollow">
+    <span class="octicon octicon-star"></span>
+    Star
+  </a>
+
+    <a class="social-count js-social-count" href="/BYVoid/continuation/stargazers">
+      134
+    </a>
+
+  </li>
+
+    <li>
+      <a href="/login?return_to=%2FBYVoid%2Fcontinuation"
+        class="minibutton with-count js-toggler-target fork-button tooltipped tooltipped-n"
+        aria-label="You must be signed in to fork a repository" rel="nofollow">
+        <span class="octicon octicon-repo-forked"></span>
+        Fork
+      </a>
+      <a href="/BYVoid/continuation/network" class="social-count">
+        19
+      </a>
+    </li>
+</ul>
+
+        <h1 itemscope itemtype="http://data-vocabulary.org/Breadcrumb" class="entry-title public">
+          <span class="repo-label"><span>public</span></span>
+          <span class="mega-octicon octicon-repo"></span>
+          <span class="author"><a href="/BYVoid" class="url fn" itemprop="url" rel="author"><span itemprop="title">BYVoid</span></a></span><!--
+       --><span class="path-divider">/</span><!--
+       --><strong><a href="/BYVoid/continuation" class="js-current-repository js-repo-home-link">continuation</a></strong>
+
+          <span class="page-context-loader">
+            <img alt="" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+          </span>
+
+        </h1>
+      </div><!-- /.container -->
+    </div><!-- /.repohead -->
+
+    <div class="container">
+      <div class="repository-with-sidebar repo-container new-discussion-timeline js-new-discussion-timeline with-full-navigation ">
+        <div class="repository-sidebar clearfix">
+            
+
+<div class="sunken-menu vertical-right repo-nav js-repo-nav js-repository-container-pjax js-octicon-loaders">
+  <div class="sunken-menu-contents">
+    <ul class="sunken-menu-group">
+      <li class="tooltipped tooltipped-w" aria-label="Code">
+        <a href="/BYVoid/continuation" aria-label="Code" class="selected js-selected-navigation-item sunken-menu-item" data-hotkey="g c" data-pjax="true" data-selected-links="repo_source repo_downloads repo_commits repo_releases repo_tags repo_branches /BYVoid/continuation">
+          <span class="octicon octicon-code"></span> <span class="full-word">Code</span>
+          <img alt="" class="mini-loader" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+</a>      </li>
+
+        <li class="tooltipped tooltipped-w" aria-label="Issues">
+          <a href="/BYVoid/continuation/issues" aria-label="Issues" class="js-selected-navigation-item sunken-menu-item js-disable-pjax" data-hotkey="g i" data-selected-links="repo_issues /BYVoid/continuation/issues">
+            <span class="octicon octicon-issue-opened"></span> <span class="full-word">Issues</span>
+            <span class='counter'>14</span>
+            <img alt="" class="mini-loader" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+</a>        </li>
+
+      <li class="tooltipped tooltipped-w" aria-label="Pull Requests">
+        <a href="/BYVoid/continuation/pulls" aria-label="Pull Requests" class="js-selected-navigation-item sunken-menu-item js-disable-pjax" data-hotkey="g p" data-selected-links="repo_pulls /BYVoid/continuation/pulls">
+            <span class="octicon octicon-git-pull-request"></span> <span class="full-word">Pull Requests</span>
+            <span class='counter'>1</span>
+            <img alt="" class="mini-loader" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+</a>      </li>
+
+
+    </ul>
+    <div class="sunken-menu-separator"></div>
+    <ul class="sunken-menu-group">
+
+      <li class="tooltipped tooltipped-w" aria-label="Pulse">
+        <a href="/BYVoid/continuation/pulse" aria-label="Pulse" class="js-selected-navigation-item sunken-menu-item" data-pjax="true" data-selected-links="pulse /BYVoid/continuation/pulse">
+          <span class="octicon octicon-pulse"></span> <span class="full-word">Pulse</span>
+          <img alt="" class="mini-loader" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+</a>      </li>
+
+      <li class="tooltipped tooltipped-w" aria-label="Graphs">
+        <a href="/BYVoid/continuation/graphs" aria-label="Graphs" class="js-selected-navigation-item sunken-menu-item" data-pjax="true" data-selected-links="repo_graphs repo_contributors /BYVoid/continuation/graphs">
+          <span class="octicon octicon-graph"></span> <span class="full-word">Graphs</span>
+          <img alt="" class="mini-loader" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+</a>      </li>
+
+      <li class="tooltipped tooltipped-w" aria-label="Network">
+        <a href="/BYVoid/continuation/network" aria-label="Network" class="js-selected-navigation-item sunken-menu-item js-disable-pjax" data-selected-links="repo_network /BYVoid/continuation/network">
+          <span class="octicon octicon-repo-forked"></span> <span class="full-word">Network</span>
+          <img alt="" class="mini-loader" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+</a>      </li>
+    </ul>
+
+
+  </div>
+</div>
+
+              <div class="only-with-full-nav">
+                
+
+  
+
+<div class="clone-url open"
+  data-protocol-type="http"
+  data-url="/users/set_protocol?protocol_selector=http&amp;protocol_type=clone">
+  <h3><strong>HTTPS</strong> clone URL</h3>
+  <div class="clone-url-box">
+    <input type="text" class="clone js-url-field"
+           value="https://github.com/BYVoid/continuation.git" readonly="readonly">
+    <span class="url-box-clippy">
+    <button aria-label="Copy to clipboard" class="js-zeroclipboard minibutton zeroclipboard-button" data-clipboard-text="https://github.com/BYVoid/continuation.git" data-copied-hint="Copied!" type="button"><span class="octicon octicon-clippy"></span></button>
+    </span>
+  </div>
+</div>
+
+  
+
+<div class="clone-url "
+  data-protocol-type="subversion"
+  data-url="/users/set_protocol?protocol_selector=subversion&amp;protocol_type=clone">
+  <h3><strong>Subversion</strong> checkout URL</h3>
+  <div class="clone-url-box">
+    <input type="text" class="clone js-url-field"
+           value="https://github.com/BYVoid/continuation" readonly="readonly">
+    <span class="url-box-clippy">
+    <button aria-label="Copy to clipboard" class="js-zeroclipboard minibutton zeroclipboard-button" data-clipboard-text="https://github.com/BYVoid/continuation" data-copied-hint="Copied!" type="button"><span class="octicon octicon-clippy"></span></button>
+    </span>
+  </div>
+</div>
+
+
+<p class="clone-options">You can clone with
+      <a href="#" class="js-clone-selector" data-protocol="http">HTTPS</a>
+      or <a href="#" class="js-clone-selector" data-protocol="subversion">Subversion</a>.
+  <a href="https://help.github.com/articles/which-remote-url-should-i-use" class="help tooltipped tooltipped-n" aria-label="Get help on which URL is right for you.">
+    <span class="octicon octicon-question"></span>
+  </a>
+</p>
+
+
+
+                <a href="/BYVoid/continuation/archive/master.zip"
+                   class="minibutton sidebar-button"
+                   aria-label="Download BYVoid/continuation as a zip file"
+                   title="Download BYVoid/continuation as a zip file"
+                   rel="nofollow">
+                  <span class="octicon octicon-cloud-download"></span>
+                  Download ZIP
+                </a>
+              </div>
+        </div><!-- /.repository-sidebar -->
+
+        <div id="js-repo-pjax-container" class="repository-content context-loader-container" data-pjax-container>
+          
+
+<span id="js-show-full-navigation"></span>
+
+<div class="repository-meta js-details-container ">
+    <div class="repository-description js-details-show">
+      <p>A compiler for JavaScript asynchronous Continuation-Passing Style transformation</p>
+    </div>
+
+
+
+</div>
+
+<div class="capped-box overall-summary ">
+
+  <div class="stats-switcher-viewport js-stats-switcher-viewport">
+    <div class="stats-switcher-wrapper">
+    <ul class="numbers-summary">
+      <li class="commits">
+        <a data-pjax href="/BYVoid/continuation/commits/master">
+            <span class="num">
+              <span class="octicon octicon-history"></span>
+              152
+            </span>
+            commits
+        </a>
+      </li>
+      <li>
+        <a data-pjax href="/BYVoid/continuation/branches">
+          <span class="num">
+            <span class="octicon octicon-git-branch"></span>
+            1
+          </span>
+          branch
+        </a>
+      </li>
+
+      <li>
+        <a data-pjax href="/BYVoid/continuation/releases">
+          <span class="num">
+            <span class="octicon octicon-tag"></span>
+            12
+          </span>
+          releases
+        </a>
+      </li>
+
+      <li>
+        
+  <a href="/BYVoid/continuation/graphs/contributors">
+    <span class="num">
+      <span class="octicon octicon-organization"></span>
+      4
+    </span>
+    contributors
+  </a>
+      </li>
+    </ul>
+
+      <div class="repository-lang-stats">
+        <ol class="repository-lang-stats-numbers">
+          <li>
+              <a href="/BYVoid/continuation/search?l=javascript">
+                <span class="color-block language-color" style="background-color:#f1e05a;"></span>
+                <span class="lang">JavaScript</span>
+                <span class="percent">100%</span>
+              </a>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <div class="tooltipped tooltipped-s" aria-label="Show language statistics">
+    <a href="#"
+     class="repository-lang-stats-graph js-toggle-lang-stats"
+     style="background-color:#f1e05a">
+  <span class="language-color" style="width:100%; background-color:#f1e05a;" itemprop="keywords">JavaScript</span>
+    </a>
+  </div>
+
+
+
+<div class="file-navigation in-mid-page">
+  <a href="/BYVoid/continuation/find/master"
+        class="js-show-file-finder minibutton empty-icon tooltipped tooltipped-s right"
+        data-pjax
+        data-hotkey="t"
+        aria-label="Quickly jump between files">
+    <span class="octicon octicon-list-unordered"></span>
+  </a>
+    <a href="/BYVoid/continuation/compare" aria-label="Compare, review, create a pull request" class="minibutton compact primary tooltipped tooltipped-s" aria-label="Compare &amp; review" data-pjax>
+      <span class="octicon octicon-git-compare"></span>
+    </a>
+
+  
+
+<div class="select-menu js-menu-container js-select-menu" >
+  <span class="minibutton select-menu-button js-menu-target css-truncate" data-hotkey="w"
+    data-master-branch="master"
+    data-ref="master"
+    title="master"
+    role="button" aria-label="Switch branches or tags" tabindex="0" aria-haspopup="true">
+    <span class="octicon octicon-git-branch"></span>
+    <i>branch:</i>
+    <span class="js-select-button css-truncate-target">master</span>
+  </span>
+
+  <div class="select-menu-modal-holder js-menu-content js-navigation-container" data-pjax aria-hidden="true">
+
+    <div class="select-menu-modal">
+      <div class="select-menu-header">
+        <span class="select-menu-title">Switch branches/tags</span>
+        <span class="octicon octicon-x js-menu-close" role="button" aria-label="Close"></span>
+      </div> <!-- /.select-menu-header -->
+
+      <div class="select-menu-filters">
+        <div class="select-menu-text-filter">
+          <input type="text" aria-label="Filter branches/tags" id="context-commitish-filter-field" class="js-filterable-field js-navigation-enable" placeholder="Filter branches/tags">
+        </div>
+        <div class="select-menu-tabs">
+          <ul>
+            <li class="select-menu-tab">
+              <a href="#" data-tab-filter="branches" class="js-select-menu-tab">Branches</a>
+            </li>
+            <li class="select-menu-tab">
+              <a href="#" data-tab-filter="tags" class="js-select-menu-tab">Tags</a>
+            </li>
+          </ul>
+        </div><!-- /.select-menu-tabs -->
+      </div><!-- /.select-menu-filters -->
+
+      <div class="select-menu-list select-menu-tab-bucket js-select-menu-tab-bucket" data-tab-filter="branches">
+
+        <div data-filterable-for="context-commitish-filter-field" data-filterable-type="substring">
+
+
+            <div class="select-menu-item js-navigation-item selected">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/master"
+                 data-name="master"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="master">master</a>
+            </div> <!-- /.select-menu-item -->
+        </div>
+
+          <div class="select-menu-no-results">Nothing to show</div>
+      </div> <!-- /.select-menu-list -->
+
+      <div class="select-menu-list select-menu-tab-bucket js-select-menu-tab-bucket" data-tab-filter="tags">
+        <div data-filterable-for="context-commitish-filter-field" data-filterable-type="substring">
+
+
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.1.3"
+                 data-name="v0.1.3"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.1.3">v0.1.3</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.1.2"
+                 data-name="v0.1.2"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.1.2">v0.1.2</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.1.1"
+                 data-name="v0.1.1"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.1.1">v0.1.1</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.1.0"
+                 data-name="v0.1.0"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.1.0">v0.1.0</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.0.8"
+                 data-name="v0.0.8"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.0.8">v0.0.8</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.0.7"
+                 data-name="v0.0.7"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.0.7">v0.0.7</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.0.6"
+                 data-name="v0.0.6"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.0.6">v0.0.6</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.0.5"
+                 data-name="v0.0.5"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.0.5">v0.0.5</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.0.4"
+                 data-name="v0.0.4"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.0.4">v0.0.4</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.0.3"
+                 data-name="v0.0.3"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.0.3">v0.0.3</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.0.2"
+                 data-name="v0.0.2"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.0.2">v0.0.2</a>
+            </div> <!-- /.select-menu-item -->
+            <div class="select-menu-item js-navigation-item ">
+              <span class="select-menu-item-icon octicon octicon-check"></span>
+              <a href="/BYVoid/continuation/tree/v0.0.1"
+                 data-name="v0.0.1"
+                 data-skip-pjax="true"
+                 rel="nofollow"
+                 class="js-navigation-open select-menu-item-text css-truncate-target"
+                 title="v0.0.1">v0.0.1</a>
+            </div> <!-- /.select-menu-item -->
+        </div>
+
+        <div class="select-menu-no-results">Nothing to show</div>
+      </div> <!-- /.select-menu-list -->
+
+    </div> <!-- /.select-menu-modal -->
+  </div> <!-- /.select-menu-modal-holder -->
+</div> <!-- /.select-menu -->
+
+
+
+  <div class="breadcrumb"><span class='repo-root js-repo-root'><span itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb"><a href="/BYVoid/continuation" data-branch="master" data-direction="back" data-pjax="true" itemscope="url"><span itemprop="title">continuation</span></a></span></span><span class="separator"> / </span><form action="/login?return_to=%2FBYVoid%2Fcontinuation" aria-label="Sign in to make or propose changes" class="js-new-blob-form tooltipped tooltipped-e new-file-link" method="post"><span aria-label="Sign in to make or propose changes" class="js-new-blob-submit octicon octicon-plus" data-test-id="create-new-git-file" role="button"></span></form></div>
+</div>
+
+
+
+
+  
+  <div class="commit commit-tease js-details-container" >
+    <p class="commit-title ">
+        <a href="/BYVoid/continuation/commit/205ed84a3b94c34733bb645e73baf0476a261e29" class="message" data-pjax="true" title="Add Travis build icon to README">Add Travis build icon to README</a>
+        
+    </p>
+    <div class="commit-meta">
+      <button aria-label="Copy SHA" class="js-zeroclipboard zeroclipboard-link" data-clipboard-text="205ed84a3b94c34733bb645e73baf0476a261e29" data-copied-hint="Copied!" type="button"><span class="octicon octicon-clippy"></span></button>
+      <a href="/BYVoid/continuation/commit/205ed84a3b94c34733bb645e73baf0476a261e29" class="sha-block" data-pjax>latest commit <span class="sha">205ed84a3b</span></a>
+
+      <div class="authorship">
+        <img alt="Carbo Kuo" class="gravatar js-avatar" data-user="245270" height="20" src="https://avatars0.githubusercontent.com/u/245270?s=140" width="20" />
+        <span class="author-name"><a href="/BYVoid" rel="author">BYVoid</a></span>
+        authored <time class="updated" datetime="2013-10-31T13:38:28+08:00" is="relative-time">October 31, 2013</time>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="file-wrap">
+    <table class="files" data-pjax>
+
+      
+<tbody class=""
+  data-url="/BYVoid/continuation/file-list/master"
+  data-deferred-content-error="Failed to load latest commit information.">
+
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-directory"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/tree/master/bin" class="js-directory-link" id="c1111bd512b29e821b120b86446026b8-31112fcd2a7107b3118838b0672439ffde994801" title="bin">bin</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/f0663fa95163e58165a7a74f3e42d4bf0c08ad59" class="message" data-pjax="true" title="Move cli handler into s separated file">Move cli handler into s separated file</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2012-12-04T17:37:06Z" is="time-ago">December 05, 2012</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-directory"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/tree/master/examples" class="js-directory-link" id="bfebe34154a0dfd9fc7b447fc9ed74e9-1f22488cf3d96bcfe3529ee7e2c5e7024d21b76b" title="examples">examples</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/b88c92f0a6165d69fed7c032422793e2179ae4a9" class="message" data-pjax="true" title="Add examples and rewrite Readme">Add examples and rewrite Readme</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2012-12-08T18:00:36Z" is="time-ago">December 09, 2012</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-directory"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/tree/master/lib" class="js-directory-link" id="e8acc63b1e238f3255c900eed37254b8-07fcbbcdb32c6687fb6787aded9e67e324f152b8" title="lib">lib</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/172deb5d68e13b1371bf896627040767f319954f" class="message" data-pjax="true" title="Replace all parameters with temporary variables.">Replace all parameters with temporary variables.</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2013-10-04T10:34:23Z" is="time-ago">October 04, 2013</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-directory"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/tree/master/scripts" class="js-directory-link" id="d6c5855a62cf32a4dadbc2831f0f295f-5eb72ef1a653c1eb4db04eed85be15cd9a79604b" title="scripts">scripts</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/46288125a3846f8a4e3ce6fe24c20bc569503797" class="message" data-pjax="true" title="Add output test.">Add output test.</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2013-10-03T16:59:05Z" is="time-ago">October 03, 2013</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-directory"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/tree/master/test" class="js-directory-link" id="098f6bcd4621d373cade4e832627b4f6-1e39bf1c51d492755b1f4bd00e27fc2a8028603c" title="test">test</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/6a6eff180ec8c08fd171c36d71d8d40ddf9d7cc8" class="message" data-pjax="true" title="Bump version to 0.1.4.
+
+Add unit test for this and argument.
+Update dependencies.">Bump version to 0.1.4.</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2013-10-04T10:55:30Z" is="time-ago">October 04, 2013</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-text"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/blob/master/.gitignore" class="js-directory-link" id="a084b794bc0759e7a6b77810e01874f2-07e1efaf9e526c3143651a5289030f1dc66735d5" title=".gitignore">.gitignore</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/46288125a3846f8a4e3ce6fe24c20bc569503797" class="message" data-pjax="true" title="Add output test.">Add output test.</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2013-10-03T16:59:05Z" is="time-ago">October 03, 2013</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-text"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/blob/master/.travis.yml" class="js-directory-link" id="354f30a63fb0907d4ad57269548329e3-4a83e22d6fa7636fd00a4b259b4f586284a73e61" title=".travis.yml">.travis.yml</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/ef99bf0db7eb9db35231d22e3fd3f3b877ca1583" class="message" data-pjax="true" title="Add Travis configuration">Add Travis configuration</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2013-10-31T05:31:12Z" is="time-ago">October 31, 2013</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-text"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/blob/master/CHANGELOG.md" class="js-directory-link" id="4ac32a78649ca5bdd8e0ba38b7006a1e-db1bcd3e2ddd997ce056dd255789129da6d1b7c8" title="CHANGELOG.md">CHANGELOG.md</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/4762a82cccb2cfc20694cf689862bf54f3dbf516" class="message" data-pjax="true" title="Update change log and readme.">Update change log and readme.</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2013-10-04T11:04:05Z" is="time-ago">October 04, 2013</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-text"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/blob/master/License" class="js-directory-link" id="794df3791a8c800841516007427a2aa3-19b614b18b74aa52a79bf24db6f2dd9dd47d731a" title="License">License</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/7e70f80dba16d78ed76d038c99904a55689b2a0a" class="message" data-pjax="true" title="Bump version to 0.0.5 and update readme and changelog">Bump version to 0.0.5 and update readme and changelog</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2012-10-10T06:23:26Z" is="time-ago">October 10, 2012</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-text"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/blob/master/README.md" class="js-directory-link" id="04c6e90faac2675aa89e2176d2eec7d8-4ad8b45ca261108d17af63ecd6390d83b01b64ba" title="README.md">README.md</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/205ed84a3b94c34733bb645e73baf0476a261e29" class="message" data-pjax="true" title="Add Travis build icon to README">Add Travis build icon to README</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2013-10-31T05:38:28Z" is="time-ago">October 31, 2013</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-text"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/blob/master/continuation.js" class="js-directory-link" id="c02e9c7146a41d260793a35fa8a1b1eb-62c3ccab6e82ef52d38d6266b79311d29c0025c9" title="continuation.js">continuation.js</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/b958717b2b87bae041ee60b2899a213fbf8ba74f" class="message" data-pjax="true" title="Fix some styles.">Fix some styles.</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2013-06-29T15:23:31Z" is="time-ago">June 29, 2013</time></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="icon">
+        <span class="octicon octicon-file-text"></span>
+        <img alt="" class="spinner" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif" width="16" />
+      </td>
+      <td class="content">
+        <span class="css-truncate css-truncate-target"><a href="/BYVoid/continuation/blob/master/package.json" class="js-directory-link" id="b9cfc7f2cdf78a7f4b91a753d10865a2-d87001332f5962a24ebb65dad544a5f3178bb03a" title="package.json">package.json</a></span>
+      </td>
+      <td class="message">
+        <span class="css-truncate css-truncate-target ">
+          <a href="/BYVoid/continuation/commit/6a6eff180ec8c08fd171c36d71d8d40ddf9d7cc8" class="message" data-pjax="true" title="Bump version to 0.1.4.
+
+Add unit test for this and argument.
+Update dependencies.">Bump version to 0.1.4.</a>
+        </span>
+      </td>
+      <td class="age">
+        <span class="css-truncate css-truncate-target"><time datetime="2013-10-04T10:55:30Z" is="time-ago">October 04, 2013</time></span>
+      </td>
+    </tr>
+</tbody>
+
+    </table>
+  </div>
+
+
+  <div id="readme" class="clearfix announce instapaper_body md">
+    <span class="name">
+      <span class="octicon octicon-book"></span>
+      README.md
+    </span>
+
+    <article class="markdown-body entry-content" itemprop="mainContentOfPage"><h1>
+<a name="user-content-continuationjs" class="anchor" href="#continuationjs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Continuation.js</h1>
+
+<h2>
+<a name="user-content-installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Install Continuation.js with <a href="https://npmjs.org/package/continuation">npm</a>:</p>
+
+<pre><code>npm install -g continuation
+</code></pre>
+
+<p>Latest version: 0.1.4 (2013-10-04)</p>
+
+<p><a href="https://github.com/BYVoid/continuation/blob/master/CHANGELOG.md">Change log</a></p>
+
+<p>Node.js version required: &gt;= 0.8</p>
+
+<p><a href="https://travis-ci.org/BYVoid/continuation"><img src="https://camo.githubusercontent.com/abafc4219bf0cfa2adf2d21cd8b00a8a1c71fc82/68747470733a2f2f7472617669732d63692e6f72672f4259566f69642f636f6e74696e756174696f6e2e706e673f6272616e63683d6d6173746572" alt="Build Status" data-canonical-src="https://travis-ci.org/BYVoid/continuation.png?branch=master" style="max-width:100%;"></a></p>
+
+<h2>
+<a name="user-content-overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<p>Continuation.js is a compiler for <a href="http://en.wikipedia.org/wiki/Continuation-passing_style">Continuation-Passing Style</a> transformation, which simplifies asynchronous JavaScript programming.
+It translates slightly flavored JavaScript syntax into standard JavaScript, so it can be also called a "translator".
+Continuation.js introduces a virtual function <code>cont</code>, which allow you to write continuation-passing style code (or asynchronous callback style code) far easier.
+<code>cont</code> is not a actual function, but a mark with the same syntax to function calls in JavaScript.
+By using Continuation.js you can write asynchronous control flows like flat threaded code, and it compiles it into continuation-passing style code.</p>
+
+<p>Typically, writing with asynchronous control flow is a pain, because you will easily write nested callbacks like below:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">function</span> <span class="nx">textProcessing</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'somefile.txt'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">contents</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">return</span> <span class="nx">callback</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+    <span class="c1">//process contents</span>
+    <span class="nx">contents</span> <span class="o">=</span> <span class="nx">contents</span><span class="p">.</span><span class="nx">toUpperCase</span><span class="p">();</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'somefile2.txt'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">contents2</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">return</span> <span class="nx">callback</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+      <span class="nx">contents</span> <span class="o">+=</span> <span class="nx">contents2</span><span class="p">;</span>
+      <span class="nx">fs</span><span class="p">.</span><span class="nx">writeFile</span><span class="p">(</span><span class="s1">'somefile_concat_uppercase.txt'</span><span class="p">,</span> <span class="nx">contents</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">return</span> <span class="nx">callback</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+        <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">contents</span><span class="p">);</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+<span class="nx">textProcessing</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">contents</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>This kind of coding style is called "callback hells" or "callback pyramids".
+While using Continuation.js, you directly write:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">function</span> <span class="nx">textProcessing</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'somefile.txt'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="nx">cont</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">contents</span><span class="p">));</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">return</span> <span class="nx">ret</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+  <span class="nx">contents</span> <span class="o">=</span> <span class="nx">contents</span><span class="p">.</span><span class="nx">toUpperCase</span><span class="p">();</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'somefile2.txt'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="nx">cont</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">contents2</span><span class="p">));</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">return</span> <span class="nx">ret</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+  <span class="nx">contents</span> <span class="o">+=</span> <span class="nx">contents2</span><span class="p">;</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">writeFile</span><span class="p">(</span><span class="s1">'somefile_concat_uppercase.txt'</span><span class="p">,</span> <span class="nx">contents</span><span class="p">,</span> <span class="nx">cont</span><span class="p">(</span><span class="nx">err</span><span class="p">));</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">return</span> <span class="nx">ret</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+  <span class="nx">ret</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">contents</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nx">textProcessing</span><span class="p">(</span><span class="nx">cont</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">contents</span><span class="p">));</span>
+<span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+</pre></div>
+
+<p>The code above is flatted by using the virtual function <code>cont</code>.
+Control flow must "wait" for the return of asynchronous function call <code>fs.readFile</code>.
+Parameters in the argument list of <code>cont</code> will be set after it returns.
+"Return" here is a little confusing because in an asynchronous function "return" means callback function called, not "return" in the literal sense.
+An asynchronous function usually returns immediately (by encountering <code>return</code> statement or the end of the function scope) while the callback function could be called later.
+You can be understood as all the statements after <code>cont</code> until the end of the function are the callback function of the asynchronous function call.
+The code feels like threaded code, but it is still asynchronous while executing.</p>
+
+<p>Even more simply, the asynchronous error can be held with JavaScript <code>try...catch</code> syntax and another virtual function call <code>obtain</code> provided by Continuation.js.
+<code>obtain(a)</code> is equivalent to <code>cont(err, a)</code>, and <code>err</code> would be thrown if it is not <code>undefined</code>.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">function</span> <span class="nx">textProcessing</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'somefile.txt'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">contents</span><span class="p">));</span>
+    <span class="nx">contents</span> <span class="o">=</span> <span class="nx">contents</span><span class="p">.</span><span class="nx">toUpperCase</span><span class="p">();</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'somefile2.txt'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">contents2</span><span class="p">));</span>
+    <span class="nx">contents</span> <span class="o">+=</span> <span class="nx">contents2</span><span class="p">;</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">writeFile</span><span class="p">(</span><span class="s1">'somefile_concat_uppercase.txt'</span><span class="p">,</span> <span class="nx">contents</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">());</span>
+    <span class="nx">ret</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">contents</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">ret</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">try</span> <span class="p">{</span>
+  <span class="nx">textProcessing</span><span class="p">(</span><span class="nx">obtain</span><span class="p">(</span><span class="nx">contents</span><span class="p">));</span>
+<span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+<h2>
+<a name="user-content-features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul class="task-list">
+<li>A JIT (Just-in-time compilation) and AOT (Ahead-of-time) compiler</li>
+<li>Strictly no runtime dependence</li>
+<li>No additional non-native JavaScript syntax and very few reserved keywords (only <code>cont</code>, <code>obtain</code> and <code>parallel</code>)</li>
+<li>Flexible coding style and readable compiled code</li>
+<li>Compatible with <a href="http://coffeescript.org/">CoffeeScript</a> and <a href="http://livescript.net/">LiveScript</a> (and other compile-to-js language)</li>
+<li>Supports both Node.js and browser-side JavaScript</li>
+<li>Supports execution in parallel and lightweight thread</li>
+</ul><h2>
+<a name="user-content-documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h2>
+
+<h3>
+<a name="user-content-cont" class="anchor" href="#cont" aria-hidden="true"><span class="octicon octicon-link"></span></a>cont</h3>
+
+<p><code>cont</code> is a mark of asynchronous calls.
+It must be used in the place of callback function parameter of a function call.
+The parameters in <code>cont</code> will be set to the values of arguments of the callback function.
+If parameter of <code>cont</code> is a variable (not an expression), it will be defined automatically before the function call.</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">setTimeout</span><span class="p">(</span><span class="nx">cont</span><span class="p">(),</span> <span class="mi">1000</span><span class="p">);</span>
+
+<span class="nx">fs</span><span class="p">.</span><span class="nx">lstat</span><span class="p">(</span><span class="s1">'/path/file'</span><span class="p">,</span> <span class="nx">cont</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">stats</span><span class="p">));</span>
+
+<span class="kd">var</span> <span class="nx">obj</span><span class="p">;</span>
+<span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span><span class="p">(</span><span class="s1">'/path'</span><span class="p">,</span> <span class="nx">cont</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">files</span><span class="p">));</span>
+</pre></div>
+
+<p>Compiled code:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">err</span><span class="p">,</span> <span class="nx">stats</span><span class="p">,</span> <span class="nx">obj</span><span class="p">;</span>
+<span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">lstat</span><span class="p">(</span><span class="s1">'/path'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">err</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="nx">stats</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span><span class="p">(</span><span class="s1">'/path'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">err</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+      <span class="nx">obj</span><span class="p">.</span><span class="nx">files</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
+</pre></div>
+
+<h3>
+<a name="user-content-obtain" class="anchor" href="#obtain" aria-hidden="true"><span class="octicon octicon-link"></span></a>obtain</h3>
+
+<p><code>obtain</code> is a syntax sugar of <code>cont</code> and <code>throw</code>.
+You can use <code>try</code> to catch asynchronous errors with <code>obtain</code>.
+One assumption is that the error object is the first parameter of the callback function (this is a convention of Node.js API).</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">function</span> <span class="nx">f1</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span><span class="p">(</span><span class="s1">'/path'</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">files</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">f2</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span><span class="p">(</span><span class="s1">'/path'</span><span class="p">,</span> <span class="nx">cont</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">files</span><span class="p">));</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+    <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Compiled code:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">function</span> <span class="nx">f1</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">_$err</span><span class="p">,</span> <span class="nx">files</span><span class="p">;</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span><span class="p">(</span><span class="s1">'/path'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">_$err</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="nx">files</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">_$err</span><span class="p">)</span>
+      <span class="k">throw</span> <span class="nx">_$err</span><span class="p">;</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+<span class="kd">function</span> <span class="nx">f2</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">err</span><span class="p">,</span> <span class="nx">files</span><span class="p">;</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span><span class="p">(</span><span class="s1">'/path'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">err</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="nx">files</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="user-content-parallel" class="anchor" href="#parallel" aria-hidden="true"><span class="octicon octicon-link"></span></a>parallel</h3>
+
+<p><code>parallel</code> allows you to execute asynchronous functions "in parallel".
+<code>parallel</code> is also a virtual function and its parameters should be all function calls with <code>cont</code> or <code>obtain</code>.
+All function calls in <code>parallel</code> will be executed in parallel and control flow continues executing the next statement after all the parallel function calls "return" (precisely speaking callback functions called).</p>
+
+<p>Note that both Node.js and browser execute JavaScript code in single thread, so this is not a multithreaded implementation.
+The function calls feel like entrances of threads so they can be called "lightweight threads".
+Only I/O and computing are executed in parallel while computing are actually executed in sequence.
+That is, when one "thread" is "blocked" by I/O, the other one runs.
+The "threads" can automatically utilize the gaps of I/O and computing.
+So you should let functions that both have I/O and computing run in parallel, rather than all functions with heavy computing and little I/O.</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">contents</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="nx">parallel</span><span class="p">(</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'/path1'</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">contents</span><span class="p">.</span><span class="nx">file1</span><span class="p">)),</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'/path2'</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">contents</span><span class="p">.</span><span class="nx">file2</span><span class="p">)),</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'/path3'</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">contents</span><span class="p">.</span><span class="nx">file3</span><span class="p">))</span>
+<span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">contents</span><span class="p">);</span>
+</pre></div>
+
+<h3>
+<a name="user-content-explicit-mode" class="anchor" href="#explicit-mode" aria-hidden="true"><span class="octicon octicon-link"></span></a>Explicit mode</h3>
+
+<p>Modules can be written in Continuation.js and they will be recursively compiled automatically when using <code>require</code>.
+Add <code>'use continuation'</code> into your source file, and use <code>continuation script.js --explicit</code> to run it and only files contains <code>'use continuation'</code> will be compiled.
+This option can reduce loading time if many modules are recursively required.</p>
+
+<h3>
+<a name="user-content-compilation-cache" class="anchor" href="#compilation-cache" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compilation cache</h3>
+
+<p>By using <code>contination script.js --cache [cacheDir]</code>, all modules compiled by Contination.js will be cached into <code>cacheDir</code>.
+If the timestamp of your source file is newer than the cached version, it will be compiled again.
+This option rely on the system clock and it can also reduce loading time.
+It is recommended to use <code>--explicit</code> and <code>--cache</code> together.</p>
+
+<p>By default <code>cacheDir</code> is <code>/tmp/continuation</code>.</p>
+
+<h3>
+<a name="user-content-use-continuationjs-in-coffeescript-and-other-compile-to-js-language" class="anchor" href="#use-continuationjs-in-coffeescript-and-other-compile-to-js-language" aria-hidden="true"><span class="octicon octicon-link"></span></a>Use Continuation.js in CoffeeScript (and other compile-to-js language)</h3>
+
+<p>Continuation.js is compatible with most kinds of compile-to-js language because it introduces no non-primitive syntax.
+The only 3 keywords <code>cont</code>, <code>obtain</code> and <code>parallel</code> are all virtual functions so you can use function call directly in your language.</p>
+
+<p>Example (CoffeeScript):</p>
+
+<div class="highlight highlight-coffeescript"><pre><span class="nv">dns = </span><span class="nx">require</span><span class="p">(</span><span class="s">'dns'</span><span class="p">)</span>
+<span class="nv">domains = </span><span class="p">[</span><span class="s">'www.google.com'</span><span class="p">,</span> <span class="s">'nodejs.org'</span><span class="p">,</span> <span class="s">'www.byvoid.com'</span><span class="p">]</span>
+<span class="k">for</span> <span class="nx">domain</span> <span class="k">in</span> <span class="nx">domains</span>
+  <span class="nx">dns</span><span class="p">.</span><span class="nx">resolve</span> <span class="nx">domain</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">addresses</span><span class="p">)</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">addresses</span>
+</pre></div>
+
+<p>Until now <a href="http://coffeescript.org/">CoffeeScript</a> and <a href="http://livescript.net/">LiveScript</a> are supported by default.</p>
+
+<h3>
+<a name="user-content-use-continuationjs-programmatically" class="anchor" href="#use-continuationjs-programmatically" aria-hidden="true"><span class="octicon octicon-link"></span></a>Use Continuation.js programmatically</h3>
+
+<p>You are able to use Continuation.js programmatically.
+Continuation.js module has one interface function <code>compile(code)</code>.
+<code>code</code> must be a string.</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">continuation</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'continuation'</span><span class="p">);</span>
+
+<span class="kd">function</span> <span class="nx">fibonacci</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">current</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">b</span> <span class="o">=</span> <span class="nx">a</span><span class="p">;</span>
+    <span class="nx">a</span> <span class="o">=</span> <span class="nx">current</span><span class="p">;</span>
+    <span class="nx">current</span> <span class="o">=</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span><span class="p">;</span>
+    <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">cont</span><span class="p">(),</span> <span class="mi">1000</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">current</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">var</span> <span class="nx">code</span> <span class="o">=</span> <span class="nx">fibonacci</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+<span class="kd">var</span> <span class="nx">compiledCode</span> <span class="o">=</span> <span class="nx">continuation</span><span class="p">.</span><span class="nx">compile</span><span class="p">(</span><span class="nx">code</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">compiledCode</span><span class="p">);</span>
+<span class="nb">eval</span><span class="p">(</span><span class="nx">compiledCode</span><span class="p">);</span>
+<span class="nx">fibonacci</span><span class="p">();</span>
+</pre></div>
+
+<p>You can run the code above using <code>node</code> command.
+That means you don't have to install Continuation.js in global environment.
+The code above converts a function into a string, and then it is compiled by Continuation.js.
+After that you can run it via <code>eval</code> function.</p>
+
+<h2>
+<a name="user-content-usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<pre><code>Usage: continuation [options] &lt;file.js/file.coffee/file.ls&gt; [arguments]
+
+Options:
+
+  -h, --help               output usage information
+  -V, --version            output the version number
+  -p, --print              compile script file and print it
+  -o, --output &lt;filename&gt;  compile script file and save as &lt;filename&gt;
+  -e, --explicit           compile only if "use continuation" is explicitly declared
+  -c, --cache [directory]  run and cache compiled sources to [directory], by default [directory] is /tmp/continuation
+  -v, --verbose            print verbosal information to stderr
+</code></pre>
+
+<p>Run code written with Continuation.js (i.e. script.js):</p>
+
+<pre><code>contination script.js
+</code></pre>
+
+<p>Print compiled code on console:</p>
+
+<pre><code>contination script.js -p
+</code></pre>
+
+<p>Compile code and save as another file:</p>
+
+<pre><code>contination script.js -o compiled.js
+</code></pre>
+
+<p>Run code in "explicit mode" (only compile sources with <code>'use continuation'</code>. see documentation):</p>
+
+<pre><code>contination script.js -e
+</code></pre>
+
+<p>Cache compiled code (including recursively required modules) to accelerate loading (see documentation):</p>
+
+<pre><code>contination script.js -c
+</code></pre>
+
+<h2>
+<a name="user-content-examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<h3>
+<a name="user-content-loops-and-sleep" class="anchor" href="#loops-and-sleep" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loops and sleep</h3>
+
+<p>Calculating Fibonacci sequence and printing one number by every one second:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">fib</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">current</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">b</span> <span class="o">=</span> <span class="nx">a</span><span class="p">;</span>
+    <span class="nx">a</span> <span class="o">=</span> <span class="nx">current</span><span class="p">;</span>
+    <span class="nx">current</span> <span class="o">=</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span><span class="p">;</span>
+    <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">cont</span><span class="p">(),</span> <span class="mi">1000</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">current</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+<span class="nx">fib</span><span class="p">();</span>
+</pre></div>
+
+<h3>
+<a name="user-content-run-asynchronous-functions-in-sequence" class="anchor" href="#run-asynchronous-functions-in-sequence" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run asynchronous functions in sequence</h3>
+
+<p>Read 5 files in sequence:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'fs'</span><span class="p">);</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">'text'</span> <span class="o">+</span> <span class="nx">i</span> <span class="o">+</span> <span class="s1">'.js'</span><span class="p">,</span> <span class="s1">'utf-8'</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">text</span><span class="p">));</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">text</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Done'</span><span class="p">);</span>
+</pre></div>
+
+<h3>
+<a name="user-content-run-asynchronous-functions-in-parallel" class="anchor" href="#run-asynchronous-functions-in-parallel" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run asynchronous functions in parallel</h3>
+
+<p>Do things (with heave I/O) in parallel:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'fs'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">dns</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'dns'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'http'</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">complexWork</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">cont</span><span class="p">(),</span> <span class="mi">500</span><span class="p">);</span>
+  <span class="nx">http</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'http://www.byvoid.com'</span><span class="p">,</span> <span class="nx">cont</span><span class="p">(</span><span class="nx">res</span><span class="p">));</span>
+  <span class="nx">next</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">res</span><span class="p">.</span><span class="nx">headers</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">parallel</span><span class="p">(</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">files</span><span class="p">)),</span>
+  <span class="nx">dns</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="s1">'npmjs.org'</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">addresses</span><span class="p">)),</span>
+  <span class="nx">complexWork</span><span class="p">(</span><span class="nx">obtain</span><span class="p">(</span><span class="nx">result</span><span class="p">))</span>
+<span class="p">);</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">files</span><span class="p">,</span> <span class="nx">addresses</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+</pre></div>
+
+<h3>
+<a name="user-content-recursions" class="anchor" href="#recursions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Recursions</h3>
+
+<p>Calculating disk usage:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'fs'</span><span class="p">);</span>
+
+<span class="kd">function</span> <span class="nx">calcDirSize</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">dirSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">dirBlockSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">files</span><span class="p">));</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">files</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">filename</span> <span class="o">=</span> <span class="nx">path</span> <span class="o">+</span> <span class="s1">'/'</span> <span class="o">+</span> <span class="nx">files</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">lstat</span><span class="p">(</span><span class="nx">filename</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">stats</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">stats</span><span class="p">.</span><span class="nx">isDirectory</span><span class="p">())</span> <span class="p">{</span>
+      <span class="nx">calcDirSize</span><span class="p">(</span><span class="nx">filename</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">subDirSize</span><span class="p">,</span> <span class="nx">subDirBlockSize</span><span class="p">));</span>
+      <span class="nx">dirSize</span> <span class="o">+=</span> <span class="nx">subDirSize</span><span class="p">;</span>
+      <span class="nx">dirBlockSize</span> <span class="o">+=</span> <span class="nx">subDirBlockSize</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">dirSize</span> <span class="o">+=</span> <span class="nx">stats</span><span class="p">.</span><span class="nx">size</span><span class="p">;</span>
+      <span class="nx">dirBlockSize</span> <span class="o">+=</span> <span class="mi">512</span> <span class="o">*</span> <span class="nx">stats</span><span class="p">.</span><span class="nx">blocks</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">dirSize</span><span class="p">,</span> <span class="nx">dirBlockSize</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">path</span><span class="p">)</span> <span class="nx">path</span> <span class="o">=</span> <span class="s1">'.'</span><span class="p">;</span>
+
+<span class="nx">calcDirSize</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">obtain</span><span class="p">(</span><span class="nx">totalSize</span><span class="p">,</span> <span class="nx">totalBlockSize</span><span class="p">));</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Size:'</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">totalSize</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">),</span> <span class="s1">'KB'</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Actual Size on Disk:'</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">totalBlockSize</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">),</span> <span class="s1">'KB'</span><span class="p">);</span>
+</pre></div>
+
+<p>More examples are available in 'examples' directory and 'test' directory.</p>
+
+<h2>
+<a name="user-content-relevant-projects" class="anchor" href="#relevant-projects" aria-hidden="true"><span class="octicon octicon-link"></span></a>Relevant projects</h2>
+
+<p>Continuation.js is not the only solution of CPS transformation, there are some alternatives.
+Below is a comparison among projects related to synchronous to asynchronous transformation.</p>
+
+<table>
+<tr>
+<th>Project</th>
+    <th>Continuation.js</th>
+    <th>streamline.js</th>
+    <th>TameJS</th>
+    <th>Wind.js</th>
+    <th>jwacs</th>
+    <th>NarrativeJS</th>
+    <th>StratifiedJS</th>
+  </tr>
+<tr>
+<td>Node.js support</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+  </tr>
+<tr>
+<td>Browser side support</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+  </tr>
+<tr>
+<td>Additional runtime dependence</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td>Yes</td>
+  </tr>
+<tr>
+<td>Additional syntax</td>
+    <td>No</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+  </tr>
+<tr>
+<td>Compatibility with compile-to-js language</td>
+    <td>Yes</td>
+    <td>Yes (CoffeeScript)</td>
+    <td>Yes (CoffeeScript)</td>
+    <td>Yes (manually)</td>
+    <td>No</td>
+    <td>No</td>
+    <td>No</td>
+  </tr>
+<tr>
+<td>Parallel support</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Unknown</td>
+    <td>Yes</td>
+  </tr>
+<tr>
+<td>Readable generated code</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>Hardly</td>
+    <td>Almost</td>
+    <td>Unknown</td>
+    <td>No</td>
+    <td>Unknown</td>
+  </tr>
+<tr>
+<td>Asynchronous results passing syntax</td>
+    <td>Parameters</td>
+    <td>Return value</td>
+    <td>Parameters</td>
+    <td>Return value</td>
+    <td>Return value</td>
+    <td>Return value</td>
+    <td>Return value</td>
+  </tr>
+<tr>
+<td>Documentation</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td>Yes</td>
+  </tr>
+<tr>
+<td>Implemented in</td>
+    <td>JavaScript</td>
+    <td>JavaScript</td>
+    <td>JavaScript</td>
+    <td>JavaScript</td>
+    <td>Lisp</td>
+    <td>Java</td>
+    <td>JavaScript</td>
+  </tr>
+</table></article>
+  </div>
+
+
+        </div>
+
+      </div><!-- /.repo-container -->
+      <div class="modal-backdrop"></div>
+    </div><!-- /.container -->
+  </div><!-- /.site -->
+
+
+    </div><!-- /.wrapper -->
+
+      <div class="container">
+  <div class="site-footer">
+    <ul class="site-footer-links right">
+      <li><a href="https://status.github.com/">Status</a></li>
+      <li><a href="http://developer.github.com">API</a></li>
+      <li><a href="http://training.github.com">Training</a></li>
+      <li><a href="http://shop.github.com">Shop</a></li>
+      <li><a href="/blog">Blog</a></li>
+      <li><a href="/about">About</a></li>
+
+    </ul>
+
+    <a href="/">
+      <span class="mega-octicon octicon-mark-github" title="GitHub"></span>
+    </a>
+
+    <ul class="site-footer-links">
+      <li>&copy; 2014 <span title="0.07059s from github-fe116-cp1-prd.iad.github.net">GitHub</span>, Inc.</li>
+        <li><a href="/site/terms">Terms</a></li>
+        <li><a href="/site/privacy">Privacy</a></li>
+        <li><a href="/security">Security</a></li>
+        <li><a href="/contact">Contact</a></li>
+    </ul>
+  </div><!-- /.site-footer -->
+</div><!-- /.container -->
+
+
+    <div class="fullscreen-overlay js-fullscreen-overlay" id="fullscreen_overlay">
+  <div class="fullscreen-container js-fullscreen-container">
+    <div class="textarea-wrap">
+      <textarea name="fullscreen-contents" id="fullscreen-contents" class="fullscreen-contents js-fullscreen-contents" placeholder="" data-suggester="fullscreen_suggester"></textarea>
+    </div>
+  </div>
+  <div class="fullscreen-sidebar">
+    <a href="#" class="exit-fullscreen js-exit-fullscreen tooltipped tooltipped-w" aria-label="Exit Zen Mode">
+      <span class="mega-octicon octicon-screen-normal"></span>
+    </a>
+    <a href="#" class="theme-switcher js-theme-switcher tooltipped tooltipped-w"
+      aria-label="Switch themes">
+      <span class="octicon octicon-color-mode"></span>
+    </a>
+  </div>
+</div>
+
+
+
+    <div id="ajax-error-message" class="flash flash-error">
+      <span class="octicon octicon-alert"></span>
+      <a href="#" class="octicon octicon-x close js-ajax-error-dismiss" aria-label="Dismiss error"></a>
+      Something went wrong with that request. Please try again.
+    </div>
+
+
+      <script crossorigin="anonymous" src="https://assets-cdn.github.com/assets/frameworks-df9e4beac80276ed3dfa56be0d97b536d0f5ee12.js" type="text/javascript"></script>
+      <script async="async" crossorigin="anonymous" src="https://assets-cdn.github.com/assets/github-534eef699bbadaf1454b432e14a2ab0a68c7ddf4.js" type="text/javascript"></script>
+      
+      
+        <script async src="https://www.google-analytics.com/analytics.js"></script>
+  </body>
+</html>
+

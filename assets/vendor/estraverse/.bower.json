@@ -1,0 +1,14 @@
+{
+  "name": "estraverse",
+  "homepage": "https://github.com/Constellation/estraverse",
+  "version": "1.5.1",
+  "_release": "1.5.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.5.1",
+    "commit": "45df730dd2c6aa93f2b2d1b13fcb30bced5b7139"
+  },
+  "_source": "git://github.com/Constellation/estraverse.git",
+  "_target": "~1.5.0",
+  "_originalSource": "estraverse"
+}
