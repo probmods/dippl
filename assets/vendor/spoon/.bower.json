@@ -1,0 +1,14 @@
+{
+  "name": "spoon",
+  "homepage": "https://github.com/indutny/spoon",
+  "version": "0.1.10",
+  "_release": "0.1.10",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.10",
+    "commit": "55dde4bc4d4e64fe954e7268ef39df9d0bbfe45c"
+  },
+  "_source": "git://github.com/indutny/spoon.git",
+  "_target": "*",
+  "_originalSource": "indutny/spoon"
+}
