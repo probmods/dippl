@@ -1,0 +1,237 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ExpressionStatement",
+      "expression": {
+        "type": "CallExpression",
+        "callee": {
+          "type": "Identifier",
+          "name": "define",
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 6
+            },
+            "source": "template.jst"
+          }
+        },
+        "arguments": [
+          {
+            "type": "FunctionExpression",
+            "id": null,
+            "params": [],
+            "defaults": [],
+            "body": {
+              "type": "BlockStatement",
+              "body": [
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "Identifier",
+                        "name": "module",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 0
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 6
+                          },
+                          "source": "source.js"
+                        }
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "exports",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 7
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 14
+                          },
+                          "source": "source.js"
+                        }
+                      },
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 0
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 14
+                        },
+                        "source": "source.js"
+                      }
+                    },
+                    "right": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "CallExpression",
+                        "callee": {
+                          "type": "Identifier",
+                          "name": "require",
+                          "loc": {
+                            "start": {
+                              "line": 1,
+                              "column": 17
+                            },
+                            "end": {
+                              "line": 1,
+                              "column": 24
+                            },
+                            "source": "source.js"
+                          }
+                        },
+                        "arguments": [
+                          {
+                            "type": "Literal",
+                            "value": "./module",
+                            "raw": "\"./module\"",
+                            "loc": {
+                              "start": {
+                                "line": 1,
+                                "column": 25
+                              },
+                              "end": {
+                                "line": 1,
+                                "column": 35
+                              },
+                              "source": "source.js"
+                            }
+                          }
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 17
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 36
+                          },
+                          "source": "source.js"
+                        }
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "property",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 37
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 45
+                          },
+                          "source": "source.js"
+                        }
+                      },
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 17
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 45
+                        },
+                        "source": "source.js"
+                      }
+                    },
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 0
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 45
+                      },
+                      "source": "source.js"
+                    }
+                  },
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 0
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 46
+                    },
+                    "source": "source.js"
+                  }
+                }
+              ]
+            },
+            "rest": null,
+            "generator": false,
+            "expression": false,
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 7
+              },
+              "end": {
+                "line": 1,
+                "column": 37
+              },
+              "source": "template.jst"
+            }
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 38
+          },
+          "source": "template.jst"
+        }
+      },
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 39
+        },
+        "source": "template.jst"
+      }
+    }
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 39
+    },
+    "source": "template.jst"
+  }
+}
