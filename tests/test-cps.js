@@ -6,6 +6,7 @@ var types = require("../assets/vendor/ast-types/main.js");
 var build = types.builders;
 
 var plus = function(x, y, k) {return k(x + y)};
+var minus = function(x, y, k) {return k(x - y)};
 var times = function(x, y, k) {return k(x * y)};
 var and = function(x, y, k) {return k(x && y)};
 var plusTwo = function(x, k) {return k(x + 2)};
@@ -47,11 +48,23 @@ exports.testCallExpression = {
         return runCpsTest(test, code, expected);
     },
 
-    // testBinaryFunc: function (test) {
-    //     var code = "plus(3, 5)";
-    //     var expected = 8;
-    //     return runCpsTest(test, code, expected);        
-    // }
+    testBinaryFuncPlus: function (test) {
+        var code = "plus(3, 5)";
+        var expected = 8;
+        return runCpsTest(test, code, expected);        
+    },
+
+    testBinaryFuncMinus: function (test) {
+        var code = "minus(3, 5)";
+        var expected = -2;
+        return runCpsTest(test, code, expected);        
+    },
+
+    testBinaryFuncAnd: function (test) {
+        var code = "and(true, false)";
+        var expected = false;
+        return runCpsTest(test, code, expected);        
+    }
 
 }
 
@@ -66,6 +79,18 @@ exports.testLiteral = {
     testString: function (test) {
         var code = "'foobar'"
         var expected = 'foobar';
+        return runCpsTest(test, code, expected);
+    },
+
+    testBool1: function (test) {
+        var code = "true"
+        var expected = true;
+        return runCpsTest(test, code, expected);
+    },
+
+    testBool2: function (test) {
+        var code = "false"
+        var expected = false;
         return runCpsTest(test, code, expected);
     }
 

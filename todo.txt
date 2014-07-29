@@ -1,8 +1,9 @@
 - extend cps to make and(flip(), flip()) work [AST]
-  - multiple function arguments
   - desugar variable declaration to lambda?
 
 - add call/cc to cps transform [AST]
+
+- automatically cps-wrap primitives
 
 - decide whether arrays and method accessors will be allowed in sppl (currently used in head.sppl for sample)
 

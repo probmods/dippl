@@ -73,6 +73,22 @@ function cpsSequence(nodes, cont){
     }
 }
 
+function cpsApplication(opNode, argNodes, argVars, cont){
+    if (argNodes.length == 0) {
+        var opVar = build.identifier(util.gensym("_f"));
+        return cps(opNode,
+                   buildFunc([opVar],
+                             build.returnStatement(
+                                 build.callExpression(opVar, argVars.concat([cont])))));
+    } else {
+        var nextArgVar = build.identifier(util.gensym("_arg"));
+        return cps(argNodes[0],
+                   buildFunc([nextArgVar],
+                             build.returnStatement(
+                                 cpsApplication(opNode, argNodes.slice(1), argVars.concat([nextArgVar]), cont))));
+    }
+}
+
 function cps(node, cont){    
 
     var recurse = function(n){return cps(n, cont)};
@@ -112,16 +128,7 @@ function cps(node, cont){
     // Function calls
 
     case Syntax.CallExpression:
-        var f = build.identifier(util.gensym("_f"));
-        var e = build.identifier(util.gensym("_e"));
-        assert.equal(node.arguments.length, 1);
-        // TODO: extend to multiple arguments
-        var x = cps(node.callee,
-                    buildFunc([f], build.returnStatement(
-                        cps(node.arguments[0], 
-                            buildFunc([e], 
-                                      build.returnStatement(build.callExpression(f, [e, cont])))))));
-        return x;
+        return cpsApplication(node.callee, node.arguments, [], cont);
 
     // Empty statement
 
