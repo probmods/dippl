@@ -16,8 +16,11 @@
 
 // console.log(z);
 
+
 foo(
   function(h){
     return function (a){return h(g(a));};
   }(function(x){return x;})
 );
+
+// and(flip(), flip());

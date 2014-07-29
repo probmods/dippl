@@ -1,7 +1,7 @@
 "use strict";
 
-var fs = require('fs');
 var assert = require('assert');
+var util = require('./util.js');
 var _ = require('../vendor/underscore/underscore.js');
 var estraverse = require("../vendor/estraverse/estraverse.js");
 var escodegen = require("../vendor/escodegen/escodegen.js");
@@ -10,21 +10,6 @@ var estemplate = require("../vendor/estemplate/lib/estemplate.js");
 var types = require("../vendor/ast-types/main.js");
 var build = types.builders;
 var Syntax = estraverse.Syntax;
-
-function makeGensym() {
-    var seq = 0;
-    return function(prefix){
-        var result = prefix + seq;
-        seq += 1;
-        return result;
-    }
-}
-
-var gensym = makeGensym();
-
-function prettyJSON(obj) {
-    console.log(JSON.stringify(obj, null, 2));
-}
 
 function buildFunc(args, body){
     if (types.namedTypes.Statement.check(body)) {
@@ -40,7 +25,7 @@ function cpsAtomic(node){
     console.log("ATOMIC", node.type);
     switch (node.type) {
     case Syntax.FunctionExpression:
-        var newCont = build.identifier(gensym("_k"));
+        var newCont = build.identifier(util.gensym("_k"));
         var newParams = node.params.slice();
         newParams.push(newCont);
         return buildFunc(newParams, cps(node.body, newCont));
@@ -96,15 +81,13 @@ function cps(node, cont){
     // Function calls
 
     case Syntax.CallExpression:
-        var f = build.identifier(gensym("_f"));
-        var e = build.identifier(gensym("_e"));
+        var f = build.identifier(util.gensym("_f"));
+        var e = build.identifier(util.gensym("_e"));
         assert.equal(node.arguments.length, 1);
         // TODO: extend to multiple arguments
         var x = cps(node.callee,
-                    buildFunc([f],
-                              cps(node.arguments[0], 
-                                  buildFunc([e], 
-                                            build.callExpression(f, [e, cont])))));
+                    buildFunc([f], cps(node.arguments[0], 
+                                       buildFunc([e], build.callExpression(f, [e, cont])))));
         return x;
 
     // case Syntax.IfStatement:
@@ -120,23 +103,13 @@ function cps(node, cont){
 
     // SampleStatement
 
+    // CallCcStatement
+
     default:
         throw new Error("cps: unknown node type: " + node.type);
     }
 }
 
-function main(){
-    var filename = process.argv[2];
-    console.log('Processing', filename);
-    var ast = esprima.parse(fs.readFileSync(filename));
-    var newAst = cps(ast, build.identifier("topK"));
-    // prettyJSON(newAst);
-    var newCode = escodegen.generate(newAst);
-    var originalCode = escodegen.generate(ast);
-    console.log("\n* Original code:\n");
-    console.log(originalCode);
-    console.log("\n* CPS code:\n");
-    console.log(newCode);
+module.exports = {
+    cps: cps
 }
-
-main();

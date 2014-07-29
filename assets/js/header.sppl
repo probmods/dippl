@@ -1,0 +1,11 @@
+// var factor = function(){
+//     return callcc(...);
+// }
+
+// var sample = function(){
+//     return callcc(...);
+// }
+
+var thisIsTheSPPLHeader = function(){
+    return 1;
+}
