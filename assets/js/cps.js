@@ -73,13 +73,23 @@ function cpsSequence(nodes, cont){
     }
 }
 
+function isCallCc(node) {
+    return (types.namedTypes.Identifier.check(node) && node.name == "callcc");
+}
+
 function cpsApplication(opNode, argNodes, argVars, cont){
     if (argNodes.length == 0) {
-        var opVar = build.identifier(util.gensym("_f"));
-        return cps(opNode,
-                   buildFunc([opVar],
-                             build.returnStatement(
-                                 build.callExpression(opVar, argVars.concat([cont])))));
+        if (isCallCc(opNode)) {
+            var args = [cont].concat(argVars.slice(1)).concat(build.identifier("topK"));
+            console.log(args);
+            return build.callExpression(argVars[0], args);
+        } else {
+            var opVar = build.identifier(util.gensym("_f"));
+            return cps(opNode,
+                       buildFunc([opVar],
+                                 build.returnStatement(
+                                     build.callExpression(opVar, argVars.concat([cont])))))
+        }
     } else {
         var nextArgVar = build.identifier(util.gensym("_arg"));
         return cps(argNodes[0],
@@ -93,10 +103,7 @@ function cps(node, cont){
 
     var recurse = function(n){return cps(n, cont)};
 
-    // console.log(node.type);
     switch (node.type) {
-
-   // Wrapper statements
 
     case Syntax.BlockStatement: 
         return cpsSequence(node.body, cont)
@@ -110,27 +117,22 @@ function cps(node, cont){
     case Syntax.ExpressionStatement: 
         return build.expressionStatement(recurse(node.expression));
 
-    // Atomic expressions
-
     case Syntax.Identifier:
     case Syntax.Literal:
     case Syntax.FunctionExpression:
         return build.callExpression(cont, [cpsAtomic(node)]);
 
-    // Variable declaration
-
     case Syntax.VariableDeclaration:
         assert.equal(node.declarations.length, 1);
-        var dec = node.declarations[0];
-        return build.variableDeclaration(node.kind, 
-                                         [build.variableDeclarator(dec.id, recurse(dec.init))])
-
-    // Function calls
+        var declaration = node.declarations[0];
+        var varName = util.gensym();
+        return cps(declaration.init, 
+                   buildFunc([declaration.id], 
+                             build.returnStatement(
+                                 build.callExpression(cont, [build.identifier("undefined")]))))
 
     case Syntax.CallExpression:
         return cpsApplication(node.callee, node.arguments, [], cont);
-
-    // Empty statement
 
     case Syntax.EmptyStatement:
         return build.callExpression(cont, [build.identifier("undefined")]);
@@ -138,15 +140,8 @@ function cps(node, cont){
     // case Syntax.IfStatement:
     //     return node;
 
-    // case Syntax.BinaryExpression: 
-    //   return node;
-
     // case Syntax.MemberExpression: 
     //  return node;
-
-    // FactorStatement
-
-    // SampleStatement
 
     // CallCcStatement
 

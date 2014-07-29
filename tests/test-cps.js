@@ -145,3 +145,27 @@ exports.testblockStatement = {
     }
 
 }
+
+exports.testVariableDeclaration = {
+    testVar1: function (test) {
+        var code = "var x = 1; x";
+        var expected = 1;
+        return runCpsTest(test, code, expected);        
+    },
+    testVar2: function (test) {
+        var code = "var x = plus(1, 2); var y = times(x, 4); y";
+        var expected = 12;
+        return runCpsTest(test, code, expected);        
+    },
+}
+
+
+// exports.testCallCc = {
+
+//     testCallCc1: function (test) {
+//         var code = "var foo = function(k){1}; callcc(foo); plusTwo(3);";
+//         var expected = 1;
+//         return runCpsTest(test, code, expected);        
+//     }
+
+// }
