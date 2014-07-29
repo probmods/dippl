@@ -11,13 +11,36 @@ var types = require("../vendor/ast-types/main.js");
 var build = types.builders;
 var Syntax = estraverse.Syntax;
 
-function buildFunc(args, body){
-    if (types.namedTypes.Statement.check(body)) {
-        return build.functionExpression(null, args, build.blockStatement([body]));
-    } else if (types.namedTypes.Expression.check(body)) {
-        return build.functionExpression(null, args, build.blockStatement([build.expressionStatement(body)]));
+function buildStatement(node){
+    if (types.namedTypes.Statement.check(node)) {
+        return node;
+    } else if (types.namedTypes.Expression.check(node)) {
+        return build.expressionStatement(node);
     } else {
-        throw new Error("buildFunc: unknown body type: " + body.type);
+        throw new Error("buildStatement: can't handle node type: " + node.type);
+    }
+}
+
+function buildFunc(args, body){
+    return build.functionExpression(null, args, build.blockStatement([buildStatement(body)]));
+}
+
+function buildSingletonFunc(stmt){
+    return build.callExpression(buildFunc([], stmt), []);
+}
+
+function buildReturn(node){
+    if (types.namedTypes.ExpressionStatement.check(node)) {
+        return build.returnStatement(node.expression);
+    } else if (types.namedTypes.Expression.check(node)) {
+        return build.returnStatement(node);
+    } else if (types.namedTypes.ReturnStatement.check(node)) {
+        return node;
+    } else if (types.namedTypes.Statement) {
+        // Convert statement to expression
+        return build.returnStatement(buildSingletonFunc(node))
+    } else {
+        throw new Error("buildReturn: can't handle node type: " + node.type);
     }
 }
 
@@ -38,6 +61,18 @@ function cpsAtomic(node){
     };
 }
 
+function cpsSequence(nodes, cont){
+    assert.ok(nodes.length > 0);
+    if (nodes.length == 1) {
+        return cps(nodes[0], cont);
+    } else {
+        var temp = build.identifier(util.gensym("_x")); // we don't care about this variable
+        return cps(nodes[0], 
+                   buildFunc([temp], buildReturn(
+                       cpsSequence(nodes.slice(1), cont))));
+    }
+}
+
 function cps(node, cont){    
 
     var recurse = function(n){return cps(n, cont)};
@@ -48,14 +83,10 @@ function cps(node, cont){
    // Wrapper statements
 
     case Syntax.BlockStatement: 
-        assert.equal(node.body.length, 1);
-        // TODO: extend to multiple statements, sequentialize (see "begin" in Scheme)
-        return build.blockStatement(_.map(node.body, recurse));
+        return cpsSequence(node.body, cont)
 
     case Syntax.Program: 
-        assert.equal(node.body.length, 1);
-        // TODO: extend to multiple statements, sequentialize (see "begin" in Scheme)
-        return build.program(_.map(node.body, recurse));
+        return build.program([buildStatement(cpsSequence(node.body, cont))]);
 
     case Syntax.ReturnStatement: 
         return build.returnStatement(recurse(node.argument));
@@ -91,6 +122,11 @@ function cps(node, cont){
                             buildFunc([e], 
                                       build.returnStatement(build.callExpression(f, [e, cont])))))));
         return x;
+
+    // Empty statement
+
+    case Syntax.EmptyStatement:
+        return build.callExpression(cont, [build.identifier("undefined")]);
 
     // case Syntax.IfStatement:
     //     return node;

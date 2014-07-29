@@ -16,7 +16,7 @@ var runCpsTest = function(test, code, expected){
     var topKAst = esprima.parse("var topK = function(x){return x};");
     newAst.body = topKAst.body.concat(newAst.body);
     var newCode = escodegen.generate(newAst);
-    console.log(newCode);
+    // console.log(newCode);
     test.equal(eval(newCode), expected);
     test.done();
 }
@@ -47,11 +47,11 @@ exports.testCallExpression = {
         return runCpsTest(test, code, expected);
     },
 
-    testBinaryFunc: function (test) {
-        var code = "plus(3, 5)";
-        var expected = 8;
-        return runCpsTest(test, code, expected);        
-    }
+    // testBinaryFunc: function (test) {
+    //     var code = "plus(3, 5)";
+    //     var expected = 8;
+    //     return runCpsTest(test, code, expected);        
+    // }
 
 }
 
@@ -71,10 +71,20 @@ exports.testLiteral = {
 
 }
 
-exports.testEmptyStatement = function (test) {
+exports.testEmptyStatement = {
+
+    testEmptyAlone: function (test) {
         var code = ";"
         var expected = undefined;
         return runCpsTest(test, code, expected);
+    },
+
+    testEmptyInBlock: function (test) {
+        var code = "plusTwo(3); ; plusTwo(5);";
+        var expected = 7;
+        return runCpsTest(test, code, expected);        
+    }
+
 }
 
 exports.testblockStatement = {
@@ -85,9 +95,27 @@ exports.testblockStatement = {
         return runCpsTest(test, code, expected);
     },
 
-    testBlock: function (test) {
-        var code = "{plusTwo(3); { plusTwo(4); }; }; plusTwo(5);";
+    testBlock1: function (test) {
+        var code = "{ plusTwo(3) }; plusTwo(5);";
         var expected = 7;
+        return runCpsTest(test, code, expected);
+    },
+
+    testBlock2: function (test) {
+        var code = "plusTwo(1); { plusTwo(3) }; plusTwo(5);";
+        var expected = 7;
+        return runCpsTest(test, code, expected);
+    },
+
+    testBlock3: function (test) {
+        var code = "plusTwo(1); { plusTwo(3); plusTwo(4); }; plusTwo(5);";
+        var expected = 7;
+        return runCpsTest(test, code, expected);
+    },
+
+    testBlock4: function (test) {
+        var code = "plusTwo(1); { plusTwo(3); plusTwo(4); }";
+        var expected = 6;
         return runCpsTest(test, code, expected);
     }
 
