@@ -1,0 +1,15 @@
+{
+  "name": "nodeunit",
+  "homepage": "https://github.com/caolan/nodeunit",
+  "version": "0.9.0",
+  "_release": "0.9.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.9.0",
+    "commit": "60b7d67250a8005fcca6d71a18697c9bdc6613bd"
+  },
+  "_source": "git://github.com/caolan/nodeunit.git",
+  "_target": "~0.9.0",
+  "_originalSource": "caolan/nodeunit",
+  "_direct": true
+}

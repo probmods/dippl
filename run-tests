@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+var reporter = require('./assets/vendor/nodeunit/lib/nodeunit.js').reporters.default;
+reporter.run(['tests']);
