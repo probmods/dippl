@@ -22,7 +22,7 @@ function buildStatement(node){
 }
 
 function buildFunc(args, body){
-    return build.functionExpression(null, args, build.blockStatement([buildStatement(body)]));
+    return build.functionExpression(null, args, build.blockStatement([buildReturn(body)]));
 }
 
 function buildSingletonFunc(stmt){
@@ -68,8 +68,7 @@ function cpsSequence(nodes, cont){
     } else {
         var temp = build.identifier(util.gensym("_x")); // we don't care about this variable
         return cps(nodes[0], 
-                   buildFunc([temp], buildReturn(
-                       cpsSequence(nodes.slice(1), cont))));
+                   buildFunc([temp], cpsSequence(nodes.slice(1), cont)));
     }
 }
 
@@ -87,15 +86,13 @@ function cpsApplication(opNode, argNodes, argVars, cont){
             var opVar = build.identifier(util.gensym("_f"));
             return cps(opNode,
                        buildFunc([opVar],
-                                 build.returnStatement(
-                                     build.callExpression(opVar, argVars.concat([cont])))))
+                                 build.callExpression(opVar, argVars.concat([cont]))))
         }
     } else {
         var nextArgVar = build.identifier(util.gensym("_arg"));
         return cps(argNodes[0],
                    buildFunc([nextArgVar],
-                             build.returnStatement(
-                                 cpsApplication(opNode, argNodes.slice(1), argVars.concat([nextArgVar]), cont))));
+                             cpsApplication(opNode, argNodes.slice(1), argVars.concat([nextArgVar]), cont)));
     }
 }
 
@@ -129,8 +126,7 @@ function cps(node, cont){
         var varName = util.gensym("_v");
         return cps(declaration.init, 
                    buildFunc([declaration.id], 
-                             build.returnStatement(
-                                 build.callExpression(cont, [build.identifier("undefined")]))))
+                             build.callExpression(cont, [build.identifier("undefined")])))
 
     case Syntax.CallExpression:
         return cpsApplication(node.callee, node.arguments, [], cont);
@@ -143,13 +139,11 @@ function cps(node, cont){
         var testName = build.identifier(util.gensym("_test"));
         return build.callExpression(
             buildFunc([contName],
-                      build.returnStatement(
-                          cps(node.test,
-                              buildFunc([testName],
-                                        build.returnStatement(
-                                            build.conditionalExpression(testName, 
-                                                                        cps(node.consequent, contName),
-                                                                        cps(node.alternate, contName))))))),
+                      cps(node.test,
+                          buildFunc([testName],
+                                    build.conditionalExpression(testName, 
+                                                                cps(node.consequent, contName),
+                                                                cps(node.alternate, contName))))),
             [cont]
         )
         return node;
