@@ -1,7 +1,3 @@
-- add tests for future cps cases
-  - blocks
-  - multiple function args (and, +, *)
-
 - extend cps to make and(flip(), flip()) work
   - blocks
   - multiple function arguments

@@ -5,10 +5,10 @@ var escodegen = require("../assets/vendor/escodegen/escodegen.js");
 var types = require("../assets/vendor/ast-types/main.js");
 var build = types.builders;
 
-var plus = function(x, y) {return x + y};
-var times = function(x, y) {return x * y};
-var and = function(x, y) {return x && y};
-var plusTwo = function(x) {return x + 2};
+var plus = function(x, y, k) {return k(x + y)};
+var times = function(x, y, k) {return k(x * y)};
+var and = function(x, y, k) {return k(x && y)};
+var plusTwo = function(x, k) {return k(x + 2)};
 
 var runCpsTest = function(test, code, expected){
     var ast = esprima.parse(code);
@@ -16,6 +16,7 @@ var runCpsTest = function(test, code, expected){
     var topKAst = esprima.parse("var topK = function(x){return x};");
     newAst.body = topKAst.body.concat(newAst.body);
     var newCode = escodegen.generate(newAst);
+    console.log(newCode);
     test.equal(eval(newCode), expected);
     test.done();
 }
@@ -44,8 +45,13 @@ exports.testCallExpression = {
         var code = "(function(y){return y})(plusTwo(123))"
         var expected = 125;
         return runCpsTest(test, code, expected);
-    }
+    },
 
+    testBinaryFunc: function (test) {
+        var code = "plus(3, 5)";
+        var expected = 8;
+        return runCpsTest(test, code, expected);        
+    }
 
 }
 
@@ -65,3 +71,24 @@ exports.testLiteral = {
 
 }
 
+exports.testEmptyStatement = function (test) {
+        var code = ";"
+        var expected = undefined;
+        return runCpsTest(test, code, expected);
+}
+
+exports.testblockStatement = {
+
+    testProgram: function (test) {
+        var code = "plusTwo(3); plusTwo(4); plusTwo(5);";
+        var expected = 7;
+        return runCpsTest(test, code, expected);
+    },
+
+    testBlock: function (test) {
+        var code = "{plusTwo(3); { plusTwo(4); }; }; plusTwo(5);";
+        var expected = 7;
+        return runCpsTest(test, code, expected);
+    }
+
+}
