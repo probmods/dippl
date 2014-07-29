@@ -22,7 +22,7 @@ function buildFunc(args, body){
 }
 
 function cpsAtomic(node){    
-    console.log("ATOMIC", node.type);
+    // console.log("ATOMIC", node.type);
     switch (node.type) {
     case Syntax.FunctionExpression:
         var newCont = build.identifier(util.gensym("_k"));
@@ -42,7 +42,7 @@ function cps(node, cont){
 
     var recurse = function(n){return cps(n, cont)};
 
-    console.log(node.type);
+    // console.log(node.type);
     switch (node.type) {
 
    // Wrapper statements
@@ -86,8 +86,10 @@ function cps(node, cont){
         assert.equal(node.arguments.length, 1);
         // TODO: extend to multiple arguments
         var x = cps(node.callee,
-                    buildFunc([f], cps(node.arguments[0], 
-                                       buildFunc([e], build.callExpression(f, [e, cont])))));
+                    buildFunc([f], build.returnStatement(
+                        cps(node.arguments[0], 
+                            buildFunc([e], 
+                                      build.returnStatement(build.callExpression(f, [e, cont])))))));
         return x;
 
     // case Syntax.IfStatement:
