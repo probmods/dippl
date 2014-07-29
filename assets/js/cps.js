@@ -103,6 +103,7 @@ function cps(node, cont){
 
     var recurse = function(n){return cps(n, cont)};
 
+    // console.log(node.type);
     switch (node.type) {
 
     case Syntax.BlockStatement: 
@@ -125,7 +126,7 @@ function cps(node, cont){
     case Syntax.VariableDeclaration:
         assert.equal(node.declarations.length, 1);
         var declaration = node.declarations[0];
-        var varName = util.gensym();
+        var varName = util.gensym("_v");
         return cps(declaration.init, 
                    buildFunc([declaration.id], 
                              build.returnStatement(
@@ -137,13 +138,21 @@ function cps(node, cont){
     case Syntax.EmptyStatement:
         return build.callExpression(cont, [build.identifier("undefined")]);
 
-    // case Syntax.IfStatement:
-    //     return node;
-
-    // case Syntax.MemberExpression: 
-    //  return node;
-
-    // CallCcStatement
+    case Syntax.ConditionalExpression:
+        var contName = build.identifier(util.gensym("_cont"));
+        var testName = build.identifier(util.gensym("_test"));
+        return build.callExpression(
+            buildFunc([contName],
+                      build.returnStatement(
+                          cps(node.test,
+                              buildFunc([testName],
+                                        build.returnStatement(
+                                            build.conditionalExpression(testName, 
+                                                                        cps(node.consequent, contName),
+                                                                        cps(node.alternate, contName))))))),
+            [cont]
+        )
+        return node;
 
     default:
         throw new Error("cps: unknown node type: " + node.type);

@@ -22,10 +22,28 @@ var runCpsTest = function(test, code, expected){
     test.done();
 }
 
-exports.testFunctionExpression = function (test) {
-    // function expressions are not allowed as statements, so can't
-    // directly test this (but the call tests cover this)
-    test.done();
+// var makeTest = function(code){
+//     var expected = eval(code);
+//     return function (test) {
+//         var ast = esprima.parse(code);
+//         var newAst = cps.cps(ast, build.identifier("topK"));
+//         var topKAst = esprima.parse("var topK = function(x){return x};");
+//         newAst.body = topKAst.body.concat(newAst.body);
+//         var newCode = escodegen.generate(newAst);
+//         // console.log(newCode);
+//         test.equal(eval(newCode), expected);
+//         test.done();        
+//     };
+// }
+
+exports.testFunctionExpression = {
+
+    testFunc1: function (test) {
+        var code = "var f = function(x){return plus(x, 10)}; f(3)";
+        var expected = 13;
+        return runCpsTest(test, code, expected);
+    }
+
 }
 
 exports.testCallExpression = {
@@ -147,11 +165,13 @@ exports.testblockStatement = {
 }
 
 exports.testVariableDeclaration = {
+
     testVar1: function (test) {
         var code = "var x = 1; x";
         var expected = 1;
         return runCpsTest(test, code, expected);        
     },
+
     testVar2: function (test) {
         var code = "var x = plus(1, 2); var y = times(x, 4); y";
         var expected = 12;
@@ -159,13 +179,24 @@ exports.testVariableDeclaration = {
     },
 }
 
+exports.testConditionalExpression = {
 
-// exports.testCallCc = {
+    testConditional1: function (test) {
+        var code = "false ? 1 : 2";
+        var expected = 2;
+        return runCpsTest(test, code, expected);                
+    },
 
-//     testCallCc1: function (test) {
-//         var code = "var foo = function(k){1}; callcc(foo); plusTwo(3);";
-//         var expected = 1;
-//         return runCpsTest(test, code, expected);        
-//     }
+    testConditional2: function (test) {
+        var code = "true ? 1 : 2";
+        var expected = 1;
+        return runCpsTest(test, code, expected);                
+    },
 
-// }
+    testConditional3: function (test) {
+        var code = "and(true, false) ? 2 : 3";
+        var expected = 3;
+        return runCpsTest(test, code, expected);                
+    },
+
+}
