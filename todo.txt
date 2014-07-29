@@ -9,8 +9,9 @@
 
 - add call/cc to cps transform
 
-- add sample using call/cc to header.sppl
-  - add definition of flip() using sample
+- decide whether arrays and method accessors will be allowed in sppl (currently used in head.sppl for sample)
+
+- figure out correct query boundary: what do we do when the computation is done?
 
 - implement forward sampling using continuations (in header.js) [NDG]
 

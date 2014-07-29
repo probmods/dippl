@@ -16,14 +16,30 @@ var thisIsTheJavascriptHeader = function(){
 //sample and factor are the co-routine handlers: they get call/cc'ed from the sppl code to handle random stuff.
 //exit gets called when the query scope is exited, it returns a representation of the marginal distribution which becomes the value of the query statement.
 
+//this global variable tracks the current coroutine, sample and factor use it to interface with the inference algorithm.
+var coroutine
+
+
 
 //forward sampling simply samples at each random choice. we track the score as well, to extend to simple importance sampling (likelihood weighting).
-function Forward() {
+function Forward(spplFn) {
     this.score = 0
+    
+    //move old coroutine out of the way and install this as the current handler
+    var old_coroutine = coroutine
+    coroutine = this
+    
+    //run the sppl computation
+    var returnval = spplFn()
+    
+    //put old coroutine back, and return the return value of the sppl fn, ignore scores for foward sampling...
+    coroutine = old_coroutine
+    
+    return returnval
 }
 
 //dist can be either a name or an ERP package.
-Forward.prototype.sample = function fw_sample(cc, dist, params) {
+Forward.sample = function(cc, dist, params) {
     switch(dist) {
         case "flip":
             var weight = params[0]
@@ -37,7 +53,7 @@ Forward.prototype.sample = function fw_sample(cc, dist, params) {
     }
 }
 
-Forward.prototype.factor = function fw_factor(cc, score) {
+Forward.factor = function(cc, score) {
     this.score += score
     cc() //go back to sppl code...
 }
