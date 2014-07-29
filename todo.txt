@@ -1,7 +1,7 @@
-- extend cps to make and(flip(), flip()) work [AST]
-  - desugar variable declaration to lambda?
-
-- add call/cc to cps transform [AST]
+- extend cps [AST]
+  - fix [blocks of] variable declarations (desugar to lambda?)
+  - call/cc
+  - if statements
 
 - automatically cps-wrap primitives
 
