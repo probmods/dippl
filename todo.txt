@@ -12,6 +12,6 @@
 - add sample using call/cc to header.sppl
   - add definition of flip() using sample
 
-- implement forward sampling using continuations (in header.js)
+- implement forward sampling using continuations (in header.js) [NDG]
 
 - implement enumeration using continuations (in header.js)
