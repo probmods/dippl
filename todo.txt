@@ -1,17 +1,14 @@
 - extend cps [AST]
   - withContinuation
+  - ArrayExpression
+  - MemberExpression (or will this make life difficult? maybe only for primitives?)
 
 - automatically cps-wrap primitives [AST]
 - simplify tests (use eval to get expected results) [AST]
 - write cps tests for bigger programs
-- add ArrayExpression
-- rename sppl to wppl
-- wrap top-level wppl code in thunk
 - probably need to trampoline continuation calls..
 
 
-- figure out correct query boundary: what do we do when the computation is done?
-
-- implement forward sampling using continuations (in header.js) [NDG]
+- test forward sampling [NDG]
 
 - implement enumeration using continuations (in header.js)

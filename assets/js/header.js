@@ -1,9 +1,4 @@
 
-
-var thisIsTheJavascriptHeader = function(){
-    return 1;
-}
-
 //Elementary Random Primitives (ERPs) are the representation of distributions. They can have sampling, scoring, and support functions. A single ERP need not hve all three, but some inference functions will complain if they're missing one.
 //The main thing we can do with ERPs in WebPPL is feed them into the "sample" primitive to get a sample. At top level we will also have some "inspection" functions to visualize them?
 //
@@ -19,12 +14,12 @@ function ERP(sampler, scorer, supporter) {
 
 var bernoulli = new ERP(
                    function flipsample(params) {
-                    var weight = params[0]
+                    var weight = params//params[0]
                     var val = Math.random() < weight
                     return val
                    },
                    function flipscore(params, val) {
-                    var weight = params[0]
+                    var weight = params//params[0]
                     return val ? Math.log(weight) : Math.log(1-weight)
                    },
                    function flipsupport(params) {
@@ -38,8 +33,12 @@ var bernoulli = new ERP(
 //  sample and factor are the co-routine handlers: they get call/cc'ed from the wppl code to handle random stuff.
 //  the inference function passes exit to the wppl fn, so that it gets called when the fn is exited, it can call the inference cc when inference is done to contintue the program.
 
-//This global variable tracks the current coroutine, sample and factor use it to interface with the inference algorithm.
-var coroutine
+//This global variable tracks the current coroutine, sample and factor use it to interface with the inference algorithm. It's default setting throws an error on sample or factor calls.
+var coroutine =
+{
+sample: function(){throw "sample allowed only inside inference"},
+factor: function(){throw "factor allowed only inside inference"}
+}
 
 
 //////////////////
@@ -83,5 +82,6 @@ Forward.exit = function(retval) {
 module.exports = {
 ERP: ERP,
 bernoulli: bernoulli,
+coroutine: coroutine,
 Forward: Forward
 }

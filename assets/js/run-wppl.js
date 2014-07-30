@@ -6,7 +6,16 @@ var esprima = require("esprima");
 var escodegen = require("escodegen");
 var cps = require("./cps.js");
 var util = require("./util.js");
+
+//make runtime stuff globally available:
 var runtime = require("./header.js");
+for (var prop in runtime)
+{
+    if (runtime.hasOwnProperty(prop))
+    {
+        global[prop] = runtime[prop]
+    }
+}
 
 function main(){
 
@@ -39,10 +48,13 @@ function main(){
     console.log(newCode);
     
     //Run the program
-    var ret = eval(newCode)
     console.log("\n* Program return value:\n")
+    var topKAst = esprima.parse("var topK = function(x){return x};");
+    newProgramAst.body = topKAst.body.concat(newProgramAst.body);
+    newCode = escodegen.generate(newProgramAst);
+    var ret = eval(newCode)
     console.log(ret)
-
+    
 }
 
 main();

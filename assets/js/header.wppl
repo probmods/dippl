@@ -14,9 +14,10 @@ var sample = function(dist, params){
 
 
 var flip = function(theta) {
-    return sample(bernoulli, [theta]) //FIXME: do we allow arrays in wppl?
+//    return sample(bernoulli, [theta]) //FIXME: put in arrayexpression, then do this.
+    return sample(bernoulli, theta)
 }
 
-var thisIsTheSPPLHeader = function(){
-    return 1; //FIXME
-}
+//var thisIsTheSPPLHeader = function(){
+//    return 1; //FIXME
+//}
