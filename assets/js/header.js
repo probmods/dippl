@@ -77,3 +77,11 @@ Forward.exit = function(retval) {
 // particle filtering
 
 
+
+
+
+module.exports = {
+ERP: ERP,
+bernoulli: bernoulli,
+Forward: Forward
+}

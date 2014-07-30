@@ -6,6 +6,7 @@ var esprima = require("esprima");
 var escodegen = require("escodegen");
 var cps = require("./cps.js");
 var util = require("./util.js");
+var runtime = require("./header.js");
 
 function main(){
 
@@ -24,10 +25,10 @@ function main(){
     // Apply CPS transform to SPPL code
     var newProgramAst = cps.cps(programAst, build.identifier("topK"));
 
-    // Add Javascript header
-    var jsHeaderFile = path.resolve(__dirname, "header.js");
-    var jsHeaderAst = esprima.parse(fs.readFileSync(jsHeaderFile));
-    newProgramAst.body = jsHeaderAst.body.concat(newProgramAst.body)
+//    // Add Javascript header -- [now via require]
+//    var jsHeaderFile = path.resolve(__dirname, "header.js");
+//    var jsHeaderAst = esprima.parse(fs.readFileSync(jsHeaderFile));
+//    newProgramAst.body = jsHeaderAst.body.concat(newProgramAst.body)
 
     // Print converted code
     var newCode = escodegen.generate(newProgramAst);
@@ -36,6 +37,11 @@ function main(){
     console.log(originalCode);
     console.log("\n* CPS code:\n");
     console.log(newCode);
+    
+    //Run the program
+    var ret = eval(newCode)
+    console.log("\n* Program return value:\n")
+    console.log(ret)
 
 }
 
