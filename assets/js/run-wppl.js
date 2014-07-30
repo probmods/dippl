@@ -15,14 +15,14 @@ function main(){
     console.log('Processing', programFile);
     var programAst = esprima.parse(fs.readFileSync(programFile));
 
-    // Load SPPL header
-    var spplHeaderFile = path.resolve(__dirname, "header.sppl");
-    var spplHeaderAst = esprima.parse(fs.readFileSync(spplHeaderFile));
+    // Load WPPL header
+    var wpplHeaderFile = path.resolve(__dirname, "header.wppl");
+    var wpplHeaderAst = esprima.parse(fs.readFileSync(wpplHeaderFile));
 
-    // Concat SPPL header and program code
-    programAst.body = spplHeaderAst.body.concat(programAst.body)
+    // Concat WPPL header and program code
+    programAst.body = wpplHeaderAst.body.concat(programAst.body)
 
-    // Apply CPS transform to SPPL code
+    // Apply CPS transform to WPPL code
     var newProgramAst = cps.cps(programAst, build.identifier("topK"));
 
 //    // Add Javascript header -- [now via require]
