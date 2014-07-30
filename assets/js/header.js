@@ -65,13 +65,78 @@ Forward.factor = function(cc, score) {
 }
 
 Forward.exit = function(retval) {
-    //put old coroutine back, and return the return value of the wppl fn, ignore scores for foward sampling...
+    //put old coroutine back, and return the return value of the wppl fn as a delta erp, ignore scores for foward sampling...
     coroutine = this.old_coroutine
-    this.cc(retval)
+    dist=new ERP()
+    this.cc(dist)
 }
 
 
-// enumeration
+
+//////////////////
+// Enumeration: enumerate all the paths through the computation based on a priority queue.
+
+function Enumerate(cc, wpplFn) {
+    this.cc = cc
+    this.score = 0 //used to track the score of the path currently being explored
+    this.queue = [] //queue of continuations and values that we have yet to explore
+    this.marginal = {} //used to build marginal
+    
+    //move old coroutine out of the way and install this as the current handler
+    this.old_coroutine = coroutine
+    coroutine = this
+    
+    //enter the wppl computation, when the computation returns we want it to call this.exit so we pass that as the continuation.
+    wpplFn(this.exit)
+}
+
+//the queue is a bunch of computation states. each state is a continuation, a value to apply it to, and a score.
+Enumerate.nextInQueue = function() {
+    if(this.queue.length > 0){
+        var next_state = this.queue.pop()
+        this.score = next_state.score
+        next_state.continuation(next_state.value)
+    }
+    //otherwise nothing left to do, so return:
+    return
+}
+
+Enumerate.sample = function(cc, dist, params) {
+    //find support of this erp:
+    var supp = dist.support(params) //TODO: catch undefined support
+    
+    //for each value in support, add the continuation paired with support value and score to queue:
+    for(var s in supp){
+        var state = {continuation: cc,
+                    value: supp[s],
+                    score: this.score + dist.score(params, supp[s])}
+        this.queue.push(state)
+    }
+    
+    //call the next state on the queue
+    Enumerate.nextInQueue() //TODO: should be this. method?
+}
+
+Enumerate.factor = function(cc, score) {
+    //update score and continue
+    this.score += score
+    cc()
+}
+
+Enumerate.exit = function(retval) {
+    //have reached an exit of the computation. accumulate log-probability into retval bin.
+    this.marginal[retval] += this.score
+    
+    //if anything is left in queue do it:
+    Enumerate.nextInQueue() //TODO: should be this. method?
+    
+    //if nextInQueue returns it means queue is empty, so we're done. make an ERP and call the cc:
+    coroutine = this.old_coroutine
+    //make erp
+    var dist = new ERP(...)
+    this.cc(dist)
+}
+
 
 // particle filtering
 

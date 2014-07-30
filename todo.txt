@@ -1,4 +1,5 @@
 - extend cps [AST]
+  - make continuation first arg
   - withContinuation
   - ArrayExpression
   - MemberExpression (or will this make life difficult? maybe only for primitives?)
@@ -6,8 +7,8 @@
 - automatically cps-wrap primitives [AST]
 - simplify tests (use eval to get expected results) [AST]
 - write cps tests for bigger programs
-- probably need to trampoline continuation calls..
 
+- probably need to trampoline continuation calls..
 
 - test forward sampling [NDG]
 
