@@ -6,6 +6,7 @@
 - write cps tests for bigger programs
 - rename sppl to wppl
 - wrap top-level wppl code in thunk
+- probably need to trampoline continuation calls..
 
 - decide whether arrays and method accessors will be allowed in sppl (currently used in head.sppl for sample)
 
