@@ -28,6 +28,21 @@ var bernoulli = new ERP(
 )
 
 
+function multinomial_sample(theta)
+{
+	var k = theta.length
+	var thetasum = 0
+	for (var i = 0; i < k; i++) {thetasum += theta[i]}
+	var x = Math.random() * thetasum
+	var probAccum = 0
+    for(var i=0; i<k; i++) {
+        probAccum += theta[i]
+        if(probAccum >= x) {return i} //FIXME: if x=0 returns i=0, but this isn't right if theta[0]==0...
+    }
+    return k
+}
+
+
 //Inference interface: an infrence function takes the current continuation and a WebPPL thunk (which itself has been transformed to take a continuation). It does some kind of inference and returns an ERP representing the nromalized marginal distribution on return values.
 //The inference function should install a coroutine object that provides sample, factor, and exit.
 //  sample and factor are the co-routine handlers: they get call/cc'ed from the wppl code to handle random stuff.
@@ -67,7 +82,7 @@ Forward.factor = function(cc, score) {
 Forward.exit = function(retval) {
     //put old coroutine back, and return the return value of the wppl fn as a delta erp, ignore scores for foward sampling...
     coroutine = this.old_coroutine
-    dist=new ERP()
+    dist=new ERP()//FIXME
     this.cc(dist)
 }
 
@@ -124,20 +139,28 @@ Enumerate.factor = function(cc, score) {
 }
 
 Enumerate.exit = function(retval) {
-    //have reached an exit of the computation. accumulate log-probability into retval bin.
-    this.marginal[retval] += this.score
+    //have reached an exit of the computation. accumulate probability into retval bin.
+    this.marginal[retval] += Math.exp(this.score)
     
     //if anything is left in queue do it:
-    Enumerate.nextInQueue() //TODO: should be this. method?
+    Enumerate.nextInQueue() //TODO: should be a this. method?
     
-    //if nextInQueue returns it means queue is empty, so we're done. make an ERP and call the cc:
+    //if nextInQueue returns it means queue is empty, so we're done.
+    //reinstate previous coroutine:
     coroutine = this.old_coroutine
-    //make erp
-    var dist = new ERP(...)
+    //make an ERP and call the cc:
+    var marginal = this.marginal
+    var supp=[], probs=[]
+    for(var i in marginal){supp.push(i); probs.push(marginal[i])}
+    var dist = new ERP(function(params){return supp[multinomial_sample(probs)]},
+                       function(params,val){return marginal[val]},
+                       function(params){return supp})
     this.cc(dist)
 }
 
 
+
+//////////////////
 // particle filtering
 
 
