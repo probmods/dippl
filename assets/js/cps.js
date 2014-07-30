@@ -11,22 +11,28 @@ var types = require("../vendor/ast-types/main.js");
 var build = types.builders;
 var Syntax = estraverse.Syntax;
 
-function buildStatement(node){
+function convertToStatement(node){
     if (types.namedTypes.Statement.check(node)) {
         return node;
     } else if (types.namedTypes.Expression.check(node)) {
         return build.expressionStatement(node);
     } else {
-        throw new Error("buildStatement: can't handle node type: " + node.type);
+        throw new Error("convertToStatement: can't handle node type: " + node.type);
     }
 }
 
-function buildFunc(args, body){
-    return build.functionExpression(null, args, build.blockStatement([buildReturn(body)]));
+// Generates function(){ stmt }()
+function buildAppliedClosure(stmt){
+    return build.callExpression(buildFunc([], stmt), []);
 }
 
-function buildSingletonFunc(stmt){
-    return build.callExpression(buildFunc([], stmt), []);
+// FIXME: We don't always add a return statement
+function buildFunc(args, body){
+    if (types.namedTypes.BlockStatement.check(body)) {
+        return build.functionExpression(null, args, body)
+    } else {        
+        return build.functionExpression(null, args, build.blockStatement([buildReturn(body)]));
+    }
 }
 
 function buildReturn(node){
@@ -38,7 +44,7 @@ function buildReturn(node){
         return node;
     } else if (types.namedTypes.Statement) {
         // Convert statement to expression
-        return build.returnStatement(buildSingletonFunc(node))
+        return build.returnStatement(buildAppliedClosure(node))
     } else {
         throw new Error("buildReturn: can't handle node type: " + node.type);
     }
@@ -49,8 +55,7 @@ function cpsAtomic(node){
     switch (node.type) {
     case Syntax.FunctionExpression:
         var newCont = build.identifier(util.gensym("_k"));
-        var newParams = node.params.slice();
-        newParams.push(newCont);
+        var newParams = [newCont].concat(node.params);
         return buildFunc(newParams, cps(node.body, newCont));
     case Syntax.Identifier:
         return node;
@@ -77,7 +82,7 @@ function cpsApplication(opNode, argNodes, argVars, cont){
         var opVar = build.identifier(util.gensym("_f"));
         return cps(opNode,
                    buildFunc([opVar],
-                             build.callExpression(opVar, argVars.concat([cont]))));
+                             build.callExpression(opVar, [cont].concat(argVars))));
     } else {
         var nextArgVar = build.identifier(util.gensym("_arg"));
         return cps(argNodes[0],
@@ -97,7 +102,7 @@ function cps(node, cont){
         return cpsSequence(node.body, cont)
 
     case Syntax.Program: 
-        return build.program([buildStatement(cpsSequence(node.body, cont))]);
+        return build.program([convertToStatement(cpsSequence(node.body, cont))]);
 
     case Syntax.ReturnStatement: 
         return build.returnStatement(recurse(node.argument));

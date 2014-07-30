@@ -5,11 +5,11 @@ var escodegen = require("../assets/vendor/escodegen/escodegen.js");
 var types = require("../assets/vendor/ast-types/main.js");
 var build = types.builders;
 
-var plus = function(x, y, k) {return k(x + y)};
-var minus = function(x, y, k) {return k(x - y)};
-var times = function(x, y, k) {return k(x * y)};
-var and = function(x, y, k) {return k(x && y)};
-var plusTwo = function(x, k) {return k(x + 2)};
+var plus = function(k, x, y) {return k(x + y)};
+var minus = function(k, x, y) {return k(x - y)};
+var times = function(k, x, y) {return k(x * y)};
+var and = function(k, x, y) {return k(x && y)};
+var plusTwo = function(k, x) {return k(x + 2)};
 
 var runCpsTest = function(test, code, expected){
     var ast = esprima.parse(code);
@@ -65,6 +65,12 @@ exports.testCallExpression = {
         var expected = 125;
         return runCpsTest(test, code, expected);
     },
+
+    // testCompound3: function (test) {    
+    //     var code = "(function(y){y})(plusTwo(123))"
+    //     var expected = undefined;
+    //     return runCpsTest(test, code, expected);
+    // },
 
     testBinaryFuncPlus: function (test) {
         var code = "plus(3, 5)";
