@@ -72,22 +72,12 @@ function cpsSequence(nodes, cont){
     }
 }
 
-function isCallCc(node) {
-    return (types.namedTypes.Identifier.check(node) && node.name == "callcc");
-}
-
 function cpsApplication(opNode, argNodes, argVars, cont){
     if (argNodes.length == 0) {
-        if (isCallCc(opNode)) {
-            var args = [cont].concat(argVars.slice(1)).concat(build.identifier("topK"));
-            console.log(args);
-            return build.callExpression(argVars[0], args);
-        } else {
-            var opVar = build.identifier(util.gensym("_f"));
-            return cps(opNode,
-                       buildFunc([opVar],
-                                 build.callExpression(opVar, argVars.concat([cont]))))
-        }
+        var opVar = build.identifier(util.gensym("_f"));
+        return cps(opNode,
+                   buildFunc([opVar],
+                             build.callExpression(opVar, argVars.concat([cont]))));
     } else {
         var nextArgVar = build.identifier(util.gensym("_arg"));
         return cps(argNodes[0],
