@@ -1,5 +1,4 @@
 - extend cps [AST]
-  - make continuation first arg
   - withContinuation
   - ArrayExpression
   - MemberExpression (or will this make life difficult? maybe only for primitives?)
