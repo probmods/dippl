@@ -1,7 +1,8 @@
 - extend cps [AST]
   - withContinuation
   - ArrayExpression
-  - MemberExpression (or will this make life difficult? maybe only for primitives?)
+  - MemberExpression
+  - {..} object constructor
 
 - automatically cps-wrap primitives [AST]
 - simplify tests (use eval to get expected results) [AST]
@@ -9,6 +10,4 @@
 
 - probably need to trampoline continuation calls..
 
-- test forward sampling [NDG]
-
-- implement enumeration using continuations (in header.js)
+- test forward sampling and enumeration [NDG]
