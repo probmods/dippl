@@ -19,7 +19,9 @@
     "estemplate": "RReverser/estemplate",
     "ast-types": "benjamn/ast-types",
     "underscore": "~1.6.0",
-    "nodeunit": "caolan/nodeunit#~0.9.0"
+    "nodeunit": "caolan/nodeunit#~0.9.0",
+    "episcope": "Gozala/episcope#~0.0.1",
+    "interset": "Gozala/interset"
   },
   "resolutions": {
     "esprima": "~1.2.2"

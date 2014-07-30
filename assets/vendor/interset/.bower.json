@@ -1,0 +1,14 @@
+{
+  "name": "interset",
+  "homepage": "https://github.com/Gozala/interset",
+  "_release": "612712fd49",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "612712fd4964223d918b17da7f62c9b24545dc7a"
+  },
+  "_source": "git://github.com/Gozala/interset.git",
+  "_target": "*",
+  "_originalSource": "Gozala/interset",
+  "_direct": true
+}

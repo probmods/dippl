@@ -1,9 +1,10 @@
+- automatically cps-wrap primitives [AST]
+  - withContinuation to prevent this
+
 - extend cps [AST]
-  - withContinuation
   - ArrayExpression
   - MemberExpression (or will this make life difficult? maybe only for primitives?)
 
-- automatically cps-wrap primitives [AST]
 - simplify tests (use eval to get expected results) [AST]
 - write cps tests for bigger programs
 
