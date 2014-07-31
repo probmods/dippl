@@ -191,7 +191,7 @@ function getContinuationPrimitives(node){
   var contVars = [];
   visitContinuationPrimitives(node,
     function(path){
-      contVars.push(path.node.arguments[0]);
+      contVars.push(path.node.arguments[0].name);
     });
   return _.uniq(contVars);
 }
@@ -209,7 +209,8 @@ function removeContinuationPrimitiveWrapper(node){
 function getPrimitiveNames(node){
   return difference(
     freeVars(node),
-    getContinuationPrimitives(node), ["withContinuation"]);
+    getContinuationPrimitives(node),
+    ["withContinuation"]);
 }
 
 function topCps(node, cont){
