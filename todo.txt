@@ -1,5 +1,4 @@
-- automatically cps-wrap primitives
-  - withContinuation to prevent this
+- replace freeVars with reliable implementation
 
 - extend cps
   - ArrayExpression
