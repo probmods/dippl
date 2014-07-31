@@ -1,7 +1,7 @@
-- automatically cps-wrap primitives [AST]
+- automatically cps-wrap primitives
   - withContinuation to prevent this
 
-- extend cps [AST]
+- extend cps
   - ArrayExpression
   - MemberExpression
   - {..} object constructor
