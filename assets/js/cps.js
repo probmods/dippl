@@ -9,14 +9,16 @@ var esprima = require("../vendor/esprima/esprima.js");
 var estemplate = require("../vendor/estemplate/lib/estemplate.js");
 var types = require("../vendor/ast-types/main.js");
 var difference = require("../vendor/interset/difference.js");
-var references = require("../vendor/episcope/references.js");
-var bindings = require("../vendor/episcope/bindings.js");
 var build = types.builders;
 var Syntax = estraverse.Syntax;
 
 function makeGensymVariable(name){
   return build.identifier("_".concat(util.gensym(name)));
 }
+
+var getName = function(x){
+  return x.name;
+};
 
 function convertToStatement(node){
   if (types.namedTypes.Statement.check(node)) {
@@ -100,7 +102,7 @@ function cpsApplication(opNode, argNodes, argVars, cont){
 
 function cps(node, cont){
 
-  var recurse = function(n){return cps(n, cont);};
+  var recurse = function(nodes){return cps(nodes, cont);};
 
   // console.log(node.type);
   switch (node.type) {
@@ -155,12 +157,65 @@ function cps(node, cont){
   }
 }
 
+var freeVarsSeq = function(nodes, bound){
+  var boundInSeq = bound.slice();
+  var freeInSeq = [];
+  _.each(nodes, function(node){
+           freeInSeq = freeInSeq.concat(_freeVars(node, boundInSeq));
+           if (types.namedTypes.VariableDeclaration.check(node)) {
+             boundInSeq.push(node.declarations[0].id);
+           }
+         });
+  return freeInSeq;
+};
+
+function _freeVars(node, bound){
+
+  switch (node.type){
+
+  case Syntax.BlockStatement:
+  case Syntax.Program:
+    return freeVarsSeq(node.body, bound);
+
+  case Syntax.ReturnStatement:
+    return _freeVars(node.argument, bound);
+
+  case Syntax.ExpressionStatement:
+    return _freeVars(node.expression, bound);
+
+  case Syntax.Identifier:
+    return [node.name];
+
+  case Syntax.Literal:
+  case Syntax.EmptyStatement:
+    return [];
+
+  case Syntax.FunctionExpression:
+    return _freeVars(node.body, bound.concat(_.map(node.params, getName)));
+
+  case Syntax.VariableDeclaration:
+    return _freeVars(node.declarations[0].init, bound.concat([node.declarations[0].id]));
+
+  case Syntax.CallExpression:
+    return _.flatten(
+      [_freeVars(node.callee, bound)].concat(
+        _.map(node.arguments,
+              function(n){return _freeVars(n, bound);})),
+      true);
+
+  case Syntax.ConditionalExpression:
+    return _.flatten(
+      _.map([node.test, node.consequent, node.alternate],
+            function(n){return _freeVars(n, bound);}),
+      true);
+
+  default:
+    throw new Error("freeVars: unknown node type: " + node.type);
+  }
+};
+
 function freeVars(node){
-  var getName = function(x){return x.name;};
-  var refs = _.map(references(node), getName); // This doesn't seem to
-                                               // be working correctly
-  var binds = _.map(bindings(node), getName);
-  return _.uniq(difference(refs, binds));
+  return _freeVars(node, []);
 }
 
 function visitContinuationPrimitives(node, func){
@@ -237,18 +292,18 @@ function topCps(node, cont){
 
   // Rename primitives to CPS primitives
   estraverse.replace(node, {
-    enter: function (n) {
-      if (types.namedTypes.Identifier.check(n)) {
+    enter: function (nodes) {
+      if (types.namedTypes.Identifier.check(nodes)) {
         var replacement = undefined;
         _.each(_.zip(oldPrimitiveNames, newPrimitiveNames),
                function (oldToNew){
                  var oldName = oldToNew[0];
                  var newName = oldToNew[1];
-                 if (n.name === oldName) {
+                 if (nodes.name === oldName) {
                    replacement = build.identifier(newName);
                  }
                });
-        // console.log(n.name, replacement);
+        // console.log(nodes.name, replacement);
         return replacement;
       }
     }

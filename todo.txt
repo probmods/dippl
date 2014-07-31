@@ -1,9 +1,9 @@
-- replace freeVars with reliable implementation
-
 - extend cps
   - ArrayExpression
   - MemberExpression
   - {..} object constructor
+
+- use callcc syntax
 
 - simplify tests (use eval to get expected results) [AST]
 - write cps tests for bigger programs

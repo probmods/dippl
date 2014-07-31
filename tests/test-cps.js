@@ -45,7 +45,7 @@ exports.testFunctionExpression = {
     return runCpsTest(test, code, expected);
   }
 
-}
+};
 
 exports.testCallExpression = {
 
