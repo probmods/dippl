@@ -152,6 +152,9 @@ function cps(node, cont){
     );
     return node;
 
+  case Syntax.ArrayExpression:
+    return cpsApplication(build.identifier("makeArray"), node.elements, [], cont);
+
   default:
     throw new Error("cps: unknown node type: " + node.type);
   }
@@ -209,6 +212,10 @@ function _freeVars(node, bound){
             function(n){return _freeVars(n, bound);}),
       true);
 
+  case Syntax.ArrayExpression:
+    return _.flatten(_.map(node.elements,
+                           function(n){return _freeVars(n, bound);}));
+
   default:
     throw new Error("freeVars: unknown node type: " + node.type);
   }
@@ -265,7 +272,7 @@ function getPrimitiveNames(node){
   return difference(
     freeVars(node),
     getContinuationPrimitives(node),
-    ["withContinuation"]);
+    ["withContinuation", "makeArray"]);
 }
 
 function topCps(node, cont){
