@@ -238,7 +238,7 @@ function getPrimitiveNames(node){
 
 function topCps(node, cont){
   var cpsPrimitiveAsts = [];
-  var oldPrimitiveNames = getPrimitiveNames(node);
+    var oldPrimitiveNames = []; //TODO: turned off primitive wrapping until issues resolved.. //getPrimitiveNames(node);
   var newPrimitiveNames = [];
   _.each(oldPrimitiveNames,
     function(oldPrimitiveName){

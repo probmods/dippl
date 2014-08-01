@@ -1,14 +1,10 @@
 
--FIXME
-  - get straight how to call coroutine.sample, etc. need to have continuation passed in and have ‘this’ bound to coroutine object…
-  - primitive non-functions are wrapped, is a problem for erp objects (etc?)
-  - method name collisions: “var factor = function(score){return coroutine.factor(score)}”?
-  - methods of primitive objects aren’t wrapped?
-  
-  
+-primitive fn calling:
+  - existing freeVars method wraps too much (non-functions) and misses object method calls.
+  - existing withContinuation doesn’t work right when called on object methods.
 
 - extend cps: {..} object constructor
-- use callcc syntax
+- use callcc syntax?
 - simplify tests (use eval to get expected results) [AST]
 - write cps tests for bigger programs
 

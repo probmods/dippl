@@ -26,7 +26,6 @@ var bernoulli = new ERP(
                     return [true, false]
                    }
 )
-function getbern(){return bernoulli}//tmp...
 
 function multinomial_sample(theta)
 {
@@ -173,7 +172,6 @@ function display(x){console.log(x)}
 module.exports = {
 ERP: ERP,
 bernoulli: bernoulli,
-getbern: getbern,
 //coroutine: coroutine,
 display: display,
 fw: fw,

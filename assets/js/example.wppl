@@ -30,4 +30,8 @@
 
 //var e = withContinuation(fw)(function(){return 12})
 
-coroutine.sample(getbern(), [0.5])
+//coroutine.sample(withContinuation(Forward)(function(){return coroutine.sample(getbern(), [0.5])}), [0])
+
+//coroutine.sample(getbern(), [0.5])
+
+sample(fw(function(){return flip(0.5)}))
