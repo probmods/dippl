@@ -14,19 +14,19 @@ function ERP(sampler, scorer, supporter) {
 
 var bernoulli = new ERP(
                    function flipsample(params) {
-                    var weight = params//params[0]
+                    var weight = params[0]
                     var val = Math.random() < weight
                     return val
                    },
                    function flipscore(params, val) {
-                    var weight = params//params[0]
+                    var weight = params[0]
                     return val ? Math.log(weight) : Math.log(1-weight)
                    },
                    function flipsupport(params) {
                     return [true, false]
                    }
 )
-
+function getbern(){return bernoulli}//tmp...
 
 function multinomial_sample(theta)
 {
@@ -48,44 +48,47 @@ function multinomial_sample(theta)
 //  sample and factor are the co-routine handlers: they get call/cc'ed from the wppl code to handle random stuff.
 //  the inference function passes exit to the wppl fn, so that it gets called when the fn is exited, it can call the inference cc when inference is done to contintue the program.
 
-//This global variable tracks the current coroutine, sample and factor use it to interface with the inference algorithm. It's default setting throws an error on sample or factor calls.
-var coroutine =
+
+//This global variable tracks the current coroutine, sample and factor use it to interface with the inference algorithm. Default setting throws an error on factor calls.
+coroutine =
 {
-sample: function(){throw "sample allowed only inside inference"},
-factor: function(){throw "factor allowed only inside inference"}
+sample: function(cc, erp, params){cc(erp.sample(params))}, //sample and keep going
+factor: function(){throw "factor allowed only inside inference."}
 }
 
 
 //////////////////
-//Forward sampling: simply samples at each random choice. we track the score as well, to extend to simple importance sampling (likelihood weighting).
+//Forward sampling: simply samples at each random choice. throws an error on factor, since we aren't doing any normalization / inference.
+//TODO: can we abstract out the inference interface somewhat?
+//TODO: i think we can make inference code ordinary functions, by having the constructor return with the value that exit finally returns...
 function Forward(cc, wpplFn) {
-    this.score = 0
     this.cc = cc
     
     //move old coroutine out of the way and install this as the current handler
     this.old_coroutine = coroutine
     coroutine = this
     
-    //run the wppl computation, when the computation returns we want it to call this.exit so we pass that as the continuation.
-    wpplFn(this.exit)
+    //run the wppl computation, when the computation returns we want it to call the exit method of this coroutine so we pass that as the continuation (we wrap it up so that it gets called as a method, thus setting 'this' right).
+    wpplFn(function(r){return coroutine.exit(r)})
+    
+    return this //constructor doesn't actually return until whole wppl program is done, because cc is called by exit...
 }
 
-Forward.sample = function(cc, erp, params) {
+Forward.prototype.sample = function(cc, erp, params) {
     cc(erp.sample(params)) //sample and keep going
 }
 
-Forward.factor = function(cc, score) {
-    this.score += score
-    cc() //keep going
-}
+Forward.prototype.factor = function(cc,score){throw "factor allowed only inside inference."}
 
-Forward.exit = function(retval) {
+Forward.prototype.exit = function(retval) {
     //put old coroutine back, and return the return value of the wppl fn as a delta erp, ignore scores for foward sampling...
     coroutine = this.old_coroutine
-    dist=new ERP()//FIXME
+    dist=new ERP(function(){return retval}, function(p, v){return (v==retval)?0:-Infinity})
     this.cc(dist)
 }
 
+
+function fw(cc, wpplFn){return new Forward(cc, wpplFn)} //wrap with new call so that 'this' is set correctly..
 
 
 //////////////////
@@ -164,12 +167,15 @@ Enumerate.exit = function(retval) {
 // particle filtering
 
 
-
+function display(x){console.log(x)}
 
 
 module.exports = {
 ERP: ERP,
 bernoulli: bernoulli,
-coroutine: coroutine,
+getbern: getbern,
+//coroutine: coroutine,
+display: display,
+fw: fw,
 Forward: Forward
 }

@@ -25,4 +25,9 @@
 
 // and(flip(), flip());
 
-flip()
+//withContinuation(Forward)(function(){return coroutine.factor(1)})
+
+
+//var e = withContinuation(fw)(function(){return 12})
+
+coroutine.sample(getbern(), [0.5])

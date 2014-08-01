@@ -3,21 +3,19 @@
 //we assume there is a global object called coroutine that coresponds to the current inference method; it has sample and factor methods.
 
 
-var factor = function(score){
-     return callcc(coroutine.factor, score);
- }
+//var factor = function(score){
+//    // return withContinuation(coroutine.factor)(score); //callcc(coroutine.factor, score);
+//    return coroutine.factor(score)
+// }
 
-//dist is an ERP object. params is an array of parameters for the dist.
-var sample = function(dist, params){
-     return callcc(coroutine.sample, dist, params);
- }
-
-
-var flip = function(theta) {
-//    return sample(bernoulli, [theta]) //FIXME: put in arrayexpression, then do this.
-    return sample(bernoulli, theta)
-}
-
-//var thisIsTheSPPLHeader = function(){
-//    return 1; //FIXME
+////dist is an ERP object. params is an array of parameters for the dist.
+//var sample = function(dist, params){
+//     return withContinuation(coroutine.sample)(dist, params); //callcc(coroutine.sample, dist, params);
+// }
+//
+//
+//var flip = function(theta) {
+////    return sample(bernoulli, [theta]) //FIXME: put in arrayexpression, then do this.
+//    return sample(bernoulli, theta)
 //}
+
