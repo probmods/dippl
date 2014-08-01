@@ -1,10 +1,5 @@
-- extend cps
-  - ArrayExpression
-  - MemberExpression
-  - {..} object constructor
-
+- extend cps: {..} object constructor
 - use callcc syntax
-
 - simplify tests (use eval to get expected results) [AST]
 - write cps tests for bigger programs
 
