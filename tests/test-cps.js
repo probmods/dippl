@@ -1,3 +1,4 @@
+var _ = require('../assets/vendor/underscore/underscore.js');
 var cps = require("../assets/js/cps.js");
 var util = require("../assets/js/util.js");
 var esprima = require("../assets/vendor/esprima/esprima.js");
@@ -5,6 +6,13 @@ var escodegen = require("../assets/vendor/escodegen/escodegen.js");
 var types = require("../assets/vendor/ast-types/main.js");
 var build = types.builders;
 
+var fooObj = {
+  bar: 1,
+  baz: {
+    blubb: 2,
+    bla: 3
+  }
+};
 var plus = function(x, y) {return x + y;};
 var minus = function(x, y) {return x - y;};
 var times = function(x, y) {return x * y;};
@@ -19,7 +27,7 @@ var runCpsTest = function(test, code, expected){
   newAst.body = topKAst.body.concat(newAst.body);
   var newCode = escodegen.generate(newAst);
   // console.log(newCode);
-  test.equal(eval(newCode), expected);
+  test.ok(_.isEqual(eval(newCode), expected));
   test.done();
 };
 
@@ -212,6 +220,38 @@ exports.testWithContinuation = {
 
   testWithContinuation1: function (test) {
     var code = "withContinuation(getTwoK)(); plus(3, 5)";
+    var expected = 2;
+    return runCpsTest(test, code, expected);
+  }
+
+};
+
+exports.testArrayExpression = {
+
+  testArray1: function (test) {
+    var code = "[1, 2, 3]";
+    var expected = [1, 2, 3];
+    return runCpsTest(test, code, expected);
+  },
+
+  testArray2: function (test) {
+    var code = "[plusTwo(1), plus(2, 5), 3]";
+    var expected = [3, 7, 3];
+    return runCpsTest(test, code, expected);
+  }
+
+};
+
+exports.testMemberExpression = {
+
+  testMember1: function (test) {
+    var code = "fooObj.bar";
+    var expected = 1;
+    return runCpsTest(test, code, expected);
+  },
+
+  testMember2: function (test) {
+    var code = "fooObj.baz.blubb";
     var expected = 2;
     return runCpsTest(test, code, expected);
   }

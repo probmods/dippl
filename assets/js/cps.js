@@ -2,6 +2,7 @@
 
 var assert = require('assert');
 var util = require('./util.js');
+var freeVars = require('./freevars.js').freeVars;
 var _ = require('../vendor/underscore/underscore.js');
 var estraverse = require("../vendor/estraverse/estraverse.js");
 var escodegen = require("../vendor/escodegen/escodegen.js");
@@ -15,10 +16,6 @@ var Syntax = estraverse.Syntax;
 function makeGensymVariable(name){
   return build.identifier("_".concat(util.gensym(name)));
 }
-
-var getName = function(x){
-  return x.name;
-};
 
 function convertToStatement(node){
   if (types.namedTypes.Statement.check(node)) {
@@ -67,7 +64,6 @@ function cpsAtomic(node){
     var newParams = [newCont].concat(node.params);
     return buildFunc(newParams, cps(node.body, newCont));
   case Syntax.Identifier:
-    return node;
   case Syntax.Literal:
     return node;
   default:
@@ -75,29 +71,67 @@ function cpsAtomic(node){
   };
 }
 
-function cpsSequence(nodes, cont){
-  assert.ok(nodes.length > 0);
-  if (nodes.length == 1) {
-    return cps(nodes[0], cont);
+function cpsSequence(atFinalElement, getFinalElement, nodes, vars){
+  vars = vars || [];
+  if (atFinalElement(nodes)){
+    return getFinalElement(nodes, vars);
   } else {
-    var temp = makeGensymVariable("x"); // we don't care about this variable
+    var nextVar = makeGensymVariable("s");
     return cps(nodes[0],
-               buildFunc([temp], cpsSequence(nodes.slice(1), cont)));
+               buildFunc([nextVar],
+                         cpsSequence(atFinalElement, getFinalElement, nodes.slice(1), vars.concat([nextVar]))));
   }
 }
 
-function cpsApplication(opNode, argNodes, argVars, cont){
-  if (argNodes.length == 0) {
-    var opVar = makeGensymVariable("f");
-    return cps(opNode,
-               buildFunc([opVar],
-                         build.callExpression(opVar, [cont].concat(argVars))));
-  } else {
-    var nextArgVar = makeGensymVariable("arg");
-    return cps(argNodes[0],
-               buildFunc([nextArgVar],
-                         cpsApplication(opNode, argNodes.slice(1), argVars.concat([nextArgVar]), cont)));
-  }
+function cpsBlock(nodes, cont){
+  return cpsSequence(
+    function (nodes){return (nodes.length == 1);},
+    function(nodes, vars){return cps(nodes[0], cont);},
+    nodes);
+}
+
+function cpsApplication(opNode, argNodes, cont){
+  var nodes = [opNode].concat(argNodes);
+  return cpsSequence(
+    function (nodes){return (nodes.length == 0);},
+    function(nodes, vars){
+      var args = [cont].concat(vars.slice(1));
+      return build.callExpression(vars[0], args);
+    },
+    nodes);
+}
+
+function cpsConditional(test, consequent, alternate, cont){
+  var contName = makeGensymVariable("cont");
+  var testName = makeGensymVariable("test");
+  return build.callExpression(
+    buildFunc([contName],
+      cps(test,
+          buildFunc([testName],
+                    build.conditionalExpression(testName,
+                                                cps(consequent, contName),
+                                                cps(alternate, contName))))),
+    [cont]
+  );
+}
+
+function cpsArrayExpression(elements, cont){
+  return cpsSequence(
+    function (nodes){return (nodes.length == 0);},
+    function(nodes, vars){
+      var arrayExpr = build.arrayExpression(vars);
+      return build.callExpression(cont, [arrayExpr]);
+    },
+    elements);
+}
+
+function cpsMemberExpression(obj, prop, computed, cont){
+  assert.ok(!computed);
+  var objName = makeGensymVariable("obj");
+  var memberExpr = build.memberExpression(objName, prop, false);
+  return cps(obj,
+    buildFunc([objName],
+    build.callExpression(cont, [memberExpr])));
 }
 
 function cps(node, cont){
@@ -108,10 +142,10 @@ function cps(node, cont){
   switch (node.type) {
 
   case Syntax.BlockStatement:
-    return cpsSequence(node.body, cont);
+    return cpsBlock(node.body, cont);
 
   case Syntax.Program:
-    return build.program([convertToStatement(cpsSequence(node.body, cont))]);
+    return build.program([convertToStatement(cpsBlock(node.body, cont))]);
 
   case Syntax.ReturnStatement:
     return build.returnStatement(recurse(node.argument));
@@ -133,96 +167,23 @@ function cps(node, cont){
                          build.callExpression(cont, [build.identifier("undefined")])));
 
   case Syntax.CallExpression:
-    return cpsApplication(node.callee, node.arguments, [], cont);
+    return cpsApplication(node.callee, node.arguments, cont);
 
   case Syntax.EmptyStatement:
     return build.callExpression(cont, [build.identifier("undefined")]);
 
   case Syntax.ConditionalExpression:
-    var contName = makeGensymVariable("cont");
-    var testName = makeGensymVariable("test");
-    return build.callExpression(
-      buildFunc([contName],
-        cps(node.test,
-            buildFunc([testName],
-              build.conditionalExpression(testName,
-                cps(node.consequent, contName),
-                cps(node.alternate, contName))))),
-      [cont]
-    );
-    return node;
+    return cpsConditional(node.test, node.consequent, node.alternate, cont);
 
   case Syntax.ArrayExpression:
-    return cpsApplication(build.identifier("makeArray"), node.elements, [], cont);
+    return cpsArrayExpression(node.elements, cont);
+
+  case Syntax.MemberExpression:
+    return cpsMemberExpression(node.object, node.property, node.computed, cont);
 
   default:
     throw new Error("cps: unknown node type: " + node.type);
   }
-}
-
-var freeVarsSeq = function(nodes, bound){
-  var boundInSeq = bound.slice();
-  var freeInSeq = [];
-  _.each(nodes, function(node){
-           freeInSeq = freeInSeq.concat(_freeVars(node, boundInSeq));
-           if (types.namedTypes.VariableDeclaration.check(node)) {
-             boundInSeq.push(node.declarations[0].id);
-           }
-         });
-  return freeInSeq;
-};
-
-function _freeVars(node, bound){
-
-  switch (node.type){
-
-  case Syntax.BlockStatement:
-  case Syntax.Program:
-    return freeVarsSeq(node.body, bound);
-
-  case Syntax.ReturnStatement:
-    return _freeVars(node.argument, bound);
-
-  case Syntax.ExpressionStatement:
-    return _freeVars(node.expression, bound);
-
-  case Syntax.Identifier:
-    return [node.name];
-
-  case Syntax.Literal:
-  case Syntax.EmptyStatement:
-    return [];
-
-  case Syntax.FunctionExpression:
-    return _freeVars(node.body, bound.concat(_.map(node.params, getName)));
-
-  case Syntax.VariableDeclaration:
-    return _freeVars(node.declarations[0].init, bound.concat([node.declarations[0].id]));
-
-  case Syntax.CallExpression:
-    return _.flatten(
-      [_freeVars(node.callee, bound)].concat(
-        _.map(node.arguments,
-              function(n){return _freeVars(n, bound);})),
-      true);
-
-  case Syntax.ConditionalExpression:
-    return _.flatten(
-      _.map([node.test, node.consequent, node.alternate],
-            function(n){return _freeVars(n, bound);}),
-      true);
-
-  case Syntax.ArrayExpression:
-    return _.flatten(_.map(node.elements,
-                           function(n){return _freeVars(n, bound);}));
-
-  default:
-    throw new Error("freeVars: unknown node type: " + node.type);
-  }
-};
-
-function freeVars(node){
-  return _freeVars(node, []);
 }
 
 function visitContinuationPrimitives(node, func){
@@ -272,7 +233,7 @@ function getPrimitiveNames(node){
   return difference(
     freeVars(node),
     getContinuationPrimitives(node),
-    ["withContinuation", "makeArray"]);
+    ["withContinuation"]);
 }
 
 function topCps(node, cont){
