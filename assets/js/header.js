@@ -166,6 +166,9 @@ Enumerate.exit = function(retval) {
 // particle filtering
 
 
+//////////////////
+//some primitive functions to make things simpler
+
 function display(k,x){console.log(x)}
 
 function callPrimitive(k,f){
@@ -173,13 +176,21 @@ function callPrimitive(k,f){
     k(f.apply(f,args))
 }
 
+function plus(k, x, y) {k(x + y)};
+function minus(k, x, y) {k(x - y)};
+function times(k, x, y) {k(x * y)};
+function and(k, x, y) {k(x && y)};
+
 
 module.exports = {
 ERP: ERP,
 bernoulli: bernoulli,
+fw: fw,
 //coroutine: coroutine,
 display: display,
 callPrimitive: callPrimitive,
-fw: fw,
-Forward: Forward
+plus: plus,
+minus: minus,
+times: times,
+and: and
 }
