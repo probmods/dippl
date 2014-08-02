@@ -49,7 +49,7 @@ function main(){
     
     //Run the program
     console.log("\n* Program return value:\n")
-    var topKAst = esprima.parse("var topK = function(x){display(x)};");
+    var topKAst = esprima.parse("var topK = function(x){console.log(x)};");
     newProgramAst.body = topKAst.body.concat(newProgramAst.body);
     newCode = escodegen.generate(newProgramAst);
     eval(newCode)

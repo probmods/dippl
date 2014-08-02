@@ -166,7 +166,12 @@ Enumerate.exit = function(retval) {
 // particle filtering
 
 
-function display(x){console.log(x)}
+function display(k,x){console.log(x)}
+
+function callPrimitive(k,f){
+    var args = Array.prototype.slice.call(arguments,2)
+    k(f.apply(f,args))
+}
 
 
 module.exports = {
@@ -174,6 +179,7 @@ ERP: ERP,
 bernoulli: bernoulli,
 //coroutine: coroutine,
 display: display,
+callPrimitive: callPrimitive,
 fw: fw,
 Forward: Forward
 }
