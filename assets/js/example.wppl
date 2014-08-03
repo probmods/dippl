@@ -36,4 +36,9 @@
 
 //sample(fw(function(){return flip(0.5)}))
 
-and(flip(0.6),flip(0.5))
+sample(
+enu(function() {
+    var a = and(flip(0.5),flip(0.5))
+    factor(a?1.4:1)
+    return a
+    }))

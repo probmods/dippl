@@ -55,6 +55,9 @@ sample: function(cc, erp, params){cc(erp.sample(params))}, //sample and keep goi
 factor: function(){throw "factor allowed only inside inference."}
 }
 
+function sample(k, dist, params){coroutine.sample(k,dist, params)}
+function factor(k, score){coroutine.factor(k,score)}
+
 
 //////////////////
 //Forward sampling: simply samples at each random choice. throws an error on factor, since we aren't doing any normalization / inference.
@@ -104,23 +107,24 @@ function Enumerate(cc, wpplFn) {
     coroutine = this
     
     //enter the wppl computation, when the computation returns we want it to call this.exit so we pass that as the continuation.
-    wpplFn(this.exit)
+    wpplFn(function(r){return coroutine.exit(r)})
+    
+    return this //constructor doesn't actually return until whole wppl program is done, because cc is called by exit...
 }
 
 //the queue is a bunch of computation states. each state is a continuation, a value to apply it to, and a score.
-Enumerate.nextInQueue = function() {
-    if(this.queue.length > 0){
+Enumerate.prototype.nextInQueue = function() {
+    
         var next_state = this.queue.pop()
         this.score = next_state.score
         next_state.continuation(next_state.value)
-    }
-    //otherwise nothing left to do, so return:
-    return
 }
 
-Enumerate.sample = function(cc, dist, params) {
+Enumerate.prototype.sample = function(cc, dist, params) {
+    
     //find support of this erp:
     var supp = dist.support(params) //TODO: catch undefined support
+    
     
     //for each value in support, add the continuation paired with support value and score to queue:
     for(var s in supp){
@@ -131,34 +135,44 @@ Enumerate.sample = function(cc, dist, params) {
     }
     
     //call the next state on the queue
-    Enumerate.nextInQueue() //TODO: should be this. method?
+    this.nextInQueue()
 }
 
-Enumerate.factor = function(cc, score) {
+Enumerate.prototype.factor = function(cc, score) {
     //update score and continue
     this.score += score
     cc()
 }
 
-Enumerate.exit = function(retval) {
+Enumerate.prototype.exit = function(retval) {
+    
     //have reached an exit of the computation. accumulate probability into retval bin.
+    if(this.marginal[retval] == undefined){this.marginal[retval]=0}
     this.marginal[retval] += Math.exp(this.score)
     
-    //if anything is left in queue do it:
-    Enumerate.nextInQueue() //TODO: should be a this. method?
+    console.log("exit called with retval "+retval+" marginal is ")
+    console.log(this.marginal)
     
-    //if nextInQueue returns it means queue is empty, so we're done.
-    //reinstate previous coroutine:
-    coroutine = this.old_coroutine
-    //make an ERP and call the cc:
-    var marginal = this.marginal
-    var supp=[], probs=[]
-    for(var i in marginal){supp.push(i); probs.push(marginal[i])}
-    var dist = new ERP(function(params){return supp[multinomial_sample(probs)]},
-                       function(params,val){return marginal[val]},
-                       function(params){return supp})
-    this.cc(dist)
+    
+    //if anything is left in queue do it:
+    if(this.queue.length > 0){
+        this.nextInQueue()
+    } else {
+        //reinstate previous coroutine:
+        coroutine = this.old_coroutine
+        //make an ERP and call the cc:
+        var marginal = this.marginal
+        var supp=[], probs=[]
+        for(var i in marginal){supp.push(i); probs.push(marginal[i])}
+        var dist = new ERP(function(params){return supp[multinomial_sample(probs)]},
+                           function(params,val){return marginal[val]},
+                           function(params){return supp})
+        //return from enumeration by calling continuation:
+        this.cc(dist)
+    }
 }
+
+function enu(cc, wpplFn){return new Enumerate(cc, wpplFn)} //wrap with new call so that 'this' is set correctly..
 
 
 
@@ -169,7 +183,7 @@ Enumerate.exit = function(retval) {
 //////////////////
 //some primitive functions to make things simpler
 
-function display(k,x){console.log(x)}
+function display(k,x){k(console.log(x))}
 
 function callPrimitive(k,f){
     var args = Array.prototype.slice.call(arguments,2)
@@ -186,7 +200,10 @@ module.exports = {
 ERP: ERP,
 bernoulli: bernoulli,
 fw: fw,
+enu: enu,
 //coroutine: coroutine,
+sample: sample,
+factor: factor,
 display: display,
 callPrimitive: callPrimitive,
 plus: plus,
