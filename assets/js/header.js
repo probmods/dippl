@@ -42,6 +42,7 @@ function multinomial_sample(theta)
 }
 
 
+
 //Inference interface: an infrence function takes the current continuation and a WebPPL thunk (which itself has been transformed to take a continuation). It does some kind of inference and returns an ERP representing the nromalized marginal distribution on return values.
 //The inference function should install a coroutine object that provides sample, factor, and exit.
 //  sample and factor are the co-routine handlers: they get call/cc'ed from the wppl code to handle random stuff.
@@ -125,7 +126,6 @@ Enumerate.prototype.sample = function(cc, dist, params) {
     //find support of this erp:
     var supp = dist.support(params) //TODO: catch undefined support
     
-    
     //for each value in support, add the continuation paired with support value and score to queue:
     for(var s in supp){
         var state = {continuation: cc,
@@ -150,31 +150,49 @@ Enumerate.prototype.exit = function(retval) {
     if(this.marginal[retval] == undefined){this.marginal[retval]=0}
     this.marginal[retval] += Math.exp(this.score)
     
-    console.log("exit called with retval "+retval+" marginal is ")
-    console.log(this.marginal)
-    
-    
     //if anything is left in queue do it:
     if(this.queue.length > 0){
         this.nextInQueue()
     } else {
         //reinstate previous coroutine:
         coroutine = this.old_coroutine
-        //make an ERP and call the cc:
+        //normalize distribution:
+        var norm=0, supp=[]
         var marginal = this.marginal
-        var supp=[], probs=[]
-        for(var i in marginal){supp.push(i); probs.push(marginal[i])}
-        var dist = new ERP(function(params){return supp[multinomial_sample(probs)]},
+        for(var v in marginal){norm+=marginal[v];supp.push(v)}
+        for(var v in marginal){marginal[v]=marginal[v]/norm}
+        console.log("Enumerated distribution: ")
+        console.log(marginal)
+        //make an ERP from marginal:
+        var dist = new ERP(function(params){
+                           var k = marginal.length
+                           var x = Math.random()
+                           var probAccum = 0
+                           for(var i in marginal) {
+                            probAccum += marginal[i]
+                            if(probAccum >= x) {return i} //FIXME: if x=0 returns i=0, but this isn't right if theta[0]==0...
+                           }
+                           return i},
                            function(params,val){return marginal[val]},
                            function(params){return supp})
-        //return from enumeration by calling continuation:
+        //return from enumeration by calling original continuation:
         this.cc(dist)
     }
 }
 
 function enu(cc, wpplFn){return new Enumerate(cc, wpplFn)} //wrap with new call so that 'this' is set correctly..
 
-
+function multinomial_sample_normed(theta)
+{
+	var k = theta.length
+	var x = Math.random() //assumes normalized theta vector
+	var probAccum = 0
+    for(var i=0; i<k; i++) {
+        probAccum += theta[i]
+        if(probAccum >= x) {return i} //FIXME: if x=0 returns i=0, but this isn't right if theta[0]==0...
+    }
+    return k
+}
 
 //////////////////
 // particle filtering

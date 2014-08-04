@@ -1,7 +1,6 @@
 
 
 var flip = function(theta) {
-//    return sample(bernoulli, [theta]) //FIXME: put in arrayexpression, then do this.
     return sample(bernoulli, [theta])
 }
 
