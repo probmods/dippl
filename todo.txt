@@ -1,13 +1,21 @@
 
--primitive fn calling:
+
+CPS:
+- binary and unary operator expression? (need to handle negative numbers!)
+- {…} object constructor
+- currently must call ordinary primitives with callPrimitive… could try to detect some…
   - existing freeVars method wraps too much (non-functions) and misses object method calls.
   - existing withContinuation doesn’t work right when called on object methods.
-  - currently must call ordinary primitives with callPrimitive… could try to detect some…
-
-- extend cps: {..} object constructor, binary operators?
-- simplify tests (use eval to get expected results) [AST]
-- test forward sampling and enumeration [NDG]
-- write cps tests for bigger programs, write inference tests
 
 - probably need to trampoline continuation calls..
+
+Inference:
+- particle filter
+- some kind of top-level expectation or hist fns?
+
+Testing:
+- simplify tests (use eval to get expected results) [AST]
+- test suite for inference methods
+- write cps tests for bigger programs
+
 
