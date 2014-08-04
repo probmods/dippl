@@ -39,7 +39,7 @@
 var e = cache(function (x){
     return Enumerate(function() {
                      var a = and(flip(0.5),flip(0.5))
-                     //factor(a?2:1)
+                     factor(a? 2 : callPrimitive(Math.log, 0.3))
                      return and(a,x)
                      })})
 Enumerate(function(){

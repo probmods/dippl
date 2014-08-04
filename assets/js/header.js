@@ -153,32 +153,37 @@ Enumerate.prototype.exit = function(retval) {
     if(this.queue.length > 0){
         this.nextInQueue()
     } else {
-        //normalize distribution:
-        var norm=0, supp=[]
         var marginal = this.marginal
-        for(var v in marginal){norm+=marginal[v];supp.push(v)}
-        for(var v in marginal){marginal[v]=marginal[v]/norm}
-        console.log("Enumerated distribution: ")
-        console.log(marginal)
-        //make an ERP from marginal:
-        var dist = new ERP(function(params){
-                           var k = marginal.length
-                           var x = Math.random()
-                           var probAccum = 0
-                           for(var i in marginal) {
-                            probAccum += marginal[i]
-                            if(probAccum >= x) {return i} //FIXME: if x=0 returns i=0, but this isn't right if theta[0]==0...
-                           }
-                           return i},
-                           function(params,val){return Math.log(marginal[val])},
-                           function(params){return supp})
-        
+        var dist = makeMarginalERP(marginal)
         //reinstate previous coroutine:
         coroutine = this.old_coroutine
         //return from enumeration by calling original continuation:
         this.k(dist)
     }
 }
+
+function makeMarginalERP(marginal) {
+    //normalize distribution:
+    var norm=0, supp=[]
+    for(var v in marginal){norm+=marginal[v];supp.push(v)}
+    for(var v in marginal){marginal[v]=marginal[v]/norm}
+    console.log("Enumerated distribution: ")
+    console.log(marginal)
+    //make an ERP from marginal:
+    var dist = new ERP(function(params){
+                       var k = marginal.length
+                       var x = Math.random()
+                       var probAccum = 0
+                       for(var i in marginal) {
+                       probAccum += marginal[i]
+                       if(probAccum >= x) {return i} //FIXME: if x=0 returns i=0, but this isn't right if theta[0]==0...
+                       }
+                       return i},
+                       function(params,val){return Math.log(marginal[val])},
+                       function(params){return supp})
+    return dist
+}
+
 
 //helper wraps with 'new' to make a new copy of Enumerate and set 'this' correctly..
 function enu(cc, wpplFn){return new Enumerate(cc, wpplFn)}
