@@ -170,7 +170,7 @@ Enumerate.prototype.exit = function(retval) {
                             if(probAccum >= x) {return i} //FIXME: if x=0 returns i=0, but this isn't right if theta[0]==0...
                            }
                            return i},
-                           function(params,val){return marginal[val]},
+                           function(params,val){return Math.log(marginal[val])},
                            function(params){return supp})
         
         //reinstate previous coroutine:
@@ -228,6 +228,21 @@ function callPrimitive(k,f){
     k(f.apply(f,args))
 }
 
+//caching for a wppl function f. caution: if f isn't deterministic weird stuff can happen, since caching is across all uses of f, even in different execuation paths.
+function cache(k,f) {
+    var c={}
+    var cf = function(k, args){
+        var args = Array.prototype.slice.call(arguments, 1);
+        if(args in c) {
+            k(c[args])
+        } else {
+            var newk = function(r){c[args]=r; k(r)}
+            f.apply(this, [newk].concat(args))
+        }
+    }
+    k(cf)
+}
+
 function plus(k, x, y) {k(x + y)};
 function minus(k, x, y) {k(x - y)};
 function times(k, x, y) {k(x * y)};
@@ -246,6 +261,7 @@ sample: sample,
 factor: factor,
 display: display,
 callPrimitive: callPrimitive,
+cache: cache,
 plus: plus,
 minus: minus,
 times: times,

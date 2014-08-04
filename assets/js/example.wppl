@@ -36,9 +36,25 @@
 
 //sample(fw(function(){return flip(0.5)}))
 
-sample(
-Enumerate(function() {
-    var a = and(flip(0.5),flip(0.5))
-//    factor(a?2:1)
-    return a
-    }))
+var e = cache(function (x){
+    return Enumerate(function() {
+                     var a = and(flip(0.5),flip(0.5))
+                     //factor(a?2:1)
+                     return and(a,x)
+                     })})
+Enumerate(function(){
+          var e1 = sample(e(true))
+          var e2 = sample(e(true))
+          return and(e1,e2)})
+
+
+//var e = function(x){return and(x,flip(0.5))}
+//var ec = cache(e)
+//Enumerate(function(){
+//          var e1 = ec(true)
+//          var e2 = ec(true)
+//          return and(e1,e2)})
+
+
+
+
