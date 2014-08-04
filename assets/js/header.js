@@ -53,17 +53,17 @@ function multinomial_sample(theta)
 coroutine =
 {
 sample: function(cc, erp, params){cc(erp.sample(params))}, //sample and keep going
-factor: function(){throw "factor allowed only inside inference."}
+factor: function(){throw "factor allowed only inside inference."},
+exit: function(r){return r}
 }
 
+//functions that call methods of whatever the coroutine is set to when called, we do it like this so that 'this' will be set correctly to the coroutine object.
 function sample(k, dist, params){coroutine.sample(k,dist, params)}
 function factor(k, score){coroutine.factor(k,score)}
-
+function exit(retval){coroutine.exit(retval)}
 
 //////////////////
 //Forward sampling: simply samples at each random choice. throws an error on factor, since we aren't doing any normalization / inference.
-//TODO: can we abstract out the inference interface somewhat?
-//TODO: i think we can make inference code ordinary functions, by having the constructor return with the value that exit finally returns...
 function Forward(cc, wpplFn) {
     this.cc = cc
     
@@ -71,49 +71,47 @@ function Forward(cc, wpplFn) {
     this.old_coroutine = coroutine
     coroutine = this
     
-    //run the wppl computation, when the computation returns we want it to call the exit method of this coroutine so we pass that as the continuation (we wrap it up so that it gets called as a method, thus setting 'this' right).
-    wpplFn(function(r){return coroutine.exit(r)})
-    
-    return this //constructor doesn't actually return until whole wppl program is done, because cc is called by exit...
+    //run the wppl computation, when the computation returns we want it to call the exit method of this coroutine so we pass that as the continuation.
+    wpplFn(exit)
 }
 
 Forward.prototype.sample = function(cc, erp, params) {
     cc(erp.sample(params)) //sample and keep going
 }
 
-Forward.prototype.factor = function(cc,score){throw "factor allowed only inside inference."}
+Forward.prototype.factor = function(cc,score){throw "'factor' is not allowed inside Forward."}
 
 Forward.prototype.exit = function(retval) {
-    //put old coroutine back, and return the return value of the wppl fn as a delta erp, ignore scores for foward sampling...
+    //return value of the wppl fn as a delta erp
+    var dist=new ERP(function(){return retval}, function(p, v){return (v==retval)?0:-Infinity})
+    //put old coroutine back, and return dist
     coroutine = this.old_coroutine
-    dist=new ERP(function(){return retval}, function(p, v){return (v==retval)?0:-Infinity})
     this.cc(dist)
 }
 
-
-function fw(cc, wpplFn){return new Forward(cc, wpplFn)} //wrap with new call so that 'this' is set correctly..
-
+//helper wraps with 'new' to make a new copy of Forward and set 'this' correctly..
+function fw(cc, wpplFn){return new Forward(cc, wpplFn)}
 
 //////////////////
-// Enumeration: enumerate all the paths through the computation based on a priority queue.
+// Enumeration: depth-first enumeration of all the paths through the computation.
 
-function Enumerate(cc, wpplFn) {
-    this.cc = cc
+function Enumerate(k, wpplFn) {
+    
     this.score = 0 //used to track the score of the path currently being explored
-    this.queue = [] //queue of continuations and values that we have yet to explore
-    this.marginal = {} //used to build marginal
+    this.queue = [] //queue of states that we have yet to explore
+    this.marginal = {} //we will accumulate the marginal distribution here
     
     //move old coroutine out of the way and install this as the current handler
+    this.k = k
     this.old_coroutine = coroutine
     coroutine = this
     
-    //enter the wppl computation, when the computation returns we want it to call this.exit so we pass that as the continuation.
-    wpplFn(function(r){return coroutine.exit(r)})
-    
-    return this //constructor doesn't actually return until whole wppl program is done, because cc is called by exit...
+    //run the wppl computation, when the computation returns we want it to call the exit method of this coroutine so we pass that as the continuation.
+    wpplFn(exit)
 }
 
 //the queue is a bunch of computation states. each state is a continuation, a value to apply it to, and a score.
+//this function simply runs the state on the top of the queue. could make this a priority / random / etc queue.
 Enumerate.prototype.nextInQueue = function() {
     
         var next_state = this.queue.pop()
@@ -124,7 +122,8 @@ Enumerate.prototype.nextInQueue = function() {
 Enumerate.prototype.sample = function(cc, dist, params) {
     
     //find support of this erp:
-    var supp = dist.support(params) //TODO: catch undefined support
+    if(!dist.support){throw "Enumerate can only be used with ERPs that have support function."}
+    var supp = dist.support(params)
     
     //for each value in support, add the continuation paired with support value and score to queue:
     for(var s in supp){
@@ -154,8 +153,6 @@ Enumerate.prototype.exit = function(retval) {
     if(this.queue.length > 0){
         this.nextInQueue()
     } else {
-        //reinstate previous coroutine:
-        coroutine = this.old_coroutine
         //normalize distribution:
         var norm=0, supp=[]
         var marginal = this.marginal
@@ -175,27 +172,50 @@ Enumerate.prototype.exit = function(retval) {
                            return i},
                            function(params,val){return marginal[val]},
                            function(params){return supp})
+        
+        //reinstate previous coroutine:
+        coroutine = this.old_coroutine
         //return from enumeration by calling original continuation:
-        this.cc(dist)
+        this.k(dist)
     }
 }
 
-function enu(cc, wpplFn){return new Enumerate(cc, wpplFn)} //wrap with new call so that 'this' is set correctly..
-
-function multinomial_sample_normed(theta)
-{
-	var k = theta.length
-	var x = Math.random() //assumes normalized theta vector
-	var probAccum = 0
-    for(var i=0; i<k; i++) {
-        probAccum += theta[i]
-        if(probAccum >= x) {return i} //FIXME: if x=0 returns i=0, but this isn't right if theta[0]==0...
-    }
-    return k
-}
+//helper wraps with 'new' to make a new copy of Enumerate and set 'this' correctly..
+function enu(cc, wpplFn){return new Enumerate(cc, wpplFn)}
 
 //////////////////
-// particle filtering
+//Particle filtering: sequential importance re-sampling, which treats 'factor' calls as the synchronization / intermediate distribution points.
+
+function PF(k, wpplFn, numP) {
+    
+    //initialize the filter by adding numP states to the set of "previous" particles
+    
+    //move old coroutine out of the way and install this as the current handler
+    this.k = k
+    this.old_coroutine = coroutine
+    coroutine = this
+    
+    //run the wppl computation, when the computation returns we want it to call the exit method of this coroutine so we pass that as the continuation.
+    wpplFn(exit)
+}
+
+PF.prototype.sample = function(cc, dist, params) {
+    
+}
+
+PF.prototype.factor = function(cc,score) {
+    
+}
+
+PF.prototype.exit = function(retval) {
+    
+    //... clean up
+    
+    //reinstate previous coroutine:
+    coroutine = this.old_coroutine
+    //return from enumeration by calling original continuation:
+    this.k(dist)
+}
 
 
 //////////////////
@@ -214,11 +234,13 @@ function times(k, x, y) {k(x * y)};
 function and(k, x, y) {k(x && y)};
 
 
+////////////////
+
 module.exports = {
 ERP: ERP,
 bernoulli: bernoulli,
-fw: fw,
-enu: enu,
+Forward: fw,
+Enumerate: enu,
 //coroutine: coroutine,
 sample: sample,
 factor: factor,
