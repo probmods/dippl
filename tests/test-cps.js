@@ -13,11 +13,11 @@ var fooObj = {
     bla: 3
   }
 };
-var plus = function(x, y) {return x + y;};
-var minus = function(x, y) {return x - y;};
-var times = function(x, y) {return x * y;};
-var and = function(x, y) {return x && y;};
-var plusTwo = function(x, y) {return x + 2;};
+var plus = function(k, x, y) {return k(x + y);};
+var minus = function(k, x, y) {return k(x - y);};
+var times = function(k, x, y) {return k(x * y);};
+var and = function(k, x, y) {return k(x && y);};
+var plusTwo = function(k, x, y) {return k(x + 2);};
 var getTwoK = function(k) {return 2;};
 
 var runCpsTest = function(test, code, expected){
@@ -219,7 +219,7 @@ exports.testConditionalExpression = {
 exports.testWithContinuation = {
 
   testWithContinuation1: function (test) {
-    var code = "withContinuation(getTwoK)(); plus(3, 5)";
+    var code = "getTwoK(); plus(3, 5)";
     var expected = 2;
     return runCpsTest(test, code, expected);
   }
