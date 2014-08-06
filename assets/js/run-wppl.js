@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require('fs');
 var path = require('path');
 var types = require("../vendor/ast-types/main.js");
@@ -18,11 +20,8 @@ for (var prop in runtime){
   }
 }
 
-function runWebPPLProgram(code, contFun, verbose){
+function compileWebPPLProgram(code, verbose){
   var programAst = esprima.parse(code);
-
-  // Install top-level continuation
-  topK = contFun;
 
   // Load WPPL header
   var wpplHeaderFile = path.resolve(__dirname, "header.wppl");
@@ -44,9 +43,14 @@ function runWebPPLProgram(code, contFun, verbose){
     console.log(newCode);
   }
 
-  // Run the program
-  var newCode = escodegen.generate(newProgramAst);
-  return eval(newCode);
+  // Generate program code
+  return escodegen.generate(newProgramAst);
+}
+
+function runWebPPLProgram(code, contFun, verbose){
+  topK = contFun;  // Install top-level continuation
+  var compiledCode = compileWebPPLProgram(code, verbose);
+  return eval(compiledCode);
 }
 
 function main(){
@@ -67,5 +71,6 @@ if (runningAsScript){
 }
 
 module.exports = {
-  runWebPPLProgram: runWebPPLProgram
+  runWebPPLProgram: runWebPPLProgram,
+  compileWebPPLProgram: compileWebPPLProgram
 };

@@ -1,3 +1,7 @@
+"use strict";
+
+var _ = require('../vendor/underscore/underscore.js');
+
 function makeGensym() {
     var seq = 0;
     return function(prefix){
@@ -13,7 +17,24 @@ function prettyJSON(obj) {
     console.log(JSON.stringify(obj, null, 2));
 }
 
+var sum = function(xs){
+  var total = _(xs).reduce(
+    function(a, b) {
+      return a + b;
+    });
+  return total;
+};
+
+var normalize = function(hist){
+  var normHist = {};
+  var Z = sum(_.values(hist));
+  _.each(hist, function(val, key){normHist[key] = hist[key]/Z;});
+  return normHist;
+}
+
 module.exports = {
     gensym: gensym,
-    prettyJSON: prettyJSON
+    prettyJSON: prettyJSON,
+    sum: sum,
+    normalize: normalize
 }

@@ -1,3 +1,5 @@
+"use strict";
+
 var _ = require('../assets/vendor/underscore/underscore.js');
 var cps = require("../assets/js/cps.js");
 var util = require("../assets/js/util.js");
