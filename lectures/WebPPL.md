@@ -1,3 +1,9 @@
+---
+layout: lecture
+title: WebPPL
+description: A probabilistic sub-language of Javascript.
+---
+
 
 This is a brief documentation of a very small probabilistic programming language, called WebPPL (pronounced 'web people').
 
