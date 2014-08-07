@@ -97,7 +97,7 @@ exports.testParticleFilter = {
                 "  function(){" +
                 "    var x = flip(0.5);" +
                 "    var y = flip(0.5);" +
-                "    factor(or(x, y) ? 0 : minusInfinity);" +
+                "    factor(or(x, y) ? 0 : -Infinity);" +
                 "    return x;" +
                 "  }," +
                 "  300) // particles");

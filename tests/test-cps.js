@@ -259,3 +259,25 @@ exports.testMemberExpression = {
   }
 
 };
+
+exports.testNAryExpression = {
+
+  testPlus: function (test) {
+    var code = "3 + 4";
+    var expected = 7;
+    return runCpsTest(test, code, expected);
+  },
+
+  testUnary: function(test) {
+    var code = "-5";
+    var expected = -5;
+    return runCpsTest(test, code, expected);
+  },
+
+  testCompound: function (test) {
+    var code = "(-3 + (4 * 5)) - 10";
+    var expected = 7;
+    return runCpsTest(test, code, expected);
+  }
+
+}

@@ -101,6 +101,31 @@ function cpsApplication(opNode, argNodes, cont){
     nodes);
 }
 
+function cpsUnaryExpression(opNode, argNode, isPrefix, cont){
+  var nodes = [argNode];
+  return cpsSequence(
+    function(nodes){return (nodes.length == 0);},
+    function(nodes, vars){
+      return build.callExpression(
+        cont,
+        [build.unaryExpression(opNode, vars[0], isPrefix)]);
+    },
+    nodes);
+}
+
+function cpsBinaryExpression(opNode, leftNode, rightNode, cont){
+  var nodes = [leftNode, rightNode];
+  return cpsSequence(
+    function(nodes){return (nodes.length == 0);},
+    function(nodes, vars){
+      assert.ok(vars.length == 2);
+      return build.callExpression(
+        cont,
+        [build.binaryExpression(opNode, vars[0], vars[1])]);
+    },
+    nodes);
+}
+
 function cpsConditional(test, consequent, alternate, cont){
   var contName = makeGensymVariable("cont");
   var testName = makeGensymVariable("test");
@@ -180,6 +205,12 @@ function cps(node, cont){
 
   case Syntax.MemberExpression:
     return cpsMemberExpression(node.object, node.property, node.computed, cont);
+
+  case Syntax.UnaryExpression:
+    return cpsUnaryExpression(node.operator, node.argument, node.prefix, cont);
+
+  case Syntax.BinaryExpression:
+    return cpsBinaryExpression(node.operator, node.left, node.right, cont);
 
   default:
     throw new Error("cps: unknown node type: " + node.type);

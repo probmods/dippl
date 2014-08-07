@@ -482,8 +482,6 @@ function or(k, x, y) {
   k(x || y);
 };
 
-var minusInfinity = -Infinity;  // TODO: Deal with UnaryExpressions
-
 
 ////////////////////////////////////////////////////////////////////
 
@@ -503,6 +501,5 @@ module.exports = {
   minus: minus,
   times: times,
   and: and,
-  or: or,
-  minusInfinity: -Infinity
+  or: or
 };
