@@ -12,9 +12,9 @@ This is a brief documentation of a very small probabilistic programming language
 ## A subset of Javascirpt
 
 Following the notation from the [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API) our language consists of the subset of javascript given by:
-Program, BlockStatement, ExpressionStatement, ReturnStatement, EmptyStatement, VariableDeclaration, Identifier, Literal, FunctionExpression, CallExpression, ConditionalExpression, ArrayExpression, MemberExpression.
+Program, BlockStatement, ExpressionStatement, ReturnStatement, EmptyStatement, VariableDeclaration, Identifier, Literal, FunctionExpression, CallExpression, ConditionalExpression, ArrayExpression, MemberExpression, BinaryExpression, UnaryExpression.
 
-Note in particular that there are no AssignmentExpressions or looping constructs. This is because a purely functional language is much easier to transform into Continuation Passing Style (CPS), which we will use to implement coroutines for inference algorithms.
+Note in particular that there are no AssignmentExpressions or looping constructs. This is because a purely functional language is much easier to transform into Continuation Passing Style (CPS), which we will use to implement inference algorithms (via coroutines).
 
 Because we allow recursive and higher-order functions this subset is still universal, and is pretty easy to use (especially once you get use to thinking in a functional style!).
 
@@ -22,12 +22,17 @@ Here is a (very boring) program that uses most of the syntax we have available:
 
 ~~~~
 var foo = function(x) {
-  var bar = x==0 ? [] : [1, foo(x-1)]
+  var bar = x==0 ? [] : [Math.log(1), foo(x-1)]
   return bar
 }
 
 foo(5) 
 ~~~~
+
+### Using Javascript libraries
+
+Functions from the Javscript environment that WebPPL is called from can be used in a WebPPL program, with a few restrictions. First, these external functions must be deterministic and can carry no state from one call to another (that is, the functions must be 'referentially transparent': calling obj.foo(args) must always return the same value when called with given arguments). Second, external functions must be invoked as the method of an object (indeed, this is the only use of object method invocation in WebPPL). So the use of `Math.log()` in the above example is allowed: it is a deterministic function invoked as a method of the `Math` object (which is a standard object in the Javascript global environment).
+
 
 ## With random sampling
 
@@ -39,7 +44,7 @@ You can sample from ERPs with the `sample` operator:
 sample(flip, 0.5)
 ~~~~
 
-There are a set of pre-defined ERPs (FIXME): flip, guassian, ... It is also possible to define new ERPs and to build distributions via inference functions (see below).
+There are a set of pre-defined ERPs: flip, guassian, [FIXME]... It is also possible to define new ERPs and to build ERP distributions via inference functions (see below).
 
 With only the ability to sample from primitive distributions and do deterministic computation, the language is already universal!
 
@@ -50,16 +55,6 @@ With only the ability to sample from primitive distributions and do deterministi
 
 It is easier to build useful models (that, for instance, condition on data) with `factor`. But `factor` by itself doesn't do anything -- it interacts with *marginalization* functions that normalize the computation they are applied to.
 
-These functions (which we will generally call inference functions) take a random computation represented as a function with no arguments and return an ERP that represents the marginal distribution on return values. How they get this marginal ERP differs between inference functions, and is the topic of most of this tutorial.
+These marginalization functions (which we will generally call inference functions) take a random computation represented as a function with no arguments and return an ERP that represents the marginal distribution on return values. How they get this marginal ERP differs between inference functions, and is the topic of most of this tutorial.
 
  
-#
-
-## A grammar of SmallPPL
-
-first the wrapper statements (which we can pretty much ignore for pedagogical purposes): Program, BlockStatement, ExpressionStatement, ReturnStatement
-        next the basic statements where nothing fancy happens: VariableDeclaration, CallExpression, Identifier, Literal
-        we need some branching operator: ConditionalExpression  or  IfStatement
-        we have to choose whether to make this turing complete via first class functions or while loops: WhileStatement  or  FunctionExpression
-        and then i think we should explicitly mark ERP applications to make life simple: SampleStatement
-        maybe also make queries a special case: QueryStatement, ConditionStatement, and maybe: FactorStatement

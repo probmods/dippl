@@ -1,17 +1,14 @@
 
 
 CPS:
-- binary and unary operator expression? (need to handle negative numbers!)
-- {…} object constructor
-- currently must call ordinary primitives with callPrimitive… could try to detect some…
-  - existing freeVars method wraps too much (non-functions) and misses object method calls.
-  - existing withContinuation doesn’t work right when called on object methods.
-
-- probably need to trampoline continuation calls..
+- binary and unary operator expression. (need to handle negative numbers!)
+- detect CallExpression that has callee a MemberExpression, and wrap this in callPrimitive.
+- need to trampoline continuation calls..?
 
 Inference:
-- particle filter
 - some kind of top-level expectation or hist fns?
+- maybe implement the particle cascade just to see how it works?
+- streams / generators that incrementally run a computation, applying global factors along the way.
 
 Testing:
 - simplify tests (use eval to get expected results) [AST]
