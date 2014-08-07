@@ -1,7 +1,6 @@
 
 
 CPS:
-- binary and unary operator expression. (need to handle negative numbers!)
 - detect CallExpression that has callee a MemberExpression, and wrap this in callPrimitive.
 - need to trampoline continuation calls..?
 
