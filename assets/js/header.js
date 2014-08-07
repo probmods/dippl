@@ -296,11 +296,10 @@ function copyParticle(particle){
 
 function ParticleFilter(k, wpplFn, numParticles) {
 
-  this.particles = [];  //
-  this.particleIndex = 0;  // marks the particle to advance next
+  this.particles = [];
+  this.particleIndex = 0;  // marks the active particle
 
-  // Initialize the filter by adding numParticles states to the set of
-  // "previous" particles.
+  // Create initial particles
   for (var i=0; i<numParticles; i++) {
     var particle = {
       continuation: function(){wpplFn(exit);},
@@ -317,7 +316,7 @@ function ParticleFilter(k, wpplFn, numParticles) {
   coroutine = this;
 
   // Run first particle
-  this.curParticle().continuation();
+  this.activeParticle().continuation();
 }
 
 ParticleFilter.prototype.sample = function(cc, erp, params) {
@@ -326,21 +325,21 @@ ParticleFilter.prototype.sample = function(cc, erp, params) {
 
 ParticleFilter.prototype.factor = function(cc, score) {
   // Update particle weight
-  this.curParticle().weight += score;
-  this.curParticle().continuation = cc;
+  this.activeParticle().weight += score;
+  this.activeParticle().continuation = cc;
 
   if (this.allParticlesAdvanced()){
     // Resample in proportion to weights
-    this.particleIndex = 0;
     this.resampleParticles();
+    this.particleIndex = 0;
   } else {
-    // Advance the next particle
+    // Advance to the next particle
     this.particleIndex += 1;
   }
-  this.curParticle().continuation();
+  this.activeParticle().continuation();
 };
 
-ParticleFilter.prototype.curParticle = function() {
+ParticleFilter.prototype.activeParticle = function() {
   return this.particles[this.particleIndex];
 };
 
@@ -349,15 +348,15 @@ ParticleFilter.prototype.allParticlesAdvanced = function() {
 };
 
 function expWeight(particle){
+  // TODO: convert resampling to log weights
   return Math.exp(particle.weight);
 }
 
 ParticleFilter.prototype.resampleParticles = function() {
-  // TODO: convert to log weights
-
   // Residual resampling following Liu 2008; p. 72, section 3.4.4
+
   var m = this.particles.length;
-  var W = util.sum(_.map(this.particles, function(particle){return expWeight(particle);}));
+  var W = util.sum(_.map(this.particles, expWeight));
 
   // Compute list of retained particles
   var retainedParticles = [];
@@ -375,13 +374,15 @@ ParticleFilter.prototype.resampleParticles = function() {
   // Compute new particles
   var numNewParticles = m - retainedParticles.length;
   var newWeights = [];
+  var w;
   for (var i in this.particles){
-    var w = m * (expWeight(this.particles[i]) / W) - retainedCounts[i];
+    w = m * (expWeight(this.particles[i]) / W) - retainedCounts[i];
     newWeights.push(w);
   }
   var newParticles = [];
+  var j;
   for (var i=0; i<numNewParticles; i++){
-    var j = multinomialSample(newWeights);
+    j = multinomialSample(newWeights);
     newParticles.push(copyParticle(this.particles[j]));
   }
 
@@ -398,13 +399,13 @@ ParticleFilter.prototype.resampleParticles = function() {
 
 ParticleFilter.prototype.exit = function(retval) {
 
-  this.curParticle().value = retval;
+  this.activeParticle().value = retval;
 
   // Wait for all particles to reach exit before computing
   // marginal distribution from particles
   if (!this.allParticlesAdvanced()){
     this.particleIndex += 1;
-    return this.curParticle().continuation();
+    return this.activeParticle().continuation();
   }
 
   // Compute marginal distribution from (unweighted) particles
