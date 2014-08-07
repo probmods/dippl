@@ -2,6 +2,7 @@
 
 var _ = require('../vendor/underscore/underscore.js');
 var util = require('./util.js');
+var PriorityQueue = require('js-priority-queue')
 
 // Elementary Random Primitives (ERPs) are the representation of
 // distributions. They can have sampling, scoring, and support
@@ -50,8 +51,8 @@ function makeMarginalERP(marginal) {
     marginal[v] = marginal[v] / norm;
   }
 
-//  console.log("Enumerated distribution: ");
-//  console.log(marginal);
+  console.log("Creating distribution: ");
+  console.log(marginal);
 
   //make an ERP from marginal:
   var dist = new ERP(
@@ -200,8 +201,9 @@ function fw(cc, wpplFn) {
 function Enumerate(k, wpplFn) {
 
   this.score = 0; //used to track the score of the path currently being explored
-  this.queue = []; //queue of states that we have yet to explore
+  this.queue = new PriorityQueue(queueproperties) //queue of states that we have yet to explore
   this.marginal = {}; //we will accumulate the marginal distribution here
+    this.steps = 0 //keep track of number of choices expanded
 
   //move old coroutine out of the way and install this as the current handler
   this.k = k;
@@ -216,13 +218,17 @@ function Enumerate(k, wpplFn) {
 // The queue is a bunch of computation states. each state is a
 // continuation, a value to apply it to, and a score.
 //
-// This function simply runs the state on the top of the queue. could
-// make this a priority / random / etc queue.
+// This function runs the highest priority state in the queue. Currently priority is score, but could be adjusted to give depth-first or breadth-first or some other search strategy (set via queueproperties).
+var queueproperties = {comparator: function(a, b){return b.score-a.score}}
+
 Enumerate.prototype.nextInQueue = function() {
-  var next_state = this.queue.pop();
+  var next_state = this.queue.dequeue()
   this.score = next_state.score;
+  this.steps++
   next_state.continuation(next_state.value);
 }
+
+
 
 Enumerate.prototype.sample = function(cc, dist, params) {
 
@@ -240,7 +246,7 @@ Enumerate.prototype.sample = function(cc, dist, params) {
       value: supp[s],
       score: this.score + dist.score(params, supp[s])
     };
-    this.queue.push(state);
+      this.queue.queue(state)
   }
 
   // Call the next state on the queue
@@ -262,7 +268,7 @@ Enumerate.prototype.exit = function(retval) {
   this.marginal[retval] += Math.exp(this.score);
 
   //if anything is left in queue do it:
-  if (this.queue.length > 0) {
+  if (this.queue.length > 0 && this.steps<10) {
     this.nextInQueue();
   } else {
     var marginal = this.marginal;
