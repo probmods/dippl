@@ -1,5 +1,8 @@
 "use strict";
 
+var _ = require('../vendor/underscore/underscore.js');
+var util = require('./util.js');
+
 // Elementary Random Primitives (ERPs) are the representation of
 // distributions. They can have sampling, scoring, and support
 // functions. A single ERP need not hve all three, but some inference
@@ -34,7 +37,7 @@ var bernoulli = new ERP(
   }
 );
 
-function multinomial_sample(theta) {
+function multinomialSample(theta) {
   var k = theta.length;
   var thetaSum = 0;
   for (var i = 0; i < k; i++) {
@@ -283,10 +286,29 @@ function enu(cc, wpplFn) {
 // Sequential importance re-sampling, which treats 'factor' calls as
 // the synchronization / intermediate distribution points.
 
-function ParticleFilter(k, wpplFn, numP) {
+function copyParticle(particle){
+  return {
+    continuation: particle.continuation,
+    weight: particle.weight,
+    value: particle.value
+  };
+}
 
-  // Initialize the filter by adding numP states to the set of
+function ParticleFilter(k, wpplFn, numParticles) {
+
+  this.particles = [];  //
+  this.particleIndex = 0;  // marks the particle to advance next
+
+  // Initialize the filter by adding numParticles states to the set of
   // "previous" particles.
+  for (var i=0; i<numParticles; i++) {
+    var particle = {
+      continuation: function(){wpplFn(exit);},
+      weight: 0,
+      value: undefined
+    };
+    this.particles.push(particle);
+  }
 
   // Move old coroutine out of the way and install this as the current
   // handler.
@@ -294,33 +316,115 @@ function ParticleFilter(k, wpplFn, numP) {
   this.old_coroutine = coroutine;
   coroutine = this;
 
-  // Run the wppl computation, when the computation returns we want it
-  // to call the exit method of this coroutine so we pass that as the
-  // continuation.
-  wpplFn(exit);
+  // Run first particle
+  this.curParticle().continuation();
 }
 
-ParticleFilter.prototype.sample = function(cc, dist, params) {
-  console.log("ParticleFilter.sample");
+ParticleFilter.prototype.sample = function(cc, erp, params) {
+  cc(erp.sample(params));
 };
 
 ParticleFilter.prototype.factor = function(cc, score) {
-  console.log("ParticleFilter.factor");
+  // Update particle weight
+  this.curParticle().weight += score;
+  this.curParticle().continuation = cc;
+
+  if (this.allParticlesAdvanced()){
+    // Resample in proportion to weights
+    this.particleIndex = 0;
+    this.resampleParticles();
+  } else {
+    // Advance the next particle
+    this.particleIndex += 1;
+  }
+  this.curParticle().continuation();
+};
+
+ParticleFilter.prototype.curParticle = function() {
+  return this.particles[this.particleIndex];
+};
+
+ParticleFilter.prototype.allParticlesAdvanced = function() {
+  return ((this.particleIndex + 1) == this.particles.length);
+};
+
+function expWeight(particle){
+  return Math.exp(particle.weight);
+}
+
+ParticleFilter.prototype.resampleParticles = function() {
+  // TODO: convert to log weights
+
+  // Residual resampling following Liu 2008; p. 72, section 3.4.4
+  var m = this.particles.length;
+  var W = util.sum(_.map(this.particles, function(particle){return expWeight(particle);}));
+
+  // Compute list of retained particles
+  var retainedParticles = [];
+  var retainedCounts = [];
+  _.each(
+    this.particles,
+    function(particle){
+      var numRetained = Math.floor(m * (expWeight(particle) / W));
+      for (var i=0; i<numRetained; i++){
+        retainedParticles.push(copyParticle(particle));
+      }
+      retainedCounts.push(numRetained);
+    });
+
+  // Compute new particles
+  var numNewParticles = m - retainedParticles.length;
+  var newWeights = [];
+  for (var i in this.particles){
+    var w = m * (expWeight(this.particles[i]) / W) - retainedCounts[i];
+    newWeights.push(w);
+  }
+  var newParticles = [];
+  for (var i=0; i<numNewParticles; i++){
+    var j = multinomialSample(newWeights);
+    newParticles.push(copyParticle(this.particles[j]));
+  }
+
+  // Particles after update: Retained + new particles
+  this.particles = newParticles.concat(retainedParticles);
+
+  // Reset all weights
+  _.each(
+    this.particles,
+    function(particle){
+      particle.weight = Math.log(W / m);
+    });
 };
 
 ParticleFilter.prototype.exit = function(retval) {
-  console.log("ParticleFilter.exit");
 
-  //... clean up
+  this.curParticle().value = retval;
 
-  //reinstate previous coroutine:
+  // Wait for all particles to reach exit before computing
+  // marginal distribution from particles
+  if (!this.allParticlesAdvanced()){
+    this.particleIndex += 1;
+    return this.curParticle().continuation();
+  }
+
+  // Compute marginal distribution from (unweighted) particles
+  var hist = {};
+  _.each(
+    this.particles,
+    function(particle){
+      hist[particle.value] = (hist[particle.value] || 0) + 1;
+    });
+  var dist = makeMarginalERP(hist);
+
+  // Reinstate previous coroutine:
   coroutine = this.old_coroutine;
-  //return from enumeration by calling original continuation:
+
+  // Return from particle filter by calling original continuation:
   this.k(dist);
 };
 
-function pf(cc, wpplFn, numP) {
-  return new ParticleFilter(cc, wpplFn, numP);
+function pf(cc, wpplFn, numParticles) {
+  return new ParticleFilter(cc, wpplFn, numParticles);
 }
 
 
@@ -376,6 +480,8 @@ function or(k, x, y) {
   k(x || y);
 };
 
+var minusInfinity = -Infinity;  // TODO: Deal with UnaryExpressions
+
 
 ////////////////////////////////////////////////////////////////////
 
@@ -395,5 +501,6 @@ module.exports = {
   minus: minus,
   times: times,
   and: and,
-  or: or
-}
+  or: or,
+  minusInfinity: -Infinity
+};

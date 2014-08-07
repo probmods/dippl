@@ -91,21 +91,21 @@ exports.testEnumeration = {
   }
 };
 
-// exports.testParticleFilter = {
-//   test1: function(test){
-//     var code = ("ParticleFilter(" +
-//                 "  function(){",
-//                 "    var x = flip(0.5);",
-//                 "    var y = flip(0.5);",
-//                 "    factor(or(x, y) ? 0 : -Infinity);",
-//                 "    return x;",
-//                 "  },",
-//                 "  100) // particles");
-//     var expectedHist = {
-//       "true": 2/3,
-//       "false": 1/3
-//     };
-//     var tolerance = .1;
-//     runDistributionTest(test, code, expectedHist, tolerance);
-//   }
-// };
+exports.testParticleFilter = {
+  test1: function(test){
+    var code = ("ParticleFilter(" +
+                "  function(){" +
+                "    var x = flip(0.5);" +
+                "    var y = flip(0.5);" +
+                "    factor(or(x, y) ? 0 : minusInfinity);" +
+                "    return x;" +
+                "  }," +
+                "  300) // particles");
+    var expectedHist = {
+      "true": 2/3,
+      "false": 1/3
+    };
+    var tolerance = .1;
+    runDistributionTest(test, code, expectedHist, tolerance);
+  }
+};

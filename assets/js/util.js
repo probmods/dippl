@@ -3,26 +3,30 @@
 var _ = require('../vendor/underscore/underscore.js');
 
 function makeGensym() {
-    var seq = 0;
-    return function(prefix){
-        var result = prefix + seq;
-        seq += 1;
-        return result;
-    }
+  var seq = 0;
+  return function(prefix){
+    var result = prefix + seq;
+    seq += 1;
+    return result;
+  };
 }
 
 var gensym = makeGensym();
 
 function prettyJSON(obj) {
-    console.log(JSON.stringify(obj, null, 2));
+  console.log(JSON.stringify(obj, null, 2));
 }
 
 var sum = function(xs){
-  var total = _(xs).reduce(
-    function(a, b) {
-      return a + b;
-    });
-  return total;
+  if (xs.length == 0) {
+    return 0.0;
+  } else {
+    var total = _(xs).reduce(
+      function(a, b) {
+        return a + b;
+      });
+    return total;
+  }
 };
 
 var normalize = function(hist){
@@ -30,11 +34,11 @@ var normalize = function(hist){
   var Z = sum(_.values(hist));
   _.each(hist, function(val, key){normHist[key] = hist[key]/Z;});
   return normHist;
-}
+};
 
 module.exports = {
-    gensym: gensym,
-    prettyJSON: prettyJSON,
-    sum: sum,
-    normalize: normalize
+  gensym: gensym,
+  prettyJSON: prettyJSON,
+  sum: sum,
+  normalize: normalize
 }

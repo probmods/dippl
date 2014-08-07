@@ -36,16 +36,18 @@
 
 //sample(fw(function(){return flip(0.5)}))
 
-var e = cache(function (x){
-    return Enumerate(function() {
-                     var a = and(flip(0.5),flip(0.5))
-                     factor(a? 2 : callPrimitive(Math.log, 0.3))
-                     return and(a,x)
-                     })})
-Enumerate(function(){
-          var e1 = sample(e(true))
-          var e2 = sample(e(true))
-          return and(e1,e2)})
+// var e = cache(function (x){
+//     return Enumerate(function() {
+//                      var a = and(flip(0.5),flip(0.5));
+//                      factor(a? 2 : callPrimitive(Math.log, 0.3));
+//                      return and(a,x);
+//                      });});
+
+// Enumerate(function(){
+//           var e1 = sample(e(true));
+//           var e2 = sample(e(true));
+//             return and(e1,e2);
+//           });
 
 
 //var e = function(x){return and(x,flip(0.5))}
@@ -56,5 +58,25 @@ Enumerate(function(){
 //          return and(e1,e2)})
 
 
+// ParticleFilter(
+//   function(){
+//     var x = flip(0.5);
+//     var y = flip(0.5);
+//     factor(or(x, y) ? 5 : 1);
+//     var z = flip(0.5);
+//     factor(or(y, z) ? 5 : 1);
+//     return and(and(x, y), z);
+//   },
+//   100 // particles
+// );
 
 
+ParticleFilter(
+  function(){
+    var x = flip(0.5);
+    var y = flip(0.5);
+    factor(or(x, y) ? 0 : minusInfinity);
+    return x;
+  },
+  5 // particles
+);
