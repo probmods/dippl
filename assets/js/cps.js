@@ -90,13 +90,57 @@ function cpsBlock(nodes, cont){
     nodes);
 }
 
-function cpsApplication(opNode, argNodes, cont){
+function cpsPrimitiveApplication(opNode, argNodes, cont){
+  return cpsSequence(
+    function (nodes){return (nodes.length == 0);},
+    function(nodes, vars){
+      return build.callExpression(
+        cont,
+        [build.callExpression(opNode, vars)]);
+    },
+    argNodes);
+}
+
+function cpsCompoundApplication(opNode, argNodes, cont){
   var nodes = [opNode].concat(argNodes);
   return cpsSequence(
     function (nodes){return (nodes.length == 0);},
     function(nodes, vars){
       var args = [cont].concat(vars.slice(1));
       return build.callExpression(vars[0], args);
+    },
+    nodes);
+}
+
+function cpsApplication(opNode, argNodes, cont){
+  if (types.namedTypes.MemberExpression.check(opNode)){
+    return cpsPrimitiveApplication(opNode, argNodes, cont);
+  } else {
+    return cpsCompoundApplication(opNode, argNodes, cont);
+  }
+}
+
+function cpsUnaryExpression(opNode, argNode, isPrefix, cont){
+  var nodes = [argNode];
+  return cpsSequence(
+    function(nodes){return (nodes.length == 0);},
+    function(nodes, vars){
+      return build.callExpression(
+        cont,
+        [build.unaryExpression(opNode, vars[0], isPrefix)]);
+    },
+    nodes);
+}
+
+function cpsBinaryExpression(opNode, leftNode, rightNode, cont){
+  var nodes = [leftNode, rightNode];
+  return cpsSequence(
+    function(nodes){return (nodes.length == 0);},
+    function(nodes, vars){
+      assert.ok(vars.length == 2);
+      return build.callExpression(
+        cont,
+        [build.binaryExpression(opNode, vars[0], vars[1])]);
     },
     nodes);
 }
@@ -181,111 +225,17 @@ function cps(node, cont){
   case Syntax.MemberExpression:
     return cpsMemberExpression(node.object, node.property, node.computed, cont);
 
+  case Syntax.UnaryExpression:
+    return cpsUnaryExpression(node.operator, node.argument, node.prefix, cont);
+
+  case Syntax.BinaryExpression:
+    return cpsBinaryExpression(node.operator, node.left, node.right, cont);
+
   default:
     throw new Error("cps: unknown node type: " + node.type);
   }
 }
 
-function visitContinuationPrimitives(node, func){
-  types.visit(node,
-    {
-      visitCallExpression: function(path) {
-        var node = path.node;
-        var callee = node.callee;
-        var args = node.arguments;
-        if (types.namedTypes.Identifier.check(callee) &&
-            callee.name === "withContinuation") {
-          if (args.length == 1) {
-            if (types.namedTypes.Identifier.check(args[0])) {
-              func(path);
-            } else {
-              throw new Error("withContinuation can only be applied to names of primitives, got " + args[0].type);
-            }
-          } else {
-            throw new Error("withContinuation requires exactly 1 argument, got " + args.length);
-          }
-        }
-        this.traverse(path);
-      }
-    });
-}
-
-function getContinuationPrimitives(node){
-  var contVars = [];
-  visitContinuationPrimitives(node,
-    function(path){
-      contVars.push(path.node.arguments[0].name);
-    });
-  return _.uniq(contVars);
-}
-
-function removeContinuationPrimitiveWrapper(node){
-  visitContinuationPrimitives(node,
-    function(path){
-      path.node.type = "Identifier";
-      path.node.name = path.node.arguments[0].name;
-      delete path.node.callee;
-      delete path.node.arguments;
-    });
-}
-
-function getPrimitiveNames(node){
-  return difference(
-    freeVars(node),
-    getContinuationPrimitives(node),
-    ["withContinuation"]);
-}
-
-function topCps(node, cont){
-  var cpsPrimitiveAsts = [];
-    var oldPrimitiveNames = []; //TODO: turned off primitive wrapping until issues resolved.. //getPrimitiveNames(node);
-  var newPrimitiveNames = [];
-  _.each(oldPrimitiveNames,
-    function(oldPrimitiveName){
-      // Generate names for CPS primitives
-      var newPrimitiveName = "_cps".concat(oldPrimitiveName);
-      newPrimitiveNames.push(newPrimitiveName);
-      // Add CPS definition of primitives to code
-      var cpsPrimDef = estemplate(
-        ('var <%= newPrimName %> = function(<%= contName %>){ ' +
-         'return <%= contName %>(<%= oldPrimName %>.apply(' +
-         'null, Array.prototype.slice.call(arguments, 1))) };'),
-        { oldPrimName: build.identifier(oldPrimitiveName),
-          newPrimName: build.identifier(newPrimitiveName),
-          contName: makeGensymVariable("cont") }
-      );
-      cpsPrimitiveAsts.push(cpsPrimDef);
-    });
-  removeContinuationPrimitiveWrapper(node);
-
-  // Rename primitives to CPS primitives
-  estraverse.replace(node, {
-    enter: function (nodes) {
-      if (types.namedTypes.Identifier.check(nodes)) {
-        var replacement = undefined;
-        _.each(_.zip(oldPrimitiveNames, newPrimitiveNames),
-               function (oldToNew){
-                 var oldName = oldToNew[0];
-                 var newName = oldToNew[1];
-                 if (nodes.name === oldName) {
-                   replacement = build.identifier(newName);
-                 }
-               });
-        // console.log(nodes.name, replacement);
-        return replacement;
-      }
-    }
-  });
-
-  var cpsCode = cps(node, cont);
-  _.each(cpsPrimitiveAsts,
-    function(primitiveAst){
-      cpsCode.body = primitiveAst.body.concat(cpsCode.body);
-    });
-
-  return cpsCode;
-}
-
 module.exports = {
-  cps: topCps
+  cps: cps
 };

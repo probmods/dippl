@@ -259,3 +259,47 @@ exports.testMemberExpression = {
   }
 
 };
+
+exports.testNAryExpression = {
+
+  testPlus: function (test) {
+    var code = "3 + 4";
+    var expected = 7;
+    return runCpsTest(test, code, expected);
+  },
+
+  testUnary: function(test) {
+    var code = "-5";
+    var expected = -5;
+    return runCpsTest(test, code, expected);
+  },
+
+  testCompound1: function (test) {
+    var code = "(-3 + (4 * 5)) - 10";
+    var expected = 7;
+    return runCpsTest(test, code, expected);
+  },
+
+  testCompound2: function (test) {
+    var code = "var f = function(x){return 2*x + 4;}; (-3 + f(4 * 5)) - f(10)";
+    var expected = 17;
+    return runCpsTest(test, code, expected);
+  }
+
+};
+
+exports.testPrimitiveWrapping = {
+
+  testMath: function(test){
+    var code = "Math.log(Math.exp(5))";
+    var expected = 5;
+    return runCpsTest(test, code, expected);
+  },
+
+  testCompound: function (test) {
+    var code = "var f = function(x){return Math.log(x);}; Math.exp(f(17))";
+    var expected = 17;
+    return runCpsTest(test, code, expected);
+  }
+
+};
