@@ -11,7 +11,7 @@ This is a brief documentation of a very small probabilistic programming language
 
 ## A subset of Javascirpt
 
-Following the notation from the [Mozilla Parser API | https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API] our language consists of the subset of javascript given by:
+Following the notation from the [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API) our language consists of the subset of javascript given by:
 Program, BlockStatement, ExpressionStatement, ReturnStatement, EmptyStatement, VariableDeclaration, Identifier, Literal, FunctionExpression, CallExpression, ConditionalExpression, ArrayExpression, MemberExpression.
 
 Note in particular that there are no AssignmentExpressions or looping constructs. This is because a purely functional language is much easier to transform into Continuation Passing Style (CPS), which we will use to implement coroutines for inference algorithms.
@@ -19,6 +19,7 @@ Note in particular that there are no AssignmentExpressions or looping constructs
 Because we allow recursive and higher-order functions this subset is still universal, and is pretty easy to use (especially once you get use to thinking in a functional style!).
 
 Here is a (very boring) program that uses most of the syntax we have available:
+
 ~~~~
 var foo = function(x) {
   var bar = x==0 ? [] : [1, foo(x-1)]
