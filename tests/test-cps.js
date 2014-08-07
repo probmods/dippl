@@ -286,4 +286,20 @@ exports.testNAryExpression = {
     return runCpsTest(test, code, expected);
   }
 
-}
+};
+
+exports.testPrimitiveWrapping = {
+
+  testMath: function(test){
+    var code = "Math.log(Math.exp(5))";
+    var expected = 5;
+    return runCpsTest(test, code, expected);
+  },
+
+  testCompound: function (test) {
+    var code = "var f = function(x){return Math.log(x);}; Math.exp(f(17))";
+    var expected = 17;
+    return runCpsTest(test, code, expected);
+  }
+
+};

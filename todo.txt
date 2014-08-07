@@ -1,7 +1,4 @@
-
-
 CPS:
-- detect CallExpression that has callee a MemberExpression, and wrap this in callPrimitive.
 - need to trampoline continuation calls..?
 
 Inference:
