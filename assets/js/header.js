@@ -243,8 +243,10 @@ function makeMarginalERP(marginal) {
   for (var v in marginal) {
     marginal[v] = marginal[v] / norm;
   }
-  console.log("Enumerated distribution: ");
-  console.log(marginal);
+
+  // console.log("Enumerated distribution: ");
+  // console.log(marginal);
+
   //make an ERP from marginal:
   var dist = new ERP(
     function(params) {
@@ -274,6 +276,7 @@ function enu(cc, wpplFn) {
   return new Enumerate(cc, wpplFn);
 }
 
+
 ////////////////////////////////////////////////////////////////////
 // Particle filtering
 //
@@ -282,26 +285,31 @@ function enu(cc, wpplFn) {
 
 function ParticleFilter(k, wpplFn, numP) {
 
-  //initialize the filter by adding numP states to the set of "previous" particles
+  // Initialize the filter by adding numP states to the set of
+  // "previous" particles.
 
-  //move old coroutine out of the way and install this as the current handler
+  // Move old coroutine out of the way and install this as the current
+  // handler.
   this.k = k;
   this.old_coroutine = coroutine;
   coroutine = this;
 
-  //run the wppl computation, when the computation returns we want it to call the exit method of this coroutine so we pass that as the continuation.
+  // Run the wppl computation, when the computation returns we want it
+  // to call the exit method of this coroutine so we pass that as the
+  // continuation.
   wpplFn(exit);
 }
 
 ParticleFilter.prototype.sample = function(cc, dist, params) {
-
+  console.log("ParticleFilter.sample");
 };
 
 ParticleFilter.prototype.factor = function(cc, score) {
-
+  console.log("ParticleFilter.factor");
 };
 
 ParticleFilter.prototype.exit = function(retval) {
+  console.log("ParticleFilter.exit");
 
   //... clean up
 
@@ -310,6 +318,10 @@ ParticleFilter.prototype.exit = function(retval) {
   //return from enumeration by calling original continuation:
   this.k(dist);
 };
+
+function pf(cc, wpplFn, numP) {
+  return new ParticleFilter(cc, wpplFn, numP);
+}
 
 
 ////////////////////////////////////////////////////////////////////
@@ -360,6 +372,10 @@ function and(k, x, y) {
   k(x && y);
 };
 
+function or(k, x, y) {
+  k(x || y);
+};
+
 
 ////////////////////////////////////////////////////////////////////
 
@@ -368,6 +384,7 @@ module.exports = {
   bernoulli: bernoulli,
   Forward: fw,
   Enumerate: enu,
+  ParticleFilter: pf,
   //coroutine: coroutine,
   sample: sample,
   factor: factor,
@@ -377,5 +394,6 @@ module.exports = {
   plus: plus,
   minus: minus,
   times: times,
-  and: and
+  and: and,
+  or: or
 }
