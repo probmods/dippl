@@ -53,6 +53,12 @@ exports.testFunctionExpression = {
     var code = "var f = function(x){return plus(x, 10)}; f(3)";
     var expected = 13;
     return runCpsTest(test, code, expected);
+  },
+
+  testRecursion: function(test) {
+    var code = "var f = function(x, n){return n==0 ? x : plusTwo(x);}; f(3, 4)";
+    var expected = 11;
+    return runCpsTest(test, code, expected);
   }
 
 };
