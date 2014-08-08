@@ -55,11 +55,27 @@ exports.testDeterministic = {
 };
 
 exports.testForwardSampling = {
+
   testApplication: function (test) {
     var code = "and(flip(.5), flip(.5))";
     var expectedHist = {
       "true": .25,
       "false": .75
+    };
+    var tolerance = .05;
+    var numSamples = 1000;
+    return runSamplingTest(test, code, expectedHist, numSamples, tolerance);
+  },
+
+  testGeometric: function(test) {
+    var code = "var geom = function() { return flip() ? 0 : geom() }; geom()";
+    var expectedHist= {
+      0: .5,
+      1: .25,
+      2: .125,
+      3: .0625,
+      4: .03125,
+      5: .015625
     };
     var tolerance = .05;
     var numSamples = 1000;

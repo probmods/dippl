@@ -178,6 +178,22 @@ function cpsMemberExpression(obj, prop, computed, cont){
     build.callExpression(cont, [memberExpr])));
 }
 
+function cpsVariableDeclaration(declarationId, declarationInit, cont){
+  if (types.namedTypes.FunctionExpression.check(declarationInit)){
+    return build.blockStatement(
+      [
+        build.variableDeclaration(
+          "var",
+          [build.variableDeclarator(declarationId, cpsAtomic(declarationInit))]),
+        convertToStatement(build.callExpression(cont, [build.identifier("undefined")]))
+      ]);
+  } else {
+    return cps(declarationInit,
+               buildFunc([declarationId],
+                         build.callExpression(cont, [build.identifier("undefined")])));
+  }
+}
+
 function cps(node, cont){
 
   var recurse = function(nodes){return cps(nodes, cont);};
@@ -205,10 +221,7 @@ function cps(node, cont){
   case Syntax.VariableDeclaration:
     assert.equal(node.declarations.length, 1);
     var declaration = node.declarations[0];
-    var varName = util.gensym("_v");
-    return cps(declaration.init,
-               buildFunc([declaration.id],
-                         build.callExpression(cont, [build.identifier("undefined")])));
+    return cpsVariableDeclaration(declaration.id, declaration.init, cont);
 
   case Syntax.CallExpression:
     return cpsApplication(node.callee, node.arguments, cont);

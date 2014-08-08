@@ -28,8 +28,14 @@ var runCpsTest = function(test, code, expected){
   var topKAst = esprima.parse("var topK = function(x){return x};");
   newAst.body = topKAst.body.concat(newAst.body);
   var newCode = escodegen.generate(newAst);
-  // console.log(newCode);
-  test.ok(_.isEqual(eval(newCode), expected));
+  var actual = eval(newCode);
+  var testPassed = _.isEqual(actual, expected);
+  test.ok(testPassed);
+  if (!testPassed){
+    console.log(newCode);
+    console.log("Expected:", expected);
+    console.log("Actual:", actual);
+  }
   test.done();
 };
 
@@ -56,7 +62,7 @@ exports.testFunctionExpression = {
   },
 
   testRecursion: function(test) {
-    var code = "var f = function(x, n){return n==0 ? x : plusTwo(x);}; f(3, 4)";
+    var code = "var f = function(x, n){return n==0 ? x : f(plusTwo(x), n-1);}; f(3, 4)";
     var expected = 11;
     return runCpsTest(test, code, expected);
   }
