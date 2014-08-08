@@ -1,4 +1,5 @@
 CPS:
+- fix function declarations so that they can be recursive.
 - need to trampoline continuation calls..?
 
 Inference:
@@ -11,4 +12,6 @@ Testing:
 - test suite for inference methods
 - write cps tests for bigger programs
 
-
+Browser integration:
+-script tag compilation / execution
+-code box execution?
