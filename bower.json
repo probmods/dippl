@@ -20,7 +20,10 @@
     "ast-types": "benjamn/ast-types",
     "underscore": "~1.6.0",
     "interset": "Gozala/interset",
-    "nodeunit": "caolan/nodeunit#~0.9.0"
+    "nodeunit": "caolan/nodeunit#~0.9.0",
+    "js-priority-queue": "~0.0.6",
+    "priorityqueuejs": "janogonzalez/priorityqueuejs#~0.2.0",
+    "amdefine": "jrburke/amdefine#~0.1.0"
   },
   "resolutions": {
     "esprima": "~1.2.2"

@@ -71,13 +71,20 @@
 // );
 
 
-ParticleFilter(
-  function(){
-    var x = flip(0.5);
-               //factor(x?1:0)
-    var y = flip(0.5);
-    factor(or(x, y) ? 0 : minusInfinity);
-    return x;
-  },
-  100 // particles
-);
+//Enumerate(
+//  function(){
+//    var x = flip(0.2);
+//               //factor(x?1:0)
+//    var y = flip(0.7);
+//    factor(or(x, y) ? 0 : minusInfinity);
+//    return x;
+//          }//,  100 // particles
+//);
+
+
+var geom = function() {
+    return flip() ? 0 : geom()
+}
+geom()
+
+//Enumerate(function(){return geom()});

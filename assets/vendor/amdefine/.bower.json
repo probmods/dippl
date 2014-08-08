@@ -1,0 +1,15 @@
+{
+  "name": "amdefine",
+  "homepage": "https://github.com/jrburke/amdefine",
+  "version": "0.1.0",
+  "_release": "0.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.1.0",
+    "commit": "9290525e30b6db31dee8111f52f61481162765eb"
+  },
+  "_source": "git://github.com/jrburke/amdefine.git",
+  "_target": "~0.1.0",
+  "_originalSource": "jrburke/amdefine",
+  "_direct": true
+}
