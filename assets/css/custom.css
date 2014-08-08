@@ -1,3 +1,22 @@
 .CodeMirror {
    height: auto!important;   
 }
+
+pre {
+  border: none;
+  background-color: #fff;
+}
+
+.CodeMirror, .resultDiv {
+   border: 1px solid #ccc;
+   border-radius: 4px;
+   padding: .5em;
+   background-color: #fafafa;
+   margin-bottom: .5em;
+   font-size: 13px;
+   font-family: monospace;
+}
+
+.resultDiv {
+   display: none;
+}

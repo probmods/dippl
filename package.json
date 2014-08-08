@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "dependencies": {
-    "codemirror": "^4.4.0"
+    "codemirror": "^4.4.0",
   },
   "devDependencies": {},
   "scripts": {
