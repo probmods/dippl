@@ -1,0 +1,7 @@
+#!/bin/bash
+cd assets/webppl
+git pull origin master
+cd ..
+git commit ./webppl -m "Updated webppl submodule"
+git push origin gh-pages
+cd ..

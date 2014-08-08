@@ -28,3 +28,7 @@ Update submodule to latest version of webppl:
     cd ..
     git commit ./webppl -m "Updated webppl submodule"
     git push origin gh-pages
+
+This can also be done using a script:
+
+    ./update-webppl
