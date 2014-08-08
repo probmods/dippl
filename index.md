@@ -9,8 +9,7 @@ This is some introductory text.
 
 {% for p in sorted_pages %}
     {% if p.layout == 'lecture' %}
-- [{{ p.title }}]({{ site.baseurl }}{{ p.url }})
-
+- [{{ p.title }}]({{ site.baseurl }}{{ p.url }})<br>
     <em>{{ p.description }}</em>
     {% endif %}
 {% endfor %}
