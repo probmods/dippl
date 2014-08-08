@@ -16,16 +16,15 @@ Run local webserver:
 
     jekyll serve --watch
 
-Pull upstream changes to repo and submodule:
+Pull upstream changes to repo:
 
-    git pull origin/gh-pages
+    git pull origin gh-pages
     git submodule update --recursive
 
-Update and submodule:
+Update submodule to latest version of webppl:
 
     cd assets/webppl
-    git pull origin/master
+    git pull origin master
     cd ..
     git commit ./webppl -m "Updated webppl submodule"
-    git push origin/gh-pages
-
+    git push origin gh-pages
