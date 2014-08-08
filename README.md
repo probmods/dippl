@@ -14,7 +14,7 @@ Installation:
 
 Run local webserver:
 
-    jekyll --serve watch
+    jekyll serve --watch
 
 Pull upstream changes to repo and submodule:
 
