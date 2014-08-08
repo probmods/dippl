@@ -1,7 +1,7 @@
 "use strict";
 
 var util = require("../assets/js/util.js");
-var _ = require('../assets/vendor/underscore/underscore.js');
+var _ = require('underscore');
 var runWebPPL = require('../assets/js/run-wppl.js');
 var compileWebPPLProgram = runWebPPL.compileWebPPLProgram;
 var runWebPPLProgram = runWebPPL.runWebPPLProgram;

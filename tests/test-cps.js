@@ -1,10 +1,10 @@
 "use strict";
 
-var _ = require('../assets/vendor/underscore/underscore.js');
+var _ = require('underscore');
 var cps = require("../assets/js/cps.js");
 var util = require("../assets/js/util.js");
-var esprima = require("../assets/vendor/esprima/esprima.js");
-var escodegen = require("../assets/vendor/escodegen/escodegen.js");
+var esprima = require("esprima");
+var escodegen = require("escodegen");
 var types = require("../assets/vendor/ast-types/main.js");
 var build = types.builders;
 

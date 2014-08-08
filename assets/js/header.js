@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require('../vendor/underscore/underscore.js');
+var _ = require('underscore');
 var util = require('./util.js');
 var PriorityQueue = require('js-priority-queue');
 

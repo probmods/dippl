@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require('../vendor/underscore/underscore.js');
+var _ = require('underscore');
 
 function makeGensym() {
   var seq = 0;

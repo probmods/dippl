@@ -1,8 +1,8 @@
 "use strict";
 
 var assert = require('assert');
-var _ = require('../vendor/underscore/underscore.js');
-var estraverse = require("../vendor/estraverse/estraverse.js");
+var _ = require('underscore');
+var estraverse = require("estraverse");
 var types = require("../vendor/ast-types/main.js");
 var Syntax = estraverse.Syntax;
 
