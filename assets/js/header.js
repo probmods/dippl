@@ -1,8 +1,8 @@
 "use strict";
 
 var _ = require('underscore');
-var util = require('./util.js');
 var PriorityQueue = require('js-priority-queue');
+var util = require('./util.js');
 
 // Elementary Random Primitives (ERPs) are the representation of
 // distributions. They can have sampling, scoring, and support

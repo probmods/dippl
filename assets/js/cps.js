@@ -1,15 +1,16 @@
 "use strict";
 
 var assert = require('assert');
-var util = require('./util.js');
-var freeVars = require('./freevars.js').freeVars;
 var _ = require('underscore');
 var estraverse = require("estraverse");
 var escodegen = require("escodegen");
 var esprima = require("esprima");
 var estemplate = require("estemplate");
 var types = require("ast-types");
-var difference = require("interset").difference;
+var interset = require("interset");
+var util = require('./util.js');
+
+var difference = interset.difference;
 var build = types.builders;
 var Syntax = estraverse.Syntax;
 

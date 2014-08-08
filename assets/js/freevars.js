@@ -4,6 +4,7 @@ var assert = require('assert');
 var _ = require('underscore');
 var estraverse = require("estraverse");
 var types = require("ast-types");
+
 var Syntax = estraverse.Syntax;
 
 var getName = function(x){

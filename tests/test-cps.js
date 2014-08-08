@@ -1,11 +1,12 @@
 "use strict";
 
 var _ = require('underscore');
-var cps = require("../assets/js/cps.js");
-var util = require("../assets/js/util.js");
 var esprima = require("esprima");
 var escodegen = require("escodegen");
 var types = require("ast-types");
+var cps = require("../assets/js/cps.js");
+var util = require("../assets/js/util.js");
+
 var build = types.builders;
 
 var fooObj = {
