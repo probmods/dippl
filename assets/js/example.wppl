@@ -83,8 +83,6 @@
 
 
 var geom = function() {
-    return flip() ? 0 : geom()
+    return flip(0.1) ? 0 : 1+geom()
 }
-geom()
-
-//Enumerate(function(){return geom()});
+Enumerate(geom,100);
