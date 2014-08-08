@@ -3,7 +3,7 @@
 var assert = require('assert');
 var _ = require('underscore');
 var estraverse = require("estraverse");
-var types = require("../vendor/ast-types/main.js");
+var types = require("ast-types");
 var Syntax = estraverse.Syntax;
 
 var getName = function(x){

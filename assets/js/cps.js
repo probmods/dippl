@@ -8,8 +8,8 @@ var estraverse = require("estraverse");
 var escodegen = require("escodegen");
 var esprima = require("esprima");
 var estemplate = require("estemplate");
-var types = require("../vendor/ast-types/main.js");
-var difference = require("../vendor/interset/difference.js");
+var types = require("ast-types");
+var difference = require("interset").difference;
 var build = types.builders;
 var Syntax = estraverse.Syntax;
 
