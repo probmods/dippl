@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "codemirror": "^4.4.0",
+    "paper": "^0.9.18"
   },
   "devDependencies": {},
   "scripts": {

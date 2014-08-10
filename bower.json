@@ -1,0 +1,17 @@
+{
+  "name": "esslli2014",
+  "version": "0.0.1",
+  "homepage": "https://github.com/probmods/esslli2014",
+  "authors": [
+    "Noah Goodman <ngoodman@stanford.edu>",
+    "Andreas Stuhlmueller <andreas@stuhlmueller.org>"
+  ],
+  "main": "index.md",
+  "private": true,
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "paper": "~0.9.18"
+  }
+}
