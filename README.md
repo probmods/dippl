@@ -11,6 +11,7 @@ Installation:
     cd esslli2014
     git submodule update --init --recursive
     npm install
+    bower install
 
 Run local webserver:
 
