@@ -11,7 +11,7 @@ cd ..
 git commit ./webppl -m "Updated webppl submodule"
 git push origin gh-pages
 
-echo "Compiling webppl for web..."
+echo "Compiling webppl for browser..."
 cd webppl
 browserify -t brfs src/main.js > compiled/webppl.js
 cd ../..
