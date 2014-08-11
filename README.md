@@ -11,6 +11,7 @@ Installation:
     cd esslli2014
     git submodule update --init --recursive
     npm install
+    npm install -g browserify    
     bower install
 
 Run local webserver:
@@ -22,14 +23,6 @@ Pull upstream changes to repo:
     git pull origin gh-pages
     git submodule update --recursive
 
-Update submodule to latest version of webppl:
-
-    cd assets/webppl
-    git pull origin master
-    cd ..
-    git commit ./webppl -m "Updated webppl submodule"
-    git push origin gh-pages
-
-This can also be done using a script:
+Update submodule to latest version of webppl and compile webppl for use in browser:
 
     ./update-webppl
