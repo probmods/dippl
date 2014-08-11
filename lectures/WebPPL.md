@@ -41,7 +41,7 @@ Elementary Random Primitives (ERPs) are the basic type that represents distribut
 You can sample from ERPs with the `sample` operator:
 
 ~~~~
-sample(flip, 0.5)
+sample(bernoulli, 0.5)
 ~~~~
 
 There are a set of pre-defined ERPs: flip, guassian, [FIXME]... It is also possible to define new ERPs and to build ERP distributions via inference functions (see below).
