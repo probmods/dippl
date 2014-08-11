@@ -36,6 +36,7 @@ function setupCodeBoxes(){
                 webppl.run(cm.getValue(), showResult, false);
               } catch (err) {
                 showResult(err.message);
+                throw err;
               }
           }
         });
