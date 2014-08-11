@@ -1,7 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -e
+
+echo "Updating webppl to latest remote..."
 cd assets/webppl
-git pull origin master
+git fetch origin
+git reset --hard origin/master
+
+echo "Creating commit in local and remote esslli repository..."
 cd ..
 git commit ./webppl -m "Updated webppl submodule"
 git push origin gh-pages
-cd ..
+
+echo "Compiling webppl for web..."
+cd webppl
+browserify -t brfs src/main.js > compiled/webppl.js
+cd ../..
+
+echo "Done!"
