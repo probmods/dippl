@@ -20,3 +20,11 @@ pre {
 .resultDiv {
    display: none;
 }
+
+.resultCanvas {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: .5em;
+  margin-bottom: .5em;
+  display: none;
+}
