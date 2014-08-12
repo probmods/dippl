@@ -20,14 +20,20 @@ Drawing many lines:
 ~~~~
 Draw.setup()
 
-var drawLines = function(n){
+var makeLines = function(n, xs){
   var x1 = randomInteger(200);
   var y1 = randomInteger(200);    
   var x2 = randomInteger(200);
   var y2 = randomInteger(200);        
-  Draw.line(x1, y1, x2, y2);
-  return (n==0) ? 0 : drawLines(n-1);
+  var xs2 = xs.concat([[x1, y1, x2, y2]]);
+  return (n==0) ? xs : makeLines(n-1, xs2);
 }
 
-drawLines(100)
+var drawLines = function(lines){
+  return (lines.length == 0) ? "done" : drawLines(lines.slice(1));
+}
+
+var lines = makeLines(100, []);
+
+drawLines(lines);
 ~~~~

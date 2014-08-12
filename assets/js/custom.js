@@ -1,5 +1,7 @@
 "use strict";
 
+var topK; // Top-level continuation
+
 
 // Drawing
 
@@ -78,16 +80,20 @@ function setupCodeBoxes(){
         "id": 'run_' + codeBoxCount,
         "class": 'runButton',
         "click": function () {
-            var oldActiveCanvas = activeCanvas;
-            activeCanvas = resultCanvas;
-            try {
-              webppl.run(cm.getValue(), showResult, false);
-            } catch (err) {
-              showResult(err.message);
-              throw err;
-            } finally {
-              // activeCanvas = oldActiveCanvas;
-            }
+          var oldActiveCanvas = activeCanvas;
+          var oldTopK = topK;
+          activeCanvas = resultCanvas;
+          topK = showResult;
+          try {
+            var compiled = webppl.compile(cm.getValue(), true);
+            eval.call(window, compiled);
+          } catch (err) {
+            showResult(err.message);
+            throw err;
+          } finally {
+            activeCanvas = oldActiveCanvas;
+            topK = oldTopK;
+          }
         }
       });
 
