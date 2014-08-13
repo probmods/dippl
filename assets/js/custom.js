@@ -128,7 +128,8 @@ function setupCodeBoxes(){
         value: $unescaped,
         mode: 'javascript',
         lineNumbers: false,
-        readOnly: false
+        readOnly: false,
+        extraKeys: {"Tab": "indentAuto"}
       });
 
     var resultDiv = $('<div/>', { "class": "resultDiv" });
