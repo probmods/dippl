@@ -95,6 +95,6 @@ ParticleFilter(
   function(){
     var lines = makeLines(4, []);
     var finalGeneratedImage = Draw(50, 50, true);
-    drawLines(finalGeneratedImage, lines);
-   }, 10)
+	drawLines(finalGeneratedImage, lines);    
+   }, 100)
 ~~~~
