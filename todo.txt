@@ -15,3 +15,12 @@ Testing:
 Browser integration:
 -script tag compilation / execution
 -code box execution?
+
+
+
+===
+from plane:
+-top-level functions don’t seem to be carried properly across boxes? double check..
+-make `display` work in browser, auto detect ERPs and do something reasonable.
+-when inference functions are applied to functions with args, they should return a caching version of the ERP…
+
