@@ -16,12 +16,6 @@ var observe = function(s) {return s?flip(0.9):flip(0.1)}
 var init = function() {return flip(0.5)}
 ~~~
 
-We will also want some true observations (the data we observe):
-
-~~~
-var trueobs = [true, true, true]
-~~~
-
 And we will initially use this helper function to compare arrays:
 
 ~~~
@@ -48,6 +42,9 @@ var hmm = function(n) {
 We can condition on some observed states:
 
 ~~~
+//some true observations (the data we observe):
+var trueobs = [true, true, true]
+
 Enumerate(function(){
           var r = hmm(2)
           factor( arrayEq(r[1], trueobs) ? 0 : -Infinity )
@@ -75,9 +72,9 @@ var hmm_recur = function(n, states, observations){
     return (n==1) ? [states, observations] : hmm_recur(n-1,states,observations)
 }
 
-var hmm2 = function(n) {
+var hmm = function(n) {
     var s = init()
-    return hmm2_recur(n,[s],[observe(s)])
+    return hmm_recur(n,[s],[observe(s)])
 }
 ~~~
 
@@ -107,6 +104,8 @@ var hmm = function(n) {
     return hmm_recur(n,[s],observations)
 }
 
+var trueobs = [true, true, true]
+
 ParticleFilter(function(){
                var r = hmm(2)
                factor( arrayEq(r[1], trueobs) ? 0 : -Infinity )
@@ -134,6 +133,8 @@ var hmm = function(n) {
     return hmm_recur(n,[s],observations)
 }
 
+var trueobs = [true, true, true]
+
 ParticleFilter(function(){
                var r = hmm(2)
                //factor(-(arrayEq(r[1], trueobs) ? 0 : -Infinity)) //these now cancel...
@@ -160,6 +161,8 @@ var hmm = function(n) {
     factor(observations[0] == trueobs[0] ? 0 : -Infinity) //simplify since we know that observations is length 1
     return hmm_recur(n,[s],observations)
 }
+
+var trueobs = [true, true, true]
 
 ParticleFilter(function(){
                var r = hmm(2)

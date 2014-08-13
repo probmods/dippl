@@ -47,14 +47,18 @@ WebPPL is not just a subset of Javascript: is is a subset augmented with the abi
 You can sample from an ERP by directly calling it's sample method, or more cleanly with the `sample` operator. For example, using the built-in ERP `bernoulli`:
 
 ~~~~
-bernoulli.sample([0.5]) & sample(bernoulli, [0.5])
+bernoulliERP.sample([0.5]) & sample(bernoulliERP, [0.5])
 ~~~~
 
-There are a set of pre-defined ERPs including `bernoulli`, `randomInteger`, etc. It is also possible to define new ERPs and to build ERP distributions via inference functions (see below).
+There are a set of pre-defined ERPs including `bernoulliERP`, `randomIntegerERP`, etc. It is also possible to define new ERPs and to build ERP distributions via inference functions (see below). (Since `sample(bernoulliERP, [p])` is very common it is aliased to `flip(p)`, etc.)
 
-With only the ability to sample from primitive distributions and do deterministic computation, the language is already universal!
+With only the ability to sample from primitive distributions and do deterministic computation, the language is already universal! This is due to the ability to construct *stochastically recursive* functions. For instance we can define a geometric distribution in terms of a bernoulli:
 
-
+~~~
+var geometric = function(p) {
+    return flip(p)?1+geometric(p):1
+}
+~~~
 
 
 ## And inference
@@ -65,9 +69,9 @@ As an example consider a simple binomial distribution: the number of times that 
 
 ~~~
 var binomial = function(){
-    var a = sample(bernoulli, [0.5])
-    var b = sample(bernoulli, [0.5])
-    var c = sample(bernoulli, [0.5])
+    var a = sample(bernoulliERP, [0.5])
+    var b = sample(bernoulliERP, [0.5])
+    var c = sample(bernoulliERP, [0.5])
     return a + b + c}
 
 var binomialERP = Enumerate(binomial)
@@ -81,9 +85,9 @@ What if we wanted to adjust the above `binomial` computation to favor executions
 
 ~~~
 var funnybinomial = function(){
-    var a = sample(bernoulli, [0.5])
-    var b = sample(bernoulli, [0.5])
-    var c = sample(bernoulli, [0.5])
+    var a = sample(bernoulliERP, [0.5])
+    var b = sample(bernoulliERP, [0.5])
+    var c = sample(bernoulliERP, [0.5])
     factor( (a|b) ? 0 : -10)
     return a + b + c}
 
@@ -93,6 +97,9 @@ sample(funnybinomialERP)
 ~~~
 
 It is easier to build useful models (that, for instance, condition on data) with `factor`. But `factor` by itself doesn't do anything -- it interacts with *marginalization* functions that normalize the computation they are applied to. For this reason running a computation with `factor` in it at the top level -- that is, not inside a marginalization operator -- results in an error. Try running `funnybinomial` directly....
+
+WebPPL has several inference operators, including `Enumerate` and `ParticleFilter`. 
+
 
 
  
