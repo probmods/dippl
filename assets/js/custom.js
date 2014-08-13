@@ -15,6 +15,11 @@ function euclideanDistance(v1, v2){
   return Math.sqrt(d);
 };
 
+function print(k, x){
+  $(activeCodeBox.parent().find(".resultDiv")).append(
+    document.createTextNode(x + "\n"));
+  k();
+}
 
 
 // Drawing
@@ -143,7 +148,8 @@ function setupCodeBoxes(){
           var oldActiveCodeBox = activeCodeBox;
           topK = showResult;
           activeCodeBox = $this;
-          activeCodeBox.find("canvas").remove();
+          activeCodeBox.parent().find("canvas").remove();
+          activeCodeBox.parent().find(".resultDiv").text("");
           try {
             var compiled = webppl.compile(cm.getValue(), true);
             eval.call(window, compiled);
