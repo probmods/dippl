@@ -88,7 +88,7 @@ var makeLines = function(n, lines){
   console.log(score);
   factor(score);
   generatedImage.destroy();
-  return (n==0) ? newLines : makeLines(n-1, newLines);
+  return (n==1) ? newLines : makeLines(n-1, newLines);
 }
 
 ParticleFilter(
