@@ -3,8 +3,8 @@
 }
 
 pre {
-  border: none;
-  background-color: #fff;
+   border: none;
+   background-color: #fff;
 }
 
 .CodeMirror, .resultDiv {
@@ -21,20 +21,20 @@ pre {
    display: none;
 }
 
-.resultCanvas {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: .5em;
-  margin-bottom: .5em;
-  display: none;
+.drawCanvas {
+   border: 1px solid #ccc;
+   border-radius: 4px;
+   padding: .5em;
+   margin-bottom: .5em;
+   margin-right: .5em;
 }
 
 p code {
-  color: #333;
-  background-color: #fafafa;
-  border: 1px solid #dcdcdc;
-  border-radius: 4px;
-  padding: 1px;
-  padding-left: 3px;
-  padding-right: 3px;
+   color: #333;
+   background-color: #fafafa;
+   border: 1px solid #dcdcdc;
+   border-radius: 4px;
+   padding: 1px;
+   padding-left: 3px;
+   padding-right: 3px;
 }
