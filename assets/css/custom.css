@@ -28,3 +28,13 @@ pre {
   margin-bottom: .5em;
   display: none;
 }
+
+p code {
+  color: #333;
+  background-color: #fafafa;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  padding: 1px;
+  padding-left: 3px;
+  padding-right: 3px;
+}
