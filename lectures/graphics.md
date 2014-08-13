@@ -84,7 +84,7 @@ var makeLines = function(n, lines){
   var newLines = lines.concat([[x1, y1, x2, y2]]);
   var generatedImage = Draw(50, 50, false);
   drawLines(generatedImage, newLines);
-  var score = -targetImage.distance(generatedImage)/100000;
+  var score = -targetImage.distance(generatedImage)/1000;
   console.log(score);
   factor(score);
   generatedImage.destroy();
