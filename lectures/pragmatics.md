@@ -18,6 +18,9 @@ var worldPrior = function(objs) {
 }
 ~~~
 
+
+
+
 utterancePrior, meaning function...
 
 
