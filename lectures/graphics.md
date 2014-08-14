@@ -76,25 +76,28 @@ var drawLines = function(drawObj, lines){
   return (lines.length == 1) ? "done" : drawLines(drawObj, lines.slice(1));
 }
 
-var makeLines = function(n, lines){
+var makeLines = function(n, lines, prevScore){
+  // Add a random line to the set of lines
   var x1 = randomInteger(50);
   var y1 = randomInteger(50);    
   var x2 = randomInteger(50);
   var y2 = randomInteger(50);        
   var newLines = lines.concat([[x1, y1, x2, y2]]);
+  // Compute image from set of lines
   var generatedImage = Draw(50, 50, false);
   drawLines(generatedImage, newLines);
-  var score = -targetImage.distance(generatedImage)/100000;
-  console.log(score);
-  factor(score);
+  // Factor prefers images that are close to target image
+  var newScore = -targetImage.distance(generatedImage)/1000; // Increase to 10000 to see more diverse samples
+  factor(newScore - prevScore);
   generatedImage.destroy();
-  return (n==0) ? newLines : makeLines(n-1, newLines);
+  // Generate remaining lines (unless done)
+  return (n==1) ? newLines : makeLines(n-1, newLines, newScore);
 }
 
 ParticleFilter(
   function(){
-    var lines = makeLines(4, []);
+    var lines = makeLines(4, [], 0);
     var finalGeneratedImage = Draw(50, 50, true);
-    drawLines(finalGeneratedImage, lines);
-   }, 10)
+	drawLines(finalGeneratedImage, lines);    
+   }, 100)
 ~~~~
