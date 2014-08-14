@@ -87,7 +87,7 @@ var makeLines = function(n, lines, prevScore){
   var generatedImage = Draw(50, 50, false);
   drawLines(generatedImage, newLines);
   // Factor prefers images that are close to target image
-  var newScore = -targetImage.distance(generatedImage)/1000;
+  var newScore = -targetImage.distance(generatedImage)/1000; // Increase to 10000 to see more diverse samples
   factor(newScore - prevScore);
   generatedImage.destroy();
   // Generate remaining lines (unless done)
