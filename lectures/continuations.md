@@ -121,6 +121,7 @@ var printError = function(x){
 }
 
 totalCpsFactorial(print, printError, 5)
+totalCpsFactorial(print, printError, -1)
 ~~~~
 
 ## Continuation-passing transform
