@@ -10,7 +10,8 @@ These are notes from the [ESSLLI 2014](http://www.esslli2014.info) class on Prob
 
 {% assign sorted_pages = site.pages | sort:"name" %}
 
-# Lectures
+## Lectures
+
 {% for p in sorted_pages %}
     {% if p.layout == 'lecture' %}
 - [{{ p.title }}]({{ site.baseurl }}{{ p.url }})<br>
@@ -19,7 +20,8 @@ These are notes from the [ESSLLI 2014](http://www.esslli2014.info) class on Prob
 {% endfor %}
 
 
-# Examples
+## Examples
+
 {% for p in sorted_pages %}
     {% if p.layout == 'example' %}
 - Example: [{{ p.title }}]({{ site.baseurl }}{{ p.url }})<br>
