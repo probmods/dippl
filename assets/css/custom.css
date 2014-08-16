@@ -13,9 +13,54 @@ body div.container {
    padding-bottom: 2em;
 }
 
+
+/* Navbar */
+
 .navbar {
    margin-bottom: 0;
 }
+
+div.navbar {
+  background-image: linear-gradient(to bottom, #B00B30 0%, #8b0d25 100%);
+}
+
+.navbar a.navbar-brand {
+   color: #fff;
+}
+
+.navbar a.navbar-brand:hover {
+   color: #fff;
+}
+
+.navbar p.navbar-text {
+   color: #eee;
+}
+
+.navbar li.dropdown a.dropdown-toggle {
+   color: #fff
+}
+
+.navbar a.navbar-brand .fa {
+   margin-right: .2em
+}
+
+.navbar #cse-text {
+  width: 300px;
+}
+.navbar .tt-hint {
+  width: 300px;
+}
+
+body .navbar-default .navbar-nav li a {
+   color: #eee;
+}
+
+body .navbar-default .navbar-nav li a:hover {
+  color: #fff;
+}
+
+
+/* Headings */
 
 h1 {
   margin-top: 1em;
@@ -77,6 +122,10 @@ p code {
 
 
 /* Editor */
+
+div#editorBlocks {
+  margin-top: 5em;
+}
 
 div#editorButtons {
    margin-top: 1em;
