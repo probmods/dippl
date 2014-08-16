@@ -1,6 +1,6 @@
 ---
 layout: example
-title: WebPPL for computer graphics
+title: Computer vision
 description: Render to canvas, condition on output
 ---
 
