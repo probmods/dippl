@@ -1,3 +1,39 @@
+/* Global layout adjustments */
+
+body {
+   background-color: #eee
+}
+
+body div.container {
+   max-width: 800px;
+   background-color: #fefefe;
+   box-shadow: 0 0 15px rgba(0, 0, 0, .3);
+   padding-left: 5em;
+   padding-right: 5em;
+   padding-bottom: 2em;
+}
+
+.navbar {
+   margin-bottom: 0;
+}
+
+h1 {
+  margin-top: 1em;
+  font-size: 2.5em;
+}
+
+h2 {
+  margin-top: .7em;
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+
+/* Code boxes */
+
 .CodeMirror {
    height: auto!important;   
 }
@@ -38,6 +74,9 @@ p code {
    padding-left: 3px;
    padding-right: 3px;
 }
+
+
+/* Editor */
 
 div#editorButtons {
    margin-top: 1em;
