@@ -1,7 +1,10 @@
 ---
 layout: default
-title: Probabilistic Programming Languages
 ---
+
+<div class="page-header">
+  <h1>Probabilistic Programming Languages</h1>
+</div>
 
 This is some introductory text.
 

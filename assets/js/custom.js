@@ -114,17 +114,15 @@ function loadImage(k, drawObject, url){
 
 var codeBoxCount = 0;
 
-function setupCodeBoxes(){
-  $('pre > code').each(function() {
-
-    var $this = $(this);
-    var $code = $this.html();
+function setupCodeBox(element){
+    var $element = $(element);
+    var $code = $element.html();
     var $unescaped = $('<div/>').html($code).text();
 
-    $this.empty();
+    $element.empty();
 
     var cm = CodeMirror(
-      this, {
+      element, {
         value: $unescaped,
         mode: 'javascript',
         lineNumbers: false,
@@ -148,7 +146,7 @@ function setupCodeBoxes(){
           var oldTopK = topK;
           var oldActiveCodeBox = activeCodeBox;
           topK = showResult;
-          activeCodeBox = $this;
+          activeCodeBox = $element;
           activeCodeBox.parent().find("canvas").remove();
           activeCodeBox.parent().find(".resultDiv").text("");
           try {
@@ -164,12 +162,66 @@ function setupCodeBoxes(){
         }
       });
 
-    $this.parent().append(resultDiv);
-    $this.parent().append(runButton);
+    $element.parent().append(resultDiv);
+    $element.parent().append(runButton);
 
     codeBoxCount += 1;
+}
 
+function setupCodeBoxes(){
+  $('pre > code').each(function() {
+    setupCodeBox(this);
   });
 }
 
 $(setupCodeBoxes);
+
+
+// iPython-style editor
+
+function addToTextarea(element, text){
+  element.val(element.val() + text);
+}
+
+function loadEditor(){
+
+  $('#editorMarkdown').autosize();
+
+  $("#addCodeBlock").click(
+    function(){
+      var newCodeBlock = $('<pre>', {'html': $('<code>', {'html': ""}),
+                                     'class': "editorBlock"});
+      $("#editorBlocks").append(newCodeBlock);
+      newCodeBlock.find("code").each(function(){setupCodeBox(this);});
+    }
+  );
+
+  $("#addTextBlock").click(
+    function(){
+      var newTextBlock = $('<textarea>', {"class": "editorBlock"});
+      $("#editorBlocks").append(newTextBlock);
+      newTextBlock.autosize();
+    }
+  );
+
+  $("#generateMarkdown").click(
+    function(){
+      $('#editorMarkdown').val("");
+      $(".editorBlock").each(
+        function(){
+          var codeElements = $(this).find(".CodeMirror");
+          if (codeElements.length == 1){
+            var code = codeElements[0].CodeMirror.getValue();
+            addToTextarea($('#editorMarkdown'), "\n\n~~~~\n" + code + "\n~~~~");
+          } else {
+            addToTextarea($('#editorMarkdown'), "\n\n" + $(this).val());
+          };
+        });
+      $('#editorMarkdown').val($.trim($('#editorMarkdown').val()));
+      $('#editorMarkdown').show().trigger('autosize.resize');
+    }
+  );
+
+}
+
+$(loadEditor);
