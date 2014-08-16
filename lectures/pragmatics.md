@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: example
 title: Rational Speech Acts models of pragmatics
 description: Modeling pragmatic language understanding in WebPPL.
 ---

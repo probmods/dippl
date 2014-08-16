@@ -1,21 +1,23 @@
 ---
 layout: lecture
-title: WebPPL
+title: The WebPPL language
 description: A small probabilistic language embedded in Javascript.
 ---
 
 
-WebPPL (pronounced 'web people'), is a small probabilistic programming language built on top of a (purely functional) subset of Javascript. This page documents the language and provides some simple examples.
+WebPPL (pronounced 'web people'), is a small probabilistic programming language built on top of a (purely functional) subset of Javascript. 
+The language is intended to be simple to implement, fairly pleasant to write models in, and a good intermediate target for other languages (such as [Church](https://probmods.org)).
+This page documents the language and provides some simple examples.
 
 # The language
 
 ## A subset of Javascript
 
 Following the notation from the [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API) our language consists of the subset of Javascript that can be built from the following syntax elements:
-Program, BlockStatement, ExpressionStatement, ReturnStatement, EmptyStatement, IfStatement, VariableDeclaration, Identifier, Literal, FunctionExpression, CallExpression, ConditionalExpression, ArrayExpression, MemberExpression, BinaryExpression, UnaryExpression.
+Program, BlockStatement, ExpressionStatement, ReturnStatement, EmptyStatement, IfStatement, VariableDeclaration, Identifier, Literal, FunctionExpression, CallExpression, ConditionalExpression, ArrayExpression, MemberExpression, BinaryExpression, UnaryExpression. (ObjectExpression is also allowed, but currently with the awkward restriction that object properties cannot be functions.)
 
 Note that there are no AssignmentExpressions or looping constructs. This is because a purely functional language is much easier to transform into Continuation Passing Style (CPS), which the WebPPL implementation uses to implement inference algorithms such as Enumeration and Particle Filtering.
-While these restrictions mean that common Javascript programming patterns aren't possible, this subset is still universal, because we allow recursive and higher-order functions. It encourages a functional style that is pretty easy to use (once you get use to thinking in a functionally!).
+While these restrictions mean that common Javascript programming patterns aren't possible, this subset is still universal, because we allow recursive and higher-order functions. It encourages a functional style, similar to Haskel or LISP, that is pretty easy to use (once you get use to thinking in a functionally!).
 
 Here is a (very boring) program that uses most of the syntax we have available:
 

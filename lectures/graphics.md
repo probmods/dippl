@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: example
 title: WebPPL for computer graphics
 description: Render to canvas, condition on output
 ---

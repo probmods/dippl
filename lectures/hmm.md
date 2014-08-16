@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: example
 title: Hidden Markov Models
 description: Various representations of the HMM, and the inference tricks that follow.
 ---
