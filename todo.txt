@@ -1,26 +1,36 @@
 CPS:
-- fix function declarations so that they can be recursive.
-- need to trampoline continuation calls..?
+- think about smarter CPS that generates fewer garbage redexes..
 
 Inference:
-- some kind of top-level expectation or hist fns?
+- useful display for ERPs to show results of inference. (ERP.display method?)
 - maybe implement the particle cascade just to see how it works?
-- streams / generators that incrementally run a computation, applying global factors along the way.
-
-Testing:
-- simplify tests (use eval to get expected results) [AST]
-- test suite for inference methods
-- write cps tests for bigger programs
+- high-level idioms for incremental factors. PCFG?
 
 Browser integration:
--script tag compilation / execution
--code box execution?
+- script tag compilation / execution
+- also run javascript code directly?
 
 
 
-===
-from plane:
--top-level functions don’t seem to be carried properly across boxes? double check..
--make `display` work in browser, auto detect ERPs and do something reasonable.
--when inference functions are applied to functions with args, they should return a caching version of the ERP…
+Lectures:
+
+- go over outline, clean up lecture descriptions, move non-lectures to different list on index page.
+
+- wppl examples for first day.
+
+- foundations?
+
+- CPS: 
+  -continuation def and examples.
+  -coroutine w/ k: first do sample with call/cc, then say computation is in CPS, so it gets handed a K for exit. do multisample and save enumeration for next section.
+  -CPS ideas (andreas).
+
+- Enumeration:
+  - using CPS, simple version w/o scores, with scores, priority queue
+  - pragmatics example
+  - caching (interpolation?)
+
+- Particle filter…
+
+
 
