@@ -1,5 +1,6 @@
 ---
 layout: default
+title: Probabilistic Programming Languages
 ---
 
 <div class="page-header">
