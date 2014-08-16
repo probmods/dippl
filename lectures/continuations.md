@@ -104,15 +104,13 @@ Let's look at our `cpsFactorial` again. Suppose we want to build in error handli
 var totalCpsFactorial = function(k, err, n) {
   if (n < 0) {
     err("cpsFactorial: n < 0!")
+  } else if (n == 0) {
+    k(1);
   } else {
-    if (n == 0) {
-      k(1);
-    } else {
-      totalCpsFactorial(
-        function(x){ k(x * n) },
-        err,
-        n - 1);
-    }
+    totalCpsFactorial(
+      function(x){ k(x * n) },
+      err,
+      n - 1);
   }
 }
 
