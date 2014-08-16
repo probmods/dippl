@@ -130,4 +130,5 @@ continuation-passing transform for the lambda calculus:
 - function def
 - function application
 - variables
-- if statements
+
+interactive form that applies our transform to webppl program (auto-update)
