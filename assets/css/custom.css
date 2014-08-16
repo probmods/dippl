@@ -38,3 +38,31 @@ p code {
    padding-left: 3px;
    padding-right: 3px;
 }
+
+div#editorButtons {
+   margin-top: 1em;
+   display: block;
+   text-align: right;
+}
+
+textarea.editorBlock {
+   display: block;
+   border: none;
+   border-left: 2px dotted #ccc;
+   margin: 9.5px;
+   padding-left: .5em;
+   background-color: #fff;
+   margin-bottom: .5em;
+   width: 100%;
+}
+
+textarea#editorMarkdown {
+   background-color: #fff;
+   width: 90%;
+   font-family: monospace;
+   font-size: 13px;  
+   padding: .5em;
+   border: 1px solid #ccc;  
+   margin: 4em;
+   display: none;
+}

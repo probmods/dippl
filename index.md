@@ -1,7 +1,10 @@
 ---
 layout: default
-title: Probabilistic Programming Languages
 ---
+
+<div class="page-header">
+  <h1>Probabilistic Programming Languages</h1>
+</div>
 
 These are notes from the [ESSLLI 2014](http://www.esslli2014.info) class on Probabilistic Programming Languages, by Noah D. Goodman and Andreas Stuhlmueller.
 

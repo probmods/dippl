@@ -12,6 +12,7 @@
     "**/.*"
   ],
   "dependencies": {
-    "paper": "~0.9.18"
+    "paper": "~0.9.18",
+    "jquery-autosize": "~1.18.9"
   }
 }
