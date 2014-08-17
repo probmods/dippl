@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: default
 title: Particle Filtering
 description: Simple parsing models. Sequential Monte Carlo techniques.
 ---

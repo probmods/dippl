@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: default
 title: Enumeration and Dynamic Programming
 description: Models with nested queries. Exact inference by enumeration with and without caching.
 ---

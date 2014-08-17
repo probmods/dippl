@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: default
 title: Implementing randomness with coroutines and continuations
 description: Coroutines, continuations, CPS, etc.
 ---
