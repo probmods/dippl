@@ -98,7 +98,7 @@ A function is **tail-recursive** when the recursive call happens as the final ac
 
 Continuation-passing style is useful because it allows us to manipulate the execution of the program in ways that would otherwise be difficult. For example, we can use CPS to implement exception handling.
 
-Let's look at our `cpsFactorial` again. Suppose we want to build in error handling for the case when 
+Let's look at `cpsFactorial` again. Suppose we want to throw an error when `n < 0`. By "throw an error", we mean that we stop whatever computations we would have done next and instead pass control to an error handler. This is easy in continuation-passing style: since there is no implicit stack -- i.e. no computations waiting to be performed -- all we have to do is call an error continuation.
 
 ~~~~
 var totalCpsFactorial = function(k, err, n) {
@@ -122,13 +122,52 @@ totalCpsFactorial(print, printError, 5)
 totalCpsFactorial(print, printError, -1)
 ~~~~
 
+
 ## Continuation-passing transform
 
-continuation-passing transform for the lambda calculus:
+Program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants:
 
-- function def
-- function application
-- variables
+Function expressions take an additional argument, the continuation `k`:
+
+~~~~
+// Before CPS
+function(x, y, ...){
+  // body
+}
+
+// After CPS
+function(k, x, y, ...){
+  var _return = k;
+  // cpsTransform(body, "k")
+}
+~~~~
+
+Function applications are sequentialized---we first evaluate the operator and pass it to a function; this function evaluates the first argument and passes it to a function; that function evaluates the next argument, etc, until we have evaluated operator and operands and can apply operator to operands, adding in an additional continuation argument `k`:
+
+~~~~
+// Before CPS
+f(x, y, ...)
+
+// After CPS (with top-level continuation k)
+(function (_s0) {
+    (function (_s1) {
+        (function (_s2) {
+            _s0(k, _s1, _s2);
+        }(y));
+    }(x));
+}(f));
+~~~~
+
+Constants get passed to the current continuation:
+
+~~~~
+// Before CPS:
+12
+
+// After CPS (with top-level continuation k)
+k(12)
+~~~~
+
 
 ## CPS transform in action
 
