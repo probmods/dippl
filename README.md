@@ -3,7 +3,7 @@ esslli2014
 
 ESSLLI 2014 Probabilistic programming languages course
 
-[Webppl](https://github.com/probmods/webppl) is included as a submodule.
+[WebPPL](https://github.com/probmods/webppl) is included as a submodule.
 
 Installation:
 
@@ -16,7 +16,7 @@ Installation:
 
 Run local webserver:
 
-    jekyll serve --watch --baseurl ""
+    jekyll serve --watch
 
 Pull upstream changes to repo:
 
