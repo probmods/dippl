@@ -154,3 +154,18 @@ textarea#editorMarkdown {
    margin: 4em;
    display: none;
 }
+
+
+/* CPS form */
+
+div#cpsTransform textarea {
+   width: 100%;
+   min-height: 50px;
+   border: 1px solid #ccc;
+   border-radius: 4px;
+   padding: .5em;
+   background-color: #fafafa;
+   margin: 0.5em 0.5em 0.5em 0;
+   font-size: 13px;
+   font-family: monospace;
+}

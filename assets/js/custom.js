@@ -226,3 +226,25 @@ function loadEditor(){
 }
 
 $(loadEditor);
+
+
+// CPS form
+
+function updateCpsForm(){
+  try {
+    var cpsCode = webppl.cps($("#cpsInput").val());
+    $("#cpsOutput").val(cpsCode);
+  } catch (err) {
+  }
+  $("#cpsOutput").trigger('autosize.resize');
+}
+
+function setupCpsForm(){
+  $('#cpsInput').autosize();
+  $('#cpsOutput').autosize();
+  $('#cpsInput').bind('input propertychange', updateCpsForm);
+  $('#cpsInput').change();
+  updateCpsForm();
+}
+
+$(setupCpsForm);

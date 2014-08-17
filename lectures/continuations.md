@@ -131,3 +131,8 @@ continuation-passing transform for the lambda calculus:
 - variables
 
 interactive form that applies our transform to webppl program (auto-update)
+
+<div id="cpsTransform">
+    <textarea id="cpsInput">1 + 2</textarea>
+    <textarea id="cpsOutput"></textarea>
+</div>

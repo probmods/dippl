@@ -13,4 +13,4 @@ title: Editor
 </div>
 
 <textarea id="editorMarkdown">
-</div>
+</textarea>
