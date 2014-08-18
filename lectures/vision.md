@@ -15,30 +15,6 @@ var y2 = randomInteger(200);
 myDraw.line(x1, y1, x2, y2);
 ~~~~
 
-Loading an image (synchronously):
-
-~~~~
-var myDraw = Draw(200, 200, true);
-loadImage(myDraw, "/esslli2014/assets/img/the_scream.jpg");
-~~~~
-
-Computing the distance between two images:
-
-~~~~
-var imageCanvas = Draw(200, 200, true);
-loadImage(imageCanvas, "/esslli2014/assets/img/the_scream.jpg")
-
-var lineCanvas = Draw(200, 200, true);
-loadImage(lineCanvas, "/esslli2014/assets/img/the_scream.jpg")
-var x1 = randomInteger(200);
-var y1 = randomInteger(200);    
-var x2 = randomInteger(200);
-var y2 = randomInteger(200);        
-lineCanvas.line(x1, y1, x2, y2);
-
-imageCanvas.distance(lineCanvas);
-~~~~
-
 Drawing many lines:
 
 ~~~~
@@ -56,18 +32,49 @@ var makeLines = function(n, xs){
 var drawLines = function(lines){
   var line = lines[0];
   myDraw.line(line[0], line[1], line[2], line[3]);
-  return (lines.length == 1) ? "done" : drawLines(lines.slice(1));
+  if (lines.length > 1) {
+    drawLines(lines.slice(1));
+  }
 }
 
-var lines = makeLines(100, []);
+var lines = makeLines(20, []);
 
 drawLines(lines);
 ~~~~
 
-Inferring lines that match an image:
+Loading images:
+
+~~~~
+var myDraw1 = Draw(200, 200, true);
+loadImage(myDraw1, "/esslli2014/assets/img/the_scream.jpg");
+
+var myDraw2 = Draw(200, 200, true);
+loadImage(myDraw2, "/esslli2014/assets/img/box.png");
+~~~~
+
+Computing the pixel-by-pixel distance between two images:
+
+~~~~
+var myDraw1 = Draw(200, 200, false);
+loadImage(myDraw1, "/esslli2014/assets/img/the_scream.jpg");
+
+var myDraw2 = Draw(200, 200, false);
+loadImage(myDraw2, "/esslli2014/assets/img/box.png");
+
+myDraw1.distance(myDraw2);
+~~~~
+
+Target image:
 
 ~~~~
 var targetImage = Draw(50, 50, true);
+loadImage(targetImage, "/esslli2014/assets/img/box.png")
+~~~~
+
+Inferring lines that match the target image:
+
+~~~~
+var targetImage = Draw(50, 50, false);
 loadImage(targetImage, "/esslli2014/assets/img/box.png")
 
 var drawLines = function(drawObj, lines){
