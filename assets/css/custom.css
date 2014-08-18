@@ -181,3 +181,8 @@ svg.barChart {
   width: 590px;
   height: 340px;
 }
+
+rect.dimple-bar {
+  fill: #357594;
+  stroke: #224E61;
+}
