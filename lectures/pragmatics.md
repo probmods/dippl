@@ -8,12 +8,12 @@ We start with a literal listener: a Bayesian agent who updates her prior beliefs
 
 ~~~
 var literalListener = function(utterance) {
-    Enumerate(function(){
-              var world = worldPrior()
-              var m = meaning(utterance, world)
-              factor(m?0:-Infinity)
-              return world
-              }, 100)
+  Enumerate(function(){
+    var world = worldPrior()
+    var m = meaning(utterance, world)
+    factor(m?0:-Infinity)
+    return world
+  }, 100)
 }
 ~~~
 
@@ -21,23 +21,23 @@ To flesh out this model, we need the `worldPrior`, the `utterancePrior`, and the
 
 ~~~
 var worldPrior = function() {
-    var num_nice_people = randomInteger(4) //3 people.. 0-3 can be nice.
-    return num_nice_people
+  var num_nice_people = randomInteger(4) //3 people.. 0-3 can be nice.
+  return num_nice_people
 }
 
 var utterancePrior = function() {
-    var utterances = ["some of the people are nice",
-                      "all of the people are nice",
-                      "none of the people are nice"]
-    var i = randomInteger(utterances.length)
-    return utterances[i]
+  var utterances = ["some of the people are nice",
+                    "all of the people are nice",
+                    "none of the people are nice"]
+  var i = randomInteger(utterances.length)
+  return utterances[i]
 }
 
 var meaning = function(utt,world) {
-    return  utt=="some of the people are nice"? world>0 :
-            utt=="all of the people are nice"? world==3 :
-            utt=="none of the people are nice"? world==0 :
-            true
+  return utt=="some of the people are nice"? world>0 :
+         utt=="all of the people are nice"? world==3 :
+         utt=="none of the people are nice"? world==0 :
+         true
 }
 
 print(literalListener("some of the people are nice"))
@@ -49,19 +49,19 @@ We can move to a more Gricean listener who assumes that the speaker has chosen a
 
 ~~~
 var speaker = function(world) {
-    Enumerate(function(){
-              var utterance = utterancePrior()
-              factor(world == sample(literalListener(utterance)) ?0:-Infinity)
-              return utterance
-              },100)
+  Enumerate(function(){
+    var utterance = utterancePrior()
+    factor(world == sample(literalListener(utterance)) ?0:-Infinity)
+    return utterance
+  }, 100)
 }
 
 var listener = function(utterance) {
-    Enumerate(function(){
-              var world = worldPrior()
-              factor(utterance == sample(speaker(world)) ?0:-Infinity)
-              return world
-              },100)
+  Enumerate(function(){
+    var world = worldPrior()
+    factor(utterance == sample(speaker(world)) ?0:-Infinity)
+    return world
+  }, 100)
 }
 
 print(listener("some of the people are nice"))
@@ -82,21 +82,21 @@ The search space in `speaker` and `literalListener` is needlessly big because th
 
 ~~~
 var speaker = function(world) {
-    Enumerate(function(){
-              var utterance = utterancePrior()
-              var L = literalListener(utterance)
-              factor(L.score(world))
-              return utterance
-              },100)
+  Enumerate(function(){
+    var utterance = utterancePrior()
+    var L = literalListener(utterance)
+    factor(L.score(world))
+    return utterance
+  }, 100)
 }
 
 var listener = function(utterance) {
-    Enumerate(function(){
-              var world = worldPrior()
-              var S = speaker(world)
-              factor(S.score(utterance))
-              return world
-              },100)
+  Enumerate(function(){
+    var world = worldPrior()
+    var S = speaker(world)
+    factor(S.score(utterance))
+    return world
+  }, 100)
 }
 ~~~
 
@@ -104,31 +104,31 @@ var listener = function(utterance) {
 
 ~~~
 var literalListener = cache(function(utterance) {
-    Enumerate(function(){
-              var world = worldPrior()
-              var m = meaning(utterance, world)
-              factor(m?0:-Infinity)
-              return world
-              }, 100)
+  Enumerate(function(){
+    var world = worldPrior()
+    var m = meaning(utterance, world)
+    factor(m?0:-Infinity)
+    return world
+  }, 100)
 })
 
 
 var speaker = cache(function(world) {
-    Enumerate(function(){
-              var utterance = utterancePrior()
-              var L = literalListener(utterance)
-              factor(L.score(world))
-              return utterance
-              },100)
+  Enumerate(function(){
+    var utterance = utterancePrior()
+    var L = literalListener(utterance)
+    factor(L.score(world))
+    return utterance
+  }, 100)
 })
 
 var listener = function(utterance) {
-    Enumerate(function(){
-              var world = worldPrior()
-              var S = speaker(world)
-              factor(S.score(utterance))
-              return world
-              },100)
+  Enumerate(function(){
+    var world = worldPrior()
+    var S = speaker(world)
+    factor(S.score(utterance))
+    return world
+  }, 100)
 }
 ~~~
 
@@ -142,101 +142,101 @@ What if we want more complex worlds, and don't want to hard code the meaning of 
 
 ~~~
 var makeObj = function(name) {
-    return {name: name, blond: flip(0.5), nice: flip(0.5)}
+  return {name: name, blond: flip(0.5), nice: flip(0.5)}
 }
 
 var worldPrior = function(objs) {
-    return [makeObj("Bob"), makeObj("Bill"), makeObj("Alice")]
+  return [makeObj("Bob"), makeObj("Bill"), makeObj("Alice")]
 }
 
 var lexical_meaning = function(word, world) {
-    return (word=="blond")? {sem: function(obj){return obj.blond},
-                             syn: ['L', 'NP', 'S']} :
-    (word=="nice")? {sem: function(obj){return obj.nice},
-                     syn: ['L', 'NP', 'S']} :
-    (word == "Bob")? {sem:find(world, function(obj){return obj.name=="Bob"}),
-                      syn: 'NP'} :
-    (word=="some")? {sem: function(P){return function(Q){return filter(filter(world, P), Q).length>0}},
-                     syn: ['R', ['L', 'NP', 'S'], ['R', ['L', 'NP', 'S'], 'S']] } :
-    (word=="all")? {sem: function(P){return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
-                    syn: ['R', ['L', 'NP', 'S'], ['R', ['L', 'NP', 'S'], 'S']] } :
-    {sem: undefined, syn: ''} //any other words are assumed to be vacuous, they'll get deleted.
-            //TODO other words...
+  return (word=="blond")? {sem: function(obj){return obj.blond},
+                           syn: ['L', 'NP', 'S']} :
+  (word=="nice")? {sem: function(obj){return obj.nice},
+                   syn: ['L', 'NP', 'S']} :
+  (word == "Bob")? {sem:find(world, function(obj){return obj.name=="Bob"}),
+                    syn: 'NP'} :
+  (word=="some")? {sem: function(P){return function(Q){return filter(filter(world, P), Q).length>0}},
+                   syn: ['R', ['L', 'NP', 'S'], ['R', ['L', 'NP', 'S'], 'S']] } :
+  (word=="all")? {sem: function(P){return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
+                  syn: ['R', ['L', 'NP', 'S'], ['R', ['L', 'NP', 'S'], 'S']] } :
+  {sem: undefined, syn: ''} //any other words are assumed to be vacuous, they'll get deleted.
+  //TODO other words...
 }
 
 var neg = function(Q){return function(x){return !Q(x)}}
 
 var syntaxMatch = function(s,t) {
-    return !(Array.isArray(s)) ? s==t :
-    s.length==0? t.length==0 : (syntaxMatch(s[0], t[0]) & syntaxMatch(s.slice(1),t.slice(1)))
+  return !(Array.isArray(s)) ? s==t :
+  s.length==0? t.length==0 : (syntaxMatch(s[0], t[0]) & syntaxMatch(s.slice(1),t.slice(1)))
 }
 
 var combine_meaning = function(meanings) {
-    var i = randomInteger(meanings.length)
-    var s = meanings[i].syn
-    if(Array.isArray(s)){ //a functor
-       if(s[0] == 'L') {//try to apply left
-            if(syntaxMatch(s[1],meanings[i-1].syn)){
-                var f = meanings[i].sem
-                var a = meanings[i-1].sem
-                var newmeaning = {sem: f(a), syn: s[2]}
-                return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
-                }
-        } else if(s[0] == 'R') {
-            if(syntaxMatch(s[1],meanings[i+1].syn)){
-                var f = meanings[i].sem
-                var a = meanings[i+1].sem
-                var newmeaning = {sem: f(a), syn: s[2]}
-                return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
-            }
-        }
+  var i = randomInteger(meanings.length)
+  var s = meanings[i].syn
+  if(Array.isArray(s)){ //a functor
+    if(s[0] == 'L') {//try to apply left
+      if(syntaxMatch(s[1],meanings[i-1].syn)){
+        var f = meanings[i].sem
+        var a = meanings[i-1].sem
+        var newmeaning = {sem: f(a), syn: s[2]}
+        return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
+      }
+    } else if(s[0] == 'R') {
+      if(syntaxMatch(s[1],meanings[i+1].syn)){
+        var f = meanings[i].sem
+        var a = meanings[i+1].sem
+        var newmeaning = {sem: f(a), syn: s[2]}
+        return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
+      }
     }
-    return meanings
+  }
+  return meanings
 }
 
 var combine_meanings = function(meanings){
-    return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
+  return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
 }
 
 var meaning = function(utterance, world) {
-    return combine_meanings( filter(map(utterance.split(" "),
-                                        function(w){return lexical_meaning(w, world)}),
-                                    function(m){return !(m.sem==undefined)}))
+  return combine_meanings( filter(map(utterance.split(" "),
+                                      function(w){return lexical_meaning(w, world)}),
+                                  function(m){return !(m.sem==undefined)}))
 }
 
 var utterancePrior = function() {
-    var utterances = ["some of the blond people are nice",
-                      "all of the blond people are nice",
-                      "none of the blond people are nice"]
-    var i = randomInteger(utterances.length)
-    return utterances[i]
+  var utterances = ["some of the blond people are nice",
+                    "all of the blond people are nice",
+                    "none of the blond people are nice"]
+  var i = randomInteger(utterances.length)
+  return utterances[i]
 }
 
 var literalListener = cache(function(utterance) {
-    Enumerate(function(){
-              var world = worldPrior()
-              var m = meaning(utterance, world)
-              factor(m?0:-Infinity)
-              return world
-              }, 100)
+  Enumerate(function(){
+    var world = worldPrior()
+    var m = meaning(utterance, world)
+    factor(m?0:-Infinity)
+    return world
+  }, 100)
 })
 
 var speaker = cache(function(world) {
-    Enumerate(function(){
-              var utterance = utterancePrior()
-              var L = literalListener(utterance)
-              factor(L.score(world))
-              return utterance
-              },100)
+  Enumerate(function(){
+    var utterance = utterancePrior()
+    var L = literalListener(utterance)
+    factor(L.score(world))
+    return utterance
+  }, 100)
 })
 
 var listener = function(utterance) {
-    Enumerate(function(){
-              var world = worldPrior()
-              var S = speaker(world)
-              factor(S.score(utterance))
-              return world
-              },100)
+  Enumerate(function(){
+    var world = worldPrior()
+    var S = speaker(world)
+    factor(S.score(utterance))
+    return world
+  }, 100)
 }
 
 listener("some of the blond people are nice")
