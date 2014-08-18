@@ -28,11 +28,18 @@ function sample(erp, params) {
   return erp.support()[0]
 }
 
-function Marginalize(comp) {
+function ExploreFirst(comp) {
   return comp()
 }
 
-Marginalize(binomial)
+var binomial = function(){
+    var a = sample(bernoulliERP, [0.5])
+    var b = sample(bernoulliERP, [0.5])
+    var c = sample(bernoulliERP, [0.5])
+    return a + b + c
+}
+
+ExploreFirst(binomial)
 ~~~
 
 This set of functions does indeed coroutine back and forth between the binomial computation and the 'randomness handling' functions. 
@@ -176,7 +183,7 @@ unexploredFutures = []
 
 function sample(cont, erp, params) {
   var sup = erp.support(params)
-  sup.foreach(function(s){unexploredFutures.push(function(){cont(s)})})
+  sup.forEach(function(s){unexploredFutures.push(function(){cont(s)})})
   unexploredFutures.pop()()
 }
 
@@ -193,6 +200,10 @@ function Explore(cpsComp) {
   cpsComp(exit)
   return returnVals
 }
+
+var CPSbinomial = function (k) {
+  sample(function (a) {k(a);}, bernoulliERP, [0.5]);
+} //FIXME
     
 Explore(CPSbinomial)
 ~~~
@@ -207,7 +218,7 @@ currScore = 0
 
 function sample(cont, erp, params) {
   var sup = erp.support(params)
-  sup.foreach(function(s){
+  sup.forEach(function(s){
   var newscore = currScore + erp.score(s,params);
   unexploredFutures.push({k: function(){cont(s)}, score: newscore})})
   runNext()
@@ -225,12 +236,16 @@ function exit(val) {
   if( unexploredFutures.length > 0 ) {runNext()}
 }
 
-function Marginalize(cpsComp) {
+function ExploreWeighted(cpsComp) {
   cpsComp(exit)
   return returnHist
 }
 
-Marginalize(CPSbinomial)
+var CPSbinomial = function (k) {
+  sample(function (a) {k(a);}, bernoulliERP, [0.5]);
+} //FIXME
+
+ExploreWeighted(CPSbinomial)
 ~~~
 
 Finally we need to deal with factor statements -- easy because they simply add a number to the current score -- and renormalize the final distribution.
@@ -245,9 +260,9 @@ function factor(s) { currScore += s}
 
 function sample(cont, erp, params) {
   var sup = erp.support(params)
-  sup.foreach(function(s){
-  var newscore = currScore + erp.score(s,params);
-  unexploredFutures.push({k: function(){cont(s)}, score: newscore})})
+  sup.forEach(function(s){
+    var newscore = currScore + erp.score(s,params);
+    unexploredFutures.push({k: function(){cont(s)}, score: newscore})})
   runNext()
 }
 
@@ -276,6 +291,10 @@ function Marginalize(cpsComp) {
   }
   return returnHist
 }
+
+var CPSbinomial = function (k) {
+  sample(function (a) {k(a);}, bernoulliERP, [0.5]);
+} //FIXME
 
 Marginalize(CPSbinomial)
 ~~~
