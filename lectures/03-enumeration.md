@@ -4,9 +4,11 @@ title: Exploring the executions of a random computation
 description: Coroutines, continuations, CPS, etc.
 ---
 
-All inference techniques involve exploring the space of executions of a random computation in one way or another.
+All inference techniques involve exploring the space of executions of a random computation in one way or another. In this section we consider how the many paths through a computation can be explored, aiming for an implementation that computes the marginal distribution of a computation by *enumerating* all possible executions.
 
 # Exploring a random computation
+
+Consider the simple binomial example from [earlier](WebPPL.html).
 
 ~~~
 var binomial = function(){
@@ -19,7 +21,7 @@ var binomial = function(){
 Enumerate(binomial)
 ~~~
 
-We can view `sample` and `factor` as coroutines for exploring a computation, which are installed by an inference operator.
+We can view `sample` and `factor` as simple 'side-computations' for exploring the main `binomial` computation. To make this concrete, let's implement `sample` as an ordinary function that always choose the first element of the support of any random choice. We will kick-off this exploration by calling `ExploreFirst`, which simply calls the computation.
 
 ~~~
 // language: javascript
@@ -42,8 +44,8 @@ var binomial = function(){
 ExploreFirst(binomial)
 ~~~
 
-This set of functions does indeed coroutine back and forth between the binomial computation and the 'randomness handling' functions. 
-However, it is only able to explore a single path through the computation.... What we would like to be able to do is 'return' from the `sample` function *multiple times* with different values, to se what will happen. We can't do this by an ordinary function return; we need an explicit handle to the return context, that is we need to reify the *future of the computation* from the return point. Such a reified computation future is called a **continuation**.
+This set of functions does indeed go back and forth between the binomial computation and the 'randomness handling' functions to explore a possible execution of the program. 
+However, it is only able to explore a single path through the computation.... We would like to be able to 'return' from the `sample` function *multiple times* with different values. If we could do so, we could try each value from the support to see what return values ultimately come from the computation. We can't do this by an ordinary function return, however; we need an explicit handle to the return context, that is we need to reify the *future of the computation* from the point that `sample` is called. Such a reified computation future is called a **continuation**.
 
 # Continuations
 
@@ -71,7 +73,7 @@ var cpsSquare = function(k, x) {
 cpsSquare(print, 3)
 ~~~~
 
-Now, when we get to `return k(x * x)`, the variable `k` contains the function `print`, which is "what happens next" in the sense that we pass the value of `x * x` to this function instead of returning.
+Now, when we get to `k(x * x)`, the variable `k` contains the function `print`, which is "what happens next" in the sense that we pass the value of `x * x` to this function instead of returning.
 
 It is helpful to think that, in continuation-passing style, functions never return -- they only ever call continuations with the values that they would otherwise have returned.
 
@@ -298,6 +300,8 @@ var CPSbinomial = function (k) {
 
 Marginalize(CPSbinomial)
 ~~~
+
+We can now do marginal inference by enumeration of an arbitrary (finite) computation! As long as we're willing to write it in CPS... which can be painful. Fortunately CPS can be done automatically, to relieve the programmer of the burden, while still enabling the coroutine method.
 
 
 # Continuation-passing transform
