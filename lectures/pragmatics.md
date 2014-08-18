@@ -85,7 +85,7 @@ var speaker = function(world) {
   Enumerate(function(){
     var utterance = utterancePrior()
     var L = literalListener(utterance)
-    factor(L.score(world))
+    factor(L.score([],world))
     return utterance
   })
 }
@@ -94,10 +94,12 @@ var listener = function(utterance) {
   Enumerate(function(){
     var world = worldPrior()
     var S = speaker(world)
-    factor(S.score(utterance))
+    factor(S.score([],utterance))
     return world
   })
 }
+
+print(listener("some of the people are nice"))
 ~~~
 
 
@@ -118,7 +120,7 @@ var speaker = cache(function(world) {
   Enumerate(function(){
     var utterance = utterancePrior()
     var L = literalListener(utterance)
-    factor(L.score(world))
+    factor(L.score([],world))
     return utterance
   })
 })
@@ -127,10 +129,12 @@ var listener = function(utterance) {
   Enumerate(function(){
     var world = worldPrior()
     var S = speaker(world)
-    factor(S.score(utterance))
+    factor(S.score([],utterance))
     return world
   })
 }
+
+print(listener("some of the people are nice"))
 ~~~
 
 
