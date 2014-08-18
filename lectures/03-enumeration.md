@@ -170,6 +170,18 @@ totalCpsFactorial(print, printError, -1)
 As a final example, let's write our earlier binomial function in CPS:
 
 ~~~
+// Standard version:
+
+var binomial = function(){
+    var a = sample(bernoulliERP, [0.5])
+    var b = sample(bernoulliERP, [0.5])
+    var c = sample(bernoulliERP, [0.5])
+    return a + b + c
+}
+
+
+// CPS version:
+
 var cpsSample = function(k, erp, params){
   return k(sample(erp, params))
 }
