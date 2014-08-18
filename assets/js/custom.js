@@ -172,7 +172,9 @@ function setupCodeBox(element){
 
   var showResult = function(x){
     resultDiv.show();
-    resultDiv.text(resultDiv.text() + x);
+    if (x !== undefined) {
+      resultDiv.append(document.createTextNode(x));
+    }
   };
 
   var runButton = $(
