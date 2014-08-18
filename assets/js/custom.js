@@ -172,7 +172,7 @@ function setupCodeBox(element){
 
   var showResult = function(x){
     resultDiv.show();
-    resultDiv.text(x);
+    resultDiv.text(resultDiv.text() + x);
   };
 
   var runButton = $(
@@ -190,9 +190,9 @@ function setupCodeBox(element){
         try {
           var compiled = webppl.compile(cm.getValue(), true);
           eval.call(window, compiled);
-          // } catch (err) {
-          //   showResult(err.message);
-          //   throw err;
+        } catch (err) {
+          showResult(err.stack);
+          throw err;
         } finally {
           // topK = oldTopK;
           // activeCodeBox = oldActiveCodeBox;
