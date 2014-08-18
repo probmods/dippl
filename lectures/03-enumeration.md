@@ -174,7 +174,7 @@ var CPSbinomial = function(){...}//TODO
 
 # Coroutines: functions that receive continuations
 
-Now we'll re-write the marginalization code above so that the `sample` coroutine gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way.
+Now we'll re-write the code above so that the `sample` function gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way. This pattern: a function that receives the continuation (often called a 'callback') from the main computation and returns only by calling the continuation is called a *coroutine*.
 
 ~~~
 // language: javascript
@@ -300,7 +300,7 @@ Marginalize(CPSbinomial)
 ~~~
 
 
-## Continuation-passing transform
+# Continuation-passing transform
 
 Program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants:
 
@@ -356,6 +356,17 @@ The auto-updating form below shows the transform that we actually use for WebPPL
     <textarea id="cpsInput">1 + 2</textarea>
     <textarea id="cpsOutput"></textarea>
 </div>
+
+
+
+# Best-first enumeration
+
+Above we have maintained a first-in-last-out queue of continuations; this results in a depth-first search strategy over program executions. Often a more useful approach is to enumerate the highest priority continuation first, based on some heuristic notion of priority. For instance, using the score-so-far as priority results in a most-likely-first strategy. We can achieve this by simply changing the above code to use a priority queue (instead of `push` and `pop`).
+ 
+
+# Caching
+
+Because the return value from `Enumerate(foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution. 
 
 
 
