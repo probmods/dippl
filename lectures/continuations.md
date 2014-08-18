@@ -137,28 +137,28 @@ function(x, y, ...){
 
 // After CPS
 function(k, x, y, ...){
-  var _return = k;
   // cpsTransform(body, "k")
 }
 ~~~~
 
-Function applications are sequentialized---we first evaluate the operator and pass it to a function; this function evaluates the first argument and passes it to a function; that function evaluates the next argument, etc, until we have evaluated operator and operands and can apply operator to operands, adding in an additional continuation argument `k`:
+Function applications are sequentialized---we first evaluate the (cps-transformed) operator and pass it to a (continuation) function; this function evaluates the (cps-transformed) argument and passes it to a (continuation) function; that function applies operator to operands, passing the current top-level continuation as an additional continuation argument `k`:
 
 ~~~~
 // Before CPS
-f(x, y, ...)
+f(x)
 
-// After CPS (with top-level continuation k)
-(function (_s0) {
-    (function (_s1) {
-        (function (_s2) {
-            _s0(k, _s1, _s2);
-        }(y));
-    }(x));
-}(f));
+// After CPS (when f and x are variables):
+f(k, x)
+
+// After CPS (when f and x are compound expressions):
+cpsTransform(f, function(_f){
+  cpsTransform(x, function(_x){
+    _f(k, _x)
+  })
+})
 ~~~~
 
-Constants get passed to the current continuation:
+Constant values get passed to the current continuation:
 
 ~~~~
 // Before CPS:
@@ -167,6 +167,8 @@ Constants get passed to the current continuation:
 // After CPS (with top-level continuation k)
 k(12)
 ~~~~
+
+This is only a sketch. For a more detailed exposition, see [How to compile with continuations](http://matt.might.net/articles/cps-conversion/).
 
 
 ## CPS transform in action
