@@ -80,7 +80,9 @@ loadImage(targetImage, "/esslli2014/assets/img/box.png")
 var drawLines = function(drawObj, lines){
   var line = lines[0];
   drawObj.line(line[0], line[1], line[2], line[3]);
-  return (lines.length == 1) ? "done" : drawLines(drawObj, lines.slice(1));
+  if (lines.length > 1) {
+    drawLines(drawObj, lines.slice(1));
+  }
 }
 
 var makeLines = function(n, lines, prevScore){
