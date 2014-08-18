@@ -16,7 +16,7 @@ function euclideanDistance(v1, v2){
 };
 
 function isErp(x){
-  return ((x.score != undefined) && (x.sample != undefined));
+  return (x && (x.score != undefined) && (x.sample != undefined));
 }
 
 function isErpWithSupport(x){
@@ -178,6 +178,14 @@ function setupCodeBox(element){
       extraKeys: {"Tab": "indentAuto"}
     });
 
+  var getLanguage = function(){
+    if (cm.getValue().split("\n")[0] == "// language: javascript") {
+      return "javascript";
+    } else {
+      return "webppl";
+    }
+  };
+
   var resultDiv = $('<div/>',
                     { "id": "result_" + codeBoxCount,
                       "class": "resultDiv" });
@@ -189,29 +197,47 @@ function setupCodeBox(element){
     }
   };
 
+  var runWebPPL = function(){
+    var oldTopK = topK;
+    var oldActiveCodeBox = activeCodeBox;
+    topK = showResult;
+    activeCodeBox = $element;
+    activeCodeBox.parent().find("canvas").remove();
+    activeCodeBox.parent().find(".resultDiv").text("");
+    try {
+      var compiled = webppl.compile(cm.getValue(), true);
+      eval.call(window, compiled);
+    } catch (err) {
+      resultDiv.show();
+      resultDiv.append(document.createTextNode((err.stack)));
+      throw err;
+    } finally {
+      // topK = oldTopK;
+      // activeCodeBox = oldActiveCodeBox;
+    }
+  };
+
+  var runJS = function(){
+    activeCodeBox = $element;
+    activeCodeBox.parent().find("canvas").remove();
+    activeCodeBox.parent().find(".resultDiv").text("");
+    try {
+      var result = eval.call(window, cm.getValue());
+      showResult(result);
+    } catch (err) {
+      resultDiv.show();
+      resultDiv.append(document.createTextNode((err.stack)));
+      throw err;
+    }
+  };
+
   var runButton = $(
     '<button/>', {
       "text": "run",
       "id": 'run_' + codeBoxCount,
       "class": 'runButton',
-      "click": function () {
-        var oldTopK = topK;
-        var oldActiveCodeBox = activeCodeBox;
-        topK = showResult;
-        activeCodeBox = $element;
-        activeCodeBox.parent().find("canvas").remove();
-        activeCodeBox.parent().find(".resultDiv").text("");
-        try {
-          var compiled = webppl.compile(cm.getValue(), true);
-          eval.call(window, compiled);
-        } catch (err) {
-          resultDiv.show();
-          resultDiv.append(document.createTextNode((err.stack)));
-          throw err;
-        } finally {
-          // topK = oldTopK;
-          // activeCodeBox = oldActiveCodeBox;
-        }
+      "click": function(){
+        return (getLanguage() == "javascript") ? runJS() : runWebPPL();
       }
     });
 
