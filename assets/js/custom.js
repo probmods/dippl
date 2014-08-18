@@ -172,7 +172,9 @@ function setupCodeBox(element){
 
   var showResult = function(x){
     resultDiv.show();
-    resultDiv.text(resultDiv.text() + x);
+    if (x !== undefined) {
+      resultDiv.append(document.createTextNode(JSON.stringify(x)));
+    }
   };
 
   var runButton = $(
@@ -191,7 +193,8 @@ function setupCodeBox(element){
           var compiled = webppl.compile(cm.getValue(), true);
           eval.call(window, compiled);
         } catch (err) {
-          showResult(err.stack);
+          resultDiv.show();
+          resultDiv.append(document.createTextNode((err.stack)));
           throw err;
         } finally {
           // topK = oldTopK;
