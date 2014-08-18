@@ -26,7 +26,7 @@ We can view `sample` and `factor` as simple 'side-computations' for exploring th
 ~~~
 // language: javascript
 
-function sample(erp, params) {
+function sampleFirst(erp, params) {
   return erp.support()[0]
 }
 
@@ -35,9 +35,9 @@ function ExploreFirst(comp) {
 }
 
 var binomial = function(){
-    var a = sample(bernoulliERP, [0.5])
-    var b = sample(bernoulliERP, [0.5])
-    var c = sample(bernoulliERP, [0.5])
+    var a = sampleFirst(bernoulliERP, [0.5])
+    var b = sampleFirst(bernoulliERP, [0.5])
+    var c = sampleFirst(bernoulliERP, [0.5])
     return a + b + c
 }
 
@@ -170,7 +170,27 @@ totalCpsFactorial(print, printError, -1)
 As a final example, let's write our earlier binomial function in CPS:
 
 ~~~
-var CPSbinomial = function(){...}//TODO
+var cpsSample = function(k, erp, params){
+  return k(sample(erp, params))
+}
+
+var cpsBinomial = function(k){
+  cpsSample(
+    function(a){
+      cpsSample(
+        function(b){
+          cpsSample(
+            function(c){
+              k(a + b + c);
+            },
+            bernoulliERP, [0.5])
+        },
+        bernoulliERP, [0.5])
+    }, 
+    bernoulliERP, [0.5])
+}
+
+cpsBinomial(print)
 ~~~
 
 
@@ -203,11 +223,23 @@ function Explore(cpsComp) {
   return returnVals
 }
 
-var CPSbinomial = function (k) {
-  sample(function (a) {k(a);}, bernoulliERP, [0.5]);
-} //FIXME
+function cpsBinomial(k){
+  sample(
+    function(a){
+      sample(
+        function(b){
+          sample(
+            function(c){
+              k(a + b + c);
+            },
+            bernoulliERP, [0.5])
+        },
+        bernoulliERP, [0.5])
+    }, 
+    bernoulliERP, [0.5])
+}
     
-Explore(CPSbinomial)
+Explore(cpsBinomial)
 ~~~
 
 The above code explores all the executions of the computation, but it doesn't keep track of probabilities. We can extend it by simply adding scores to the futures, and keeping track of the score of the execution we are currently working on. Because we only care about the total probability of all paths with a given return value, we combine them into a 'histogram' mapping return values to (un-normalized) probabilities.
@@ -243,11 +275,7 @@ function ExploreWeighted(cpsComp) {
   return returnHist
 }
 
-var CPSbinomial = function (k) {
-  sample(function (a) {k(a);}, bernoulliERP, [0.5]);
-} //FIXME
-
-ExploreWeighted(CPSbinomial)
+ExploreWeighted(cpsBinomial)
 ~~~
 
 Finally we need to deal with factor statements -- easy because they simply add a number to the current score -- and renormalize the final distribution.
@@ -294,11 +322,7 @@ function Marginalize(cpsComp) {
   return returnHist
 }
 
-var CPSbinomial = function (k) {
-  sample(function (a) {k(a);}, bernoulliERP, [0.5]);
-} //FIXME
-
-Marginalize(CPSbinomial)
+Marginalize(cpsBinomial)
 ~~~
 
 We can now do marginal inference by enumeration of an arbitrary (finite) computation! As long as we're willing to write it in CPS... which can be painful. Fortunately CPS can be done automatically, to relieve the programmer of the burden, while still enabling the coroutine method.
