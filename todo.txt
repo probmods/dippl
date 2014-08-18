@@ -2,30 +2,29 @@ CPS:
 - think about smarter CPS that generates fewer garbage redexes..
 
 Inference:
-- useful display for ERPs to show results of inference. (ERP.display method?)
 - maybe implement the particle cascade just to see how it works?
 - high-level idioms for incremental factors. PCFG?
 
 Browser integration:
 - script tag compilation / execution
-- also run javascript code directly?
+* run javascript code from appropriately tagged boxes (tag in md or in first line comment?).
 
 
 
 Lectures:
 
-- go over outline, clean up lecture descriptions, move non-lectures to different list on index page.
-
-- wppl examples for first day.
-
 - foundations?
 
-- CPS: 
-  -continuation def and examples.
-  -coroutine w/ k: first do sample with call/cc, then say computation is in CPS, so it gets handed a K for exit. do multisample and save enumeration for next section.
-  -CPS ideas (andreas).
-
 - Enumeration:
+  - first simple function implementation on sample, continues on first element of support.
+  - but… want to explore multiple returns from same sample… need re-enterable “futures”.
+  - introduce continuations, with examples.
+  - show sketch of enumeration *if* sample gets K — i.e. coroutine.
+  - CPS to make K available.
+
+  - implementing enumeration for real…
+
+
   - using CPS, simple version w/o scores, with scores, priority queue
   - pragmatics example
   - caching (interpolation?)
