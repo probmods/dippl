@@ -35,17 +35,19 @@ First here is a fairly standard, 'direct', version that never explicitly represe
 ~~~
 var hmminit = function(){
   var s = init(); 
-  return [[s],[observe(s)]];
+  return {states: [s], observations: [observe(s)]};
 }
 
 var hmm = function(n) {
   var prev = (n==1) ? hmminit() : hmm(n-1)
-  var newstate = transition(prev[0][0])
+  var newstate = transition(prev.states[0])
   var newobs = observe(newstate)
-  var next = [prev[0].concat([newstate]),
-              prev[1].concat([newobs])]
+  var next = {states: prev.states.concat([newstate]),
+              observations: prev.observations.concat([newobs])}
   return next
 }
+
+hmm(4)
 ~~~
 
 We can condition on some observed states:
@@ -56,15 +58,20 @@ var trueobs = [true, true, true]
 
 print(Enumerate(function(){
   var r = hmm(2)
-  factor( arrayEq(r[1], trueobs) ? 0 : -Infinity )
-  return r[0]
+  factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )
+  return r.states
 }, 100))
+~~~
 
-//we could also do inference with a particle filter:
+We could also do inference with a particle filter (or other method):
+
+~~~
+var trueobs = [true, true, true]
+
 print(ParticleFilter(function(){
   var r = hmm(2)
-  factor( arrayEq(r[1], trueobs) ? 0 : -Infinity )
-  return r[0]
+  factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )
+  return r.states
 }, 500))
 ~~~
 
@@ -78,13 +85,16 @@ var hmm_recur = function(n, states, observations){
   var newobs = observe(newstate)
   var states = states.concat([newstate])
   var observations = observations.concat([newobs])
-  return (n==1) ? [states, observations] : hmm_recur(n-1,states,observations)
+  return (n==1) ? {states: states, observations: observations} : 
+                  hmm_recur(n-1,states,observations)
 }
 
 var hmm = function(n) {
   var s = init()
   return hmm_recur(n,[s],[observe(s)])
 }
+
+hmm(4)
 ~~~
 
 

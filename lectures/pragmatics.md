@@ -13,7 +13,7 @@ var literalListener = function(utterance) {
     var m = meaning(utterance, world)
     factor(m?0:-Infinity)
     return world
-  }, 100)
+  })
 }
 ~~~
 
@@ -53,7 +53,7 @@ var speaker = function(world) {
     var utterance = utterancePrior()
     factor(world == sample(literalListener(utterance)) ?0:-Infinity)
     return utterance
-  }, 100)
+  })
 }
 
 var listener = function(utterance) {
@@ -61,7 +61,7 @@ var listener = function(utterance) {
     var world = worldPrior()
     factor(utterance == sample(speaker(world)) ?0:-Infinity)
     return world
-  }, 100)
+  })
 }
 
 print(listener("some of the people are nice"))
@@ -87,7 +87,7 @@ var speaker = function(world) {
     var L = literalListener(utterance)
     factor(L.score(world))
     return utterance
-  }, 100)
+  })
 }
 
 var listener = function(utterance) {
@@ -96,9 +96,10 @@ var listener = function(utterance) {
     var S = speaker(world)
     factor(S.score(utterance))
     return world
-  }, 100)
+  })
 }
 ~~~
+
 
 ## Caching
 
@@ -109,7 +110,7 @@ var literalListener = cache(function(utterance) {
     var m = meaning(utterance, world)
     factor(m?0:-Infinity)
     return world
-  }, 100)
+  })
 })
 
 
@@ -119,7 +120,7 @@ var speaker = cache(function(world) {
     var L = literalListener(utterance)
     factor(L.score(world))
     return utterance
-  }, 100)
+  })
 })
 
 var listener = function(utterance) {
@@ -128,7 +129,7 @@ var listener = function(utterance) {
     var S = speaker(world)
     factor(S.score(utterance))
     return world
-  }, 100)
+  })
 }
 ~~~
 
