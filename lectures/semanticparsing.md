@@ -74,30 +74,59 @@ The lexicon is captured in a function `lexical_meaning` which looks up the meani
 
 ~~~
 var lexical_meaning = function(word, world) {
-  return (word=="blond")? {sem: function(obj){return obj.blond},
-                           syn: {dir:'L', int:'NP', out:'S'} } :
-  (word=="nice")? {sem: function(obj){return obj.nice},
-                   syn: {dir:'L', int:'NP', out:'S'} } :
-  (word == "Bob")? {sem:find(world, function(obj){return obj.name=="Bob"}),
-                    syn: 'NP' } :
-  (word=="some")? {sem: function(P){return function(Q){return filter(filter(world, P), Q).length>0}},
-                   syn: {dir:'R',
-                         int:{dir:'L', int:'NP', out:'S'},
-                         out:{dir:'R',
-                              int:{dir:'L', int:'NP', out:'S'},
-                              out:'S'}} } :
-  (word=="all")? {sem: function(P){return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
-                  syn: {dir:'R',
-                        int:{dir:'L', int:'NP', out:'S'},
-                        out:{dir:'R',
-                             int:{dir:'L', int:'NP', out:'S'},
-                             out:'S'}} } :
-  {sem: undefined, syn: ''} //any other words are assumed to be vacuous, they'll get deleted.
-  //TODO other words...
+
+  var wordMeanings = {
+    
+    "blond" : {
+      sem: function(obj){return obj.blond},
+      syn: {dir:'L', int:'NP', out:'S'} },
+    
+    "nice" : {
+      sem: function(obj){return obj.nice},
+      syn: {dir:'L', int:'NP', out:'S'} },
+    
+    "Bob" : {
+      sem: find(world, function(obj){return obj.name=="Bob"}),
+      syn: 'NP' },
+    
+    "some" : {
+      sem: function(P){
+        return function(Q){return filter(filter(world, P), Q).length>0}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} },  
+    
+    "all" : {
+      sem: function(P){
+        return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} }
+  }
+  
+  // any words not in wordMeanings are assumed to be vacuous, 
+  // they'll get deleted.
+  //
+  // TODO other words...  
+
+  var meaning = wordMeanings[word];
+  
+  if (meaning == undefined) {
+    return {sem: undefined, syn: ''}
+  } else {
+    return meaning;
+  }
+  
 }
 
-//we use this helper function to negate a predicate above:
-var neg = function(Q){return function(x){return !Q(x)}}
+// We use this helper function to negate a predicate above:
+var neg = function(Q){
+  return function(x){return !Q(x)}
+}
 ~~~
 
 Note that the `lexical_meaning` mapping could be stochastic, allowing us to capture polysemy. It can also depend on auxiliary elements of the world that play the role of semantically-free context variables.
