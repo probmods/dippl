@@ -80,7 +80,7 @@ var binomial = function(){
 
 var binomialERP = Enumerate(binomial)
 
-binomialERP
+print(binomialERP)
 ~~~
 
 The distribution on return values from `binomial()` and `sample(binomialERP)` are the same -- but `binomialERP` has already collapsed out the intermediate random choices to represent this distribution as a primitive.
@@ -92,12 +92,12 @@ var funnybinomial = function(){
     var a = sample(bernoulliERP, [0.5])
     var b = sample(bernoulliERP, [0.5])
     var c = sample(bernoulliERP, [0.5])
-    factor( (a|b) ? 0 : -10)
+    factor( (a|b) ? 0 : -2)
     return a + b + c}
 
 var funnybinomialERP = Enumerate(funnybinomial)
 
-sample(funnybinomialERP)
+print(funnybinomialERP)
 ~~~
 
 It is easier to build useful models (that, for instance, condition on data) with `factor`. But `factor` by itself doesn't do anything -- it interacts with *marginalization* functions that normalize the computation they are applied to. For this reason running a computation with `factor` in it at the top level -- that is, not inside a marginalization operator -- results in an error. Try running `funnybinomial` directly....
