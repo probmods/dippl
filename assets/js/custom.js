@@ -15,10 +15,46 @@ function euclideanDistance(v1, v2){
   return Math.sqrt(d);
 };
 
+function isErpWithSupport(x){
+  return ((x.score != undefined) && (x.support != undefined));
+}
+
 function print(k, x){
-  $(activeCodeBox.parent().find(".resultDiv")).append(
-    document.createTextNode(x + "\n"));
+  var resultDiv = $(activeCodeBox.parent().find(".resultDiv"));
+  if (isErpWithSupport(x)){
+    var params = Array.prototype.slice.call(arguments, 2);
+    var labels = x.support(params);
+    var counts = _.map(labels, function(label){return Math.exp(x.score(params, label));});
+    var resultDivSelector = "#" + resultDiv.attr('id');
+    barChart(resultDivSelector, labels, counts);
+  } else {
+    resultDiv.append(document.createTextNode(x + "\n"));
+  }
   k();
+}
+
+
+// Bar plots
+
+function barChart(containerSelector, labels, counts){
+  var svg = d3.select(containerSelector)
+    .append("svg")
+    .attr("class", "barChart");
+  var data = [];
+  for (var i=0; i<labels.length; i++){
+    data.push({
+                "Label": labels[i],
+                "Count": counts[i]
+              });
+  };
+  var chart = new dimple.chart(svg, data);
+  chart.setBounds(80, 30, 480, 250);
+  var xAxis = chart.addMeasureAxis("x", "Count");
+  xAxis.title = null;
+  var yAxis = chart.addCategoryAxis("y", "Label");
+  yAxis.title = null;
+  chart.addSeries("Count", dimple.plot.bar);
+  chart.draw();
 }
 
 
@@ -115,57 +151,59 @@ function loadImage(k, drawObject, url){
 var codeBoxCount = 0;
 
 function setupCodeBox(element){
-    var $element = $(element);
-    var $code = $element.html();
-    var $unescaped = $('<div/>').html($code).text();
+  var $element = $(element);
+  var $code = $element.html();
+  var $unescaped = $('<div/>').html($code).text();
 
-    $element.empty();
+  $element.empty();
 
-    var cm = CodeMirror(
-      element, {
-        value: $unescaped,
-        mode: 'javascript',
-        lineNumbers: false,
-        readOnly: false,
-        extraKeys: {"Tab": "indentAuto"}
-      });
+  var cm = CodeMirror(
+    element, {
+      value: $unescaped,
+      mode: 'javascript',
+      lineNumbers: false,
+      readOnly: false,
+      extraKeys: {"Tab": "indentAuto"}
+    });
 
-    var resultDiv = $('<div/>', { "class": "resultDiv" });
+  var resultDiv = $('<div/>',
+                    { "id": "result_" + codeBoxCount,
+                      "class": "resultDiv" });
 
-    var showResult = function(x){
-      resultDiv.show();
-      resultDiv.text(x);
-    };
+  var showResult = function(x){
+    resultDiv.show();
+    resultDiv.text(x);
+  };
 
-    var runButton = $(
-      '<button/>', {
-        "text": "run",
-        "id": 'run_' + codeBoxCount,
-        "class": 'runButton',
-        "click": function () {
-          var oldTopK = topK;
-          var oldActiveCodeBox = activeCodeBox;
-          topK = showResult;
-          activeCodeBox = $element;
-          activeCodeBox.parent().find("canvas").remove();
-          activeCodeBox.parent().find(".resultDiv").text("");
-          try {
-            var compiled = webppl.compile(cm.getValue(), true);
-            eval.call(window, compiled);
-            // } catch (err) {
-            //   showResult(err.message);
-            //   throw err;
-          } finally {
-            // topK = oldTopK;
-            // activeCodeBox = oldActiveCodeBox;
-          }
+  var runButton = $(
+    '<button/>', {
+      "text": "run",
+      "id": 'run_' + codeBoxCount,
+      "class": 'runButton',
+      "click": function () {
+        var oldTopK = topK;
+        var oldActiveCodeBox = activeCodeBox;
+        topK = showResult;
+        activeCodeBox = $element;
+        activeCodeBox.parent().find("canvas").remove();
+        activeCodeBox.parent().find(".resultDiv").text("");
+        try {
+          var compiled = webppl.compile(cm.getValue(), true);
+          eval.call(window, compiled);
+          // } catch (err) {
+          //   showResult(err.message);
+          //   throw err;
+        } finally {
+          // topK = oldTopK;
+          // activeCodeBox = oldActiveCodeBox;
         }
-      });
+      }
+    });
 
-    $element.parent().append(resultDiv);
-    $element.parent().append(runButton);
+  $element.parent().append(resultDiv);
+  $element.parent().append(runButton);
 
-    codeBoxCount += 1;
+  codeBoxCount += 1;
 }
 
 function setupCodeBoxes(){

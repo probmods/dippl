@@ -13,6 +13,9 @@
   ],
   "dependencies": {
     "paper": "~0.9.18",
-    "jquery-autosize": "~1.18.9"
+    "jquery-autosize": "~1.18.9",
+    "dimple": "~2.1.0",
+    "d3": "~3.4.11",
+    "underscore": "~1.6.0"
   }
 }

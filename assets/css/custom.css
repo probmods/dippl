@@ -169,3 +169,15 @@ div#cpsTransform textarea {
    font-size: 13px;
    font-family: monospace;
 }
+
+
+/* Bar chart */
+
+svg.barChart {
+  display: block;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  margin: 1em auto;
+  width: 590px;
+  height: 340px;
+}
