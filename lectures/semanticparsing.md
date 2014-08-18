@@ -107,20 +107,9 @@ var lexical_meaning = function(word, world) {
                  int:{dir:'L', int:'NP', out:'S'},
                  out:'S'}} }
   }
-  
-  // any words not in wordMeanings are assumed to be vacuous, 
-  // they'll get deleted.
-  //
-  // TODO other words...  
 
   var meaning = wordMeanings[word];
-  
-  if (meaning == undefined) {
-    return {sem: undefined, syn: ''}
-  } else {
-    return meaning;
-  }
-  
+  return meaning == undefined?{sem: undefined, syn: ''}:meaning;
 }
 
 // We use this helper function to negate a predicate above:
@@ -131,32 +120,42 @@ var neg = function(Q){
 
 Note that the `lexical_meaning` mapping could be stochastic, allowing us to capture polysemy. It can also depend on auxiliary elements of the world that play the role of semantically-free context variables.
 
-To make a parsing step, we randomly choose a word, try applying as it asks (left or right), and if the application doesn't type we return original meanings. We do this until only one meaning fragment is left.
-(It would be more efficient to pre-screen for typing and only choose among those applications which are syntactically well-formed. This introduces some ugly bookkeeping, so we've avoided it for simplicity.)
+To make a parsing step, we randomly choose a word such that the syntactic rules claim an application is possible, and do this application (reducing the set of meaning fragments). We do this until only one meaning fragment is left.
 
 ~~~
 var combine_meaning = function(meanings) {
-  var i = randomInteger(meanings.length)
+  var possibleComb = canApply(meanings,0)
+  display(possibleComb)
+  var i = possibleComb[randomInteger(possibleComb.length)]
+  var s = meanings[i].syn
+  if (s.dir == 'L') {
+    var f = meanings[i].sem
+    var a = meanings[i-1].sem
+    var newmeaning = {sem: f(a), syn: s.out}
+    return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
+  }
+  if (s.dir == 'R') {
+    var f = meanings[i].sem
+    var a = meanings[i+1].sem
+    var newmeaning = {sem: f(a), syn: s.out}
+    return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
+  }
+}
+
+//make a list of the indexes that can (syntactically) apply.
+var canApply = function(meanings,i) {
+  if(i==meanings.length){
+    return []
+  }
   var s = meanings[i].syn
   if (s.hasOwnProperty('dir')){ //a functor
-    if (s.dir == 'L') {//try to apply left
-      if (syntaxMatch(s.int, meanings[i-1].syn)){
-        var f = meanings[i].sem
-        var a = meanings[i-1].sem
-        var newmeaning = {sem: f(a), syn: s.out}
-        return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
-      }
-    } else if (s.dir == 'R') {
-      if (syntaxMatch(s.int, meanings[i+1].syn)){
-        var f = meanings[i].sem
-        var a = meanings[i+1].sem
-        var newmeaning = {sem: f(a), syn: s.out}
-        return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
-      }
-    }
+    var a = ((s.dir == 'L')?syntaxMatch(s.int, meanings[i-1].syn):false) |
+            ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
+    if(a){return [i].concat(canApply(meanings,i+1))}
   }
-  return meanings
+  return canApply(meanings,i+1)
 }
+
 
 // The syntaxMatch function is a simple recursion to 
 // check if two syntactic types are equal.
@@ -180,7 +179,7 @@ To allow fancy movement and binding we would mix this with type-shifting operato
 //literalListener("Bob is nice")
 //literalListener("some blond are nice")
 //literalListener("some blond people are nice")
-literalListener("all blond people are nice")
+print(literalListener("all blond people are nice"))
 ~~~
 
 
