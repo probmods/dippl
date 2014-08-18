@@ -102,7 +102,7 @@ sample(funnybinomialERP)
 
 It is easier to build useful models (that, for instance, condition on data) with `factor`. But `factor` by itself doesn't do anything -- it interacts with *marginalization* functions that normalize the computation they are applied to. For this reason running a computation with `factor` in it at the top level -- that is, not inside a marginalization operator -- results in an error. Try running `funnybinomial` directly....
 
-WebPPL has several inference operators, including `Enumerate` and `ParticleFilter`. These are all implemented by providing a co-routine that receives the current continuation at `sample` and `factor` statements. We explain these ideas and techniques in the next few sections. To get an idea what you can do with WebPPL take a look at the examples on [pragmatics](pragmatics.html), [semantic parsing](semanticparsing.html), and [computer graphics](vision.html); or for PPLs ore generally, look at [forestdb.org](http://forestdb.org).
+WebPPL has several inference operators, including `Enumerate` and `ParticleFilter`. These are all implemented by providing a co-routine that receives the current continuation at `sample` and `factor` statements. We explain these ideas and techniques in the next few sections. To get an idea what you can do with WebPPL take a look at the examples on [pragmatics](pragmatics.html), [semantic parsing](semanticparsing.html), and [computer graphics](vision.html); or for PPLs more generally, look at [forestdb.org](http://forestdb.org).
 
 
  
