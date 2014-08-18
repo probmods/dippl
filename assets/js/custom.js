@@ -43,7 +43,7 @@ function barChart(containerSelector, labels, counts){
   var data = [];
   for (var i=0; i<labels.length; i++){
     data.push({
-                "Label": labels[i],
+                "Label": JSON.stringify(labels[i]),
                 "Count": counts[i]
               });
   };
