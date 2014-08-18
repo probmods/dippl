@@ -1,9 +1,10 @@
 ---
 layout: example
 title: Semantic parsing
-description: A Bayesian literal listener who conditions on the meaning of a sentence. The meaning is computed by a CCG-like system.
+description: A Bayesian literal listener who conditions on the meaning of a sentence. The meaning is computed by direct composition in a categorial grammar.
 ---
 
+We implement a Bayesian language comprehender on top of a syntactic-semantic parsing system based on (combinatory) categorial grammar.
 
 #The world and the listener
 
@@ -35,9 +36,27 @@ var worldPrior = function(objs) {
 
 #The parser
 
-The meanings function is a stochastic semantic parser akin to CCG.
-Each step of the meaning function tries to combine meaning fragments by left or right application, resulting in a new meaning.
-First we get a lexical meaning for each word and filter out the undefined meanings, then we recursively apply until only one meaning fragment is left.
+Notice that we have written the `meaning` function as taking the utterance and world and returning a (model-theoretic) denotation -- a truth value when the utterance is a sentence. The motivation for doing things this way, rather than breaking it up into a meaning function that builds an 'LF' form which is then separately applied to the world, is well described by the introduction to Jacobson (1999):
+
+
+>The point of departure for this paper is the hypothesis of "direct compositionality"
+(see, e.g., Montague 1974): the syntax and the model-theoretic semantics work in
+tandem. Thus the syntax "builds" (i.e. proves the well-formedness of)
+expressions, where each syntactic rule supplies the proof of the well-formedness of
+an output expression in terms of the well-formedness of one or more input
+expressions. (These rules might, of course, be stated in highly general and
+schematic terms as in, e.g., Categorial Grammar.) The semantics works in tandem
+with this - each output expression is directly assigned a meaning (a model-theoretic
+interpretation) in terms of the meaning(s) of the input expressions(s). There is thus
+no need to for any kind of abstract level like LF mediating between the surface
+syntax and the model-theoretic interpretation, and hence no need for an additional
+set of rules mapping one "level" of syntactic representation into another.
+
+
+
+For our system, the `meaning` function is a *stochastic* map from utterances to truth values, with the different return values corresponding (non-uniquely) to different parses or lexical choices.
+
+First we get a lexical meaning for each word and filter out the undefined meanings, then we recursively apply meaning fragments to each other until only one meaning fragment is left.
 
 ~~~
 //split the string into words, lookup lexical meanings, delete words with vacuous meaning, then call combine_meanings..
@@ -47,7 +66,6 @@ var meaning = function(utterance, world) {
                                     function(m){return !(m.sem==undefined)}))
 }
 ~~~
-
 
 The lexicon is captured in a function `lexical_meaning` which looks up the meaning of a word. A meaning is an object with semantics and syntax. 
 
@@ -73,7 +91,7 @@ var neg = function(Q){return function(x){return !Q(x)}}
 
 Note that the `lexical_meaning` mapping could be stochastic, allowing us to capture polysemy. It can also depend on auxiliary elements of the world that play the role of semantically-free context variables.
 
-To make a parsing step, we randomly choose a word, try applying as it asks, and if it doesn't type we return original meanings. We do this until only one meaning fragment is left.
+To make a parsing step, we randomly choose a word, try applying as it asks (left or right), and if the application doesn't type we return original meanings. We do this until only one meaning fragment is left.
 (It would be more efficient to pre-screen for typing and only choose among those applications which are syntactically well-formed. This introduces some ugly bookkeeping, so we've avoided it for simplicity.)
 
 ~~~
@@ -112,7 +130,7 @@ var combine_meanings = function(meanings){
 }
 ~~~
 
-To allow fancy movement and binding we would mix this with type-shifting operators, following, for example, Barker 2002 (who extends Jacobsen 1999).
+To allow fancy movement and binding we would mix this with type-shifting operators, following, for example, Barker (2002) (who extends Jacobson, 1999).
 
 
 ~~~

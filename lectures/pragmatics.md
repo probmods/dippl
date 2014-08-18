@@ -39,9 +39,11 @@ var meaning = function(utt,world) {
             utt=="none of the people are nice"? world==0 :
             true
 }
+
+print(literalListener("some of the people are nice"))
 ~~~
 
-If you evaluate `literalListener("some of the people are nice")` in the above code box, you will see that the inferred meaning is uniform on all world states where at least one person is nice -- including the state in which all people are nice. This fails to capture the usual 'some but not all' scalar implicature.
+If you evaluate the above code box, you will see that the inferred meaning of "some of the people are nice" is uniform on all world states where at least one person is nice -- including the state in which all people are nice. This fails to capture the usual 'some but not all' scalar implicature.
 
 We can move to a more Gricean listener who assumes that the speaker has chosen an utterance to convey the intended state of the world: 
 
@@ -61,26 +63,13 @@ var listener = function(utterance) {
               return world
               },100)
 }
+
+print(listener("some of the people are nice"))
 ~~~
 
-If you evaluate `literal("some of the people are nice")` in the above code box you will see that it does capture the scalar implicature!
+If you evaluate the above code box you will see that it does capture the scalar implicature!
 
 This simple Rational Speech Acts model was introduced in Frank and Goodman (2012) and Goodman and Stuhlmueller (2013). It is similar to the Iterated Best Response, and other game theoretic models of pragmatics. The RSA has been extended and applied to a host of phenomena.
-
-
-
-# With semantic parsing
-
-What if we want more complex worlds, and don't want to hard code the meaning of sentences? The section on [semantic parsing](semantic parsing.html) shows how to implement a literal listener that does a CCG-like parsing process, to compute the meaning value of a sentence in a world by 'direct compositionality'. We can simply plug that parsing model in to the above pragmatic speaker and listener.
-
-
-<!---
-# With free indices
-
---->
-
-
-
 
 
 
@@ -142,6 +131,124 @@ var listener = function(utterance) {
               },100)
 }
 ~~~
+
+
+
+
+# With semantic parsing
+
+What if we want more complex worlds, and don't want to hard code the meaning of sentences? The section on [semantic parsing](semantic parsing.html) shows how to implement a literal listener that does a CCG-like parsing process, to compute the meaning value of a sentence in a world by 'direct compositionality'. We can simply plug that parsing model in to the above pragmatic speaker and listener.
+(Note: still debugging this one...)
+
+~~~
+var makeObj = function(name) {
+    return {name: name, blond: flip(0.5), nice: flip(0.5)}
+}
+
+var worldPrior = function(objs) {
+    return [makeObj("Bob"), makeObj("Bill"), makeObj("Alice")]
+}
+
+var lexical_meaning = function(word, world) {
+    return (word=="blond")? {sem: function(obj){return obj.blond},
+                             syn: ['L', 'NP', 'S']} :
+    (word=="nice")? {sem: function(obj){return obj.nice},
+                     syn: ['L', 'NP', 'S']} :
+    (word == "Bob")? {sem:find(world, function(obj){return obj.name=="Bob"}),
+                      syn: 'NP'} :
+    (word=="some")? {sem: function(P){return function(Q){return filter(filter(world, P), Q).length>0}},
+                     syn: ['R', ['L', 'NP', 'S'], ['R', ['L', 'NP', 'S'], 'S']] } :
+    (word=="all")? {sem: function(P){return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
+                    syn: ['R', ['L', 'NP', 'S'], ['R', ['L', 'NP', 'S'], 'S']] } :
+    {sem: undefined, syn: ''} //any other words are assumed to be vacuous, they'll get deleted.
+            //TODO other words...
+}
+
+var neg = function(Q){return function(x){return !Q(x)}}
+
+var syntaxMatch = function(s,t) {
+    return !(Array.isArray(s)) ? s==t :
+    s.length==0? t.length==0 : (syntaxMatch(s[0], t[0]) & syntaxMatch(s.slice(1),t.slice(1)))
+}
+
+var combine_meaning = function(meanings) {
+    var i = randomInteger(meanings.length)
+    var s = meanings[i].syn
+    if(Array.isArray(s)){ //a functor
+       if(s[0] == 'L') {//try to apply left
+            if(syntaxMatch(s[1],meanings[i-1].syn)){
+                var f = meanings[i].sem
+                var a = meanings[i-1].sem
+                var newmeaning = {sem: f(a), syn: s[2]}
+                return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
+                }
+        } else if(s[0] == 'R') {
+            if(syntaxMatch(s[1],meanings[i+1].syn)){
+                var f = meanings[i].sem
+                var a = meanings[i+1].sem
+                var newmeaning = {sem: f(a), syn: s[2]}
+                return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
+            }
+        }
+    }
+    return meanings
+}
+
+var combine_meanings = function(meanings){
+    return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
+}
+
+var meaning = function(utterance, world) {
+    return combine_meanings( filter(map(utterance.split(" "),
+                                        function(w){return lexical_meaning(w, world)}),
+                                    function(m){return !(m.sem==undefined)}))
+}
+
+var utterancePrior = function() {
+    var utterances = ["some of the blond people are nice",
+                      "all of the blond people are nice",
+                      "none of the blond people are nice"]
+    var i = randomInteger(utterances.length)
+    return utterances[i]
+}
+
+var literalListener = cache(function(utterance) {
+    Enumerate(function(){
+              var world = worldPrior()
+              var m = meaning(utterance, world)
+              factor(m?0:-Infinity)
+              return world
+              }, 100)
+})
+
+var speaker = cache(function(world) {
+    Enumerate(function(){
+              var utterance = utterancePrior()
+              var L = literalListener(utterance)
+              factor(L.score(world))
+              return utterance
+              },100)
+})
+
+var listener = function(utterance) {
+    Enumerate(function(){
+              var world = worldPrior()
+              var S = speaker(world)
+              factor(S.score(utterance))
+              return world
+              },100)
+}
+
+listener("some of the blond people are nice")
+~~~
+
+
+<!---
+# With free indices
+
+--->
+
+
 
 
 <!---
