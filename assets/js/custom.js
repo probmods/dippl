@@ -15,8 +15,12 @@ function euclideanDistance(v1, v2){
   return Math.sqrt(d);
 };
 
+function isErp(x){
+  return ((x.score != undefined) && (x.sample != undefined));
+}
+
 function isErpWithSupport(x){
-  return ((x.score != undefined) && (x.support != undefined));
+  return (isErp(x) && (x.support != undefined));
 }
 
 function print(k, x){
@@ -148,6 +152,14 @@ function loadImage(k, drawObject, url){
 
 // Code boxes
 
+function webpplObjectToText(x){
+  if (isErp(x)){
+    return "<erp>";
+  } else {
+    return JSON.stringify(x);
+  }
+}
+
 var codeBoxCount = 0;
 
 function setupCodeBox(element){
@@ -173,7 +185,7 @@ function setupCodeBox(element){
   var showResult = function(x){
     resultDiv.show();
     if (x !== undefined) {
-      resultDiv.append(document.createTextNode(JSON.stringify(x)));
+      resultDiv.append(document.createTextNode(webpplObjectToText(x)));
     }
   };
 
