@@ -1,6 +1,6 @@
 ---
-layout: default
-title: Implementing randomness with coroutines and continuations
+layout: lecture
+title: Exploring the executions of a random computation
 description: Coroutines, continuations, CPS, etc.
 ---
 
@@ -13,7 +13,8 @@ var binomial = function(){
     var a = sample(bernoulliERP, [0.5])
     var b = sample(bernoulliERP, [0.5])
     var c = sample(bernoulliERP, [0.5])
-    return a + b + c}
+    return a + b + c
+}
 
 Enumerate(binomial)
 ~~~
@@ -21,7 +22,7 @@ Enumerate(binomial)
 We can view `sample` and `factor` as coroutines for exploring a computation, which are installed by an inference operator.
 
 ~~~
-//js
+// language: javascript
 
 function sample(erp, params) {
   return erp.support()[0]
@@ -30,12 +31,6 @@ function sample(erp, params) {
 function Marginalize(comp) {
   return comp()
 }
-
-var binomial = function(){
-    var a = sample(bernoulliERP, [0.5])
-    var b = sample(bernoulliERP, [0.5])
-    var c = sample(bernoulliERP, [0.5])
-    return a + b + c}
 
 Marginalize(binomial)
 ~~~
@@ -163,7 +158,11 @@ totalCpsFactorial(print, printError, 5)
 totalCpsFactorial(print, printError, -1)
 ~~~~
 
-TODO: binomial example in CPS
+As a final example, let's write our earlier binomial function in CPS:
+
+~~~
+var CPSbinomial = function(){...}//TODO
+~~~
 
 
 # Coroutines: functions that receive continuations
@@ -171,7 +170,7 @@ TODO: binomial example in CPS
 Now we'll re-write the marginalization code above so that the `sample` coroutine gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way.
 
 ~~~
-//js
+// language: javascript
 
 unexploredFutures = []
 
@@ -194,26 +193,14 @@ function Explore(cpsComp) {
   cpsComp(exit)
   return returnVals
 }
-
-var binomial = function(k){
-  sample(function(a){
-    ...
-    var b = callcc(sample, bernoulliERP, [0.5])
-    var c = callcc(sample, bernoulliERP, [0.5])
-    return a + b + c}
-
     
-  }, 
-         bernoulliERP, [0.5])
-    
-
-Explore(binomial)
+Explore(CPSbinomial)
 ~~~
 
 The above code explores all the executions of the computation, but it doesn't keep track of probabilities. We can extend it by simply adding scores to the futures, and keeping track of the score of the execution we are currently working on. Because we only care about the total probability of all paths with a given return value, we combine them into a 'histogram' mapping return values to (un-normalized) probabilities.
 
 ~~~
-//js
+// language: javascript
 
 unexploredFutures = []
 currScore = 0
@@ -243,25 +230,13 @@ function Marginalize(cpsComp) {
   return returnHist
 }
 
-var binomial = function(k){
-  sample(function(a){
-    ...
-    var b = callcc(sample, bernoulliERP, [0.5])
-    var c = callcc(sample, bernoulliERP, [0.5])
-    return a + b + c}
-
-    
-  }, 
-         bernoulliERP, [0.5])
-    
-
-Marginalize(binomial)
+Marginalize(CPSbinomial)
 ~~~
 
 Finally we need to deal with factor statements -- easy because they simply add a number to the current score -- and renormalize the final distribution.
 
 ~~~
-//js
+// language: javascript
 
 unexploredFutures = []
 currScore = 0
@@ -290,24 +265,19 @@ function exit(val) {
 
 function Marginalize(cpsComp) {
   cpsComp(exit)
-  //normalize
-  ...
+  
+  //normalize:
+  var norm = 0
+  for (var v in returnHist) {
+    norm += returnHist[v];
+  }
+  for (var v in returnHist) {
+    returnHist[v] = returnHist[v] / norm;
+  }
   return returnHist
 }
 
-var binomial = function(k){
-  sample(function(a){
-    ...
-    var b = callcc(sample, bernoulliERP, [0.5])
-    var c = callcc(sample, bernoulliERP, [0.5])
-    return a + b + c}
-
-    
-  }, 
-         bernoulliERP, [0.5])
-    
-
-Marginalize(binomial)
+Marginalize(CPSbinomial)
 ~~~
 
 
