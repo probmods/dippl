@@ -1,7 +1,7 @@
 ---
 layout: lecture
 title: Exploring the executions of a random computation
-description: Coroutines, continuations, CPS, etc.
+description: Implementing marginal inference by enumeration using continuations, coroutines, and CPS.
 ---
 
 All inference techniques involve exploring the space of executions of a random computation in one way or another. In this section we consider how the many paths through a computation can be explored, aiming for an implementation that computes the marginal distribution of a computation by *enumerating* all possible executions.
@@ -401,7 +401,26 @@ The auto-updating form below shows the transform that we actually use for WebPPL
 
 # Best-first enumeration
 
-Above we have maintained a first-in-last-out queue of continuations; this results in a depth-first search strategy over program executions. Often a more useful approach is to enumerate the highest priority continuation first, based on some heuristic notion of priority. For instance, using the score-so-far as priority results in a most-likely-first strategy. We can achieve this by simply changing the above code to use a priority queue (instead of `push` and `pop`).
+Above we have maintained a first-in-last-out queue of continuations; this results in a depth-first search strategy over program executions. Often a more useful approach is to enumerate the highest priority continuation first, based on some heuristic notion of priority. For instance, using the score-so-far as priority results in a most-likely-first strategy. We can achieve this by simply changing the above code to use a priority queue (instead of `push` and `pop`). 
+
+Here we compare different enumeration orders for a simple computation. The argument to the Enumerate methods indicates how many executions to complete before stoping -- try reducing it to 1, 2, and 3 to see what the first few executions found by each method are.
+
+~~~
+var binomial = function(){
+    var a = sample(bernoulliERP, [0.1])
+    var b = sample(bernoulliERP, [0.9])
+    var c = sample(bernoulliERP, [0.1])
+    return a + b + c
+}
+
+var numexec = 10
+
+print(EnumerateDepthFirst(binomial, numexec))
+
+print(EnumerateBreadthFirst(binomial, numexec))
+
+print(EnumerateLikelyFirst(binomial, numexec))
+~~~
  
 
 # Caching

@@ -13,7 +13,7 @@ var literalListener = function(utterance) {
     var m = meaning(utterance, world)
     factor(m?0:-Infinity)
     return world
-  }, 100)
+  })
 }
 ~~~
 
@@ -53,7 +53,7 @@ var speaker = function(world) {
     var utterance = utterancePrior()
     factor(world == sample(literalListener(utterance)) ?0:-Infinity)
     return utterance
-  }, 100)
+  })
 }
 
 var listener = function(utterance) {
@@ -61,7 +61,7 @@ var listener = function(utterance) {
     var world = worldPrior()
     factor(utterance == sample(speaker(world)) ?0:-Infinity)
     return world
-  }, 100)
+  })
 }
 
 print(listener("some of the people are nice"))
@@ -85,20 +85,23 @@ var speaker = function(world) {
   Enumerate(function(){
     var utterance = utterancePrior()
     var L = literalListener(utterance)
-    factor(L.score(world))
+    factor(L.score([],world))
     return utterance
-  }, 100)
+  })
 }
 
 var listener = function(utterance) {
   Enumerate(function(){
     var world = worldPrior()
     var S = speaker(world)
-    factor(S.score(utterance))
+    factor(S.score([],utterance))
     return world
-  }, 100)
+  })
 }
+
+print(listener("some of the people are nice"))
 ~~~
+
 
 ## Caching
 
@@ -109,7 +112,7 @@ var literalListener = cache(function(utterance) {
     var m = meaning(utterance, world)
     factor(m?0:-Infinity)
     return world
-  }, 100)
+  })
 })
 
 
@@ -117,19 +120,21 @@ var speaker = cache(function(world) {
   Enumerate(function(){
     var utterance = utterancePrior()
     var L = literalListener(utterance)
-    factor(L.score(world))
+    factor(L.score([],world))
     return utterance
-  }, 100)
+  })
 })
 
 var listener = function(utterance) {
   Enumerate(function(){
     var world = worldPrior()
     var S = speaker(world)
-    factor(S.score(utterance))
+    factor(S.score([],utterance))
     return world
-  }, 100)
+  })
 }
+
+print(listener("some of the people are nice"))
 ~~~
 
 
@@ -150,48 +155,81 @@ var worldPrior = function(objs) {
 }
 
 var lexical_meaning = function(word, world) {
-  return (word=="blond")? {sem: function(obj){return obj.blond},
-                           syn: ['L', 'NP', 'S']} :
-  (word=="nice")? {sem: function(obj){return obj.nice},
-                   syn: ['L', 'NP', 'S']} :
-  (word == "Bob")? {sem:find(world, function(obj){return obj.name=="Bob"}),
-                    syn: 'NP'} :
-  (word=="some")? {sem: function(P){return function(Q){return filter(filter(world, P), Q).length>0}},
-                   syn: ['R', ['L', 'NP', 'S'], ['R', ['L', 'NP', 'S'], 'S']] } :
-  (word=="all")? {sem: function(P){return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
-                  syn: ['R', ['L', 'NP', 'S'], ['R', ['L', 'NP', 'S'], 'S']] } :
-  {sem: undefined, syn: ''} //any other words are assumed to be vacuous, they'll get deleted.
-  //TODO other words...
+
+  var wordMeanings = {
+    
+    "blond" : {
+      sem: function(obj){return obj.blond},
+      syn: {dir:'L', int:'NP', out:'S'} },
+    
+    "nice" : {
+      sem: function(obj){return obj.nice},
+      syn: {dir:'L', int:'NP', out:'S'} },
+    
+    "Bob" : {
+      sem: find(world, function(obj){return obj.name=="Bob"}),
+      syn: 'NP' },
+    
+    "some" : {
+      sem: function(P){
+        return function(Q){return filter(filter(world, P), Q).length>0}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} },  
+    
+    "all" : {
+      sem: function(P){
+        return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} }
+  }
+
+  var meaning = wordMeanings[word];
+  return meaning == undefined?{sem: undefined, syn: ''}:meaning;
 }
 
 var neg = function(Q){return function(x){return !Q(x)}}
 
-var syntaxMatch = function(s,t) {
-  return !(Array.isArray(s)) ? s==t :
-  s.length==0? t.length==0 : (syntaxMatch(s[0], t[0]) & syntaxMatch(s.slice(1),t.slice(1)))
+var combine_meaning = function(meanings) {
+  var possibleComb = canApply(meanings,0)
+  display(possibleComb)
+  var i = possibleComb[randomInteger(possibleComb.length)]
+  var s = meanings[i].syn
+  if (s.dir == 'L') {
+    var f = meanings[i].sem
+    var a = meanings[i-1].sem
+    var newmeaning = {sem: f(a), syn: s.out}
+    return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
+  }
+  if (s.dir == 'R') {
+    var f = meanings[i].sem
+    var a = meanings[i+1].sem
+    var newmeaning = {sem: f(a), syn: s.out}
+    return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
+  }
 }
 
-var combine_meaning = function(meanings) {
-  var i = randomInteger(meanings.length)
-  var s = meanings[i].syn
-  if(Array.isArray(s)){ //a functor
-    if(s[0] == 'L') {//try to apply left
-      if(syntaxMatch(s[1],meanings[i-1].syn)){
-        var f = meanings[i].sem
-        var a = meanings[i-1].sem
-        var newmeaning = {sem: f(a), syn: s[2]}
-        return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
-      }
-    } else if(s[0] == 'R') {
-      if(syntaxMatch(s[1],meanings[i+1].syn)){
-        var f = meanings[i].sem
-        var a = meanings[i+1].sem
-        var newmeaning = {sem: f(a), syn: s[2]}
-        return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
-      }
-    }
+var canApply = function(meanings,i) {
+  if(i==meanings.length){
+    return []
   }
-  return meanings
+  var s = meanings[i].syn
+  if (s.hasOwnProperty('dir')){ //a functor
+    var a = ((s.dir == 'L')?syntaxMatch(s.int, meanings[i-1].syn):false) |
+            ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
+    if(a){return [i].concat(canApply(meanings,i+1))}
+  }
+  return canApply(meanings,i+1)
+}
+
+var syntaxMatch = function(s,t) {
+  return !s.hasOwnProperty('dir') ? s==t :
+  s.dir==t.dir & syntaxMatch(s.int,t.int) & syntaxMatch(s.out,t.out)
 }
 
 var combine_meanings = function(meanings){
@@ -199,15 +237,15 @@ var combine_meanings = function(meanings){
 }
 
 var meaning = function(utterance, world) {
-  return combine_meanings( filter(map(utterance.split(" "),
-                                      function(w){return lexical_meaning(w, world)}),
-                                  function(m){return !(m.sem==undefined)}))
+  return combine_meanings(
+    filter(map(utterance.split(" "),
+               function(w){return lexical_meaning(w, world)}),
+           function(m){return !(m.sem==undefined)}))
 }
 
 var utterancePrior = function() {
   var utterances = ["some of the blond people are nice",
-                    "all of the blond people are nice",
-                    "none of the blond people are nice"]
+                    "all of the blond people are nice"]
   var i = randomInteger(utterances.length)
   return utterances[i]
 }
@@ -225,7 +263,7 @@ var speaker = cache(function(world) {
   Enumerate(function(){
     var utterance = utterancePrior()
     var L = literalListener(utterance)
-    factor(L.score(world))
+    factor(L.score([],world))
     return utterance
   }, 100)
 })
@@ -234,7 +272,7 @@ var listener = function(utterance) {
   Enumerate(function(){
     var world = worldPrior()
     var S = speaker(world)
-    factor(S.score(utterance))
+    factor(S.score([],utterance))
     return world
   }, 100)
 }
