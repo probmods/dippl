@@ -6,7 +6,7 @@ description: Implementing marginal inference by enumeration using continuations,
 
 All inference techniques involve exploring the space of executions of a random computation in one way or another. In this section we consider how the many paths through a computation can be explored, aiming for an implementation that computes the marginal distribution of a computation by *enumerating* all possible executions.
 
-# Exploring a random computation
+## Exploring a random computation
 
 Consider the simple binomial example from [earlier](WebPPL.html).
 
@@ -47,7 +47,7 @@ ExploreFirst(binomial)
 This set of functions does indeed go back and forth between the binomial computation and the 'randomness handling' functions to explore a possible execution of the program. 
 However, it is only able to explore a single path through the computation.... We would like to be able to 'return' from the `sample` function *multiple times* with different values. If we could do so, we could try each value from the support to see what return values ultimately come from the computation. We can't do this by an ordinary function return, however; we need an explicit handle to the return context, that is we need to reify the *future of the computation* from the point that `sample` is called. Such a reified computation future is called a **continuation**.
 
-# Continuations
+## Continuations
 
 A continuation is a function that expresses "what to do next" with the value of a computation. In the following, we give a few examples of continuations in use and describe what continuation-passing style is. This exposition is partly based on the articles [By example: Continuation-passing style in JavaScript](http://matt.might.net/articles/by-example-continuation-passing-style/) and [How to compile with continuations](http://matt.might.net/articles/cps-conversion/) by Matt Might.
 
@@ -212,7 +212,7 @@ First, we had to wrap the primitive function `sample` such that it takes a conti
 Second, the sequence of definition statements was sequentialized in in a way similar to how we transformed function applications above: We evaluate the (cps-ed) version of the first statement and pass the result to a continuation function that then evaluates the (cps-ed) version of the second statement, which then calls the (cps-ed) version of the third statement. When `a`, `b`, and `c` are all evaluated, we can pass `a + b + c` to the global continuation function `k`.
 
 
-# Coroutines: functions that receive continuations
+## Coroutines: functions that receive continuations
 
 Now we'll re-write the code above so that the `sample` function gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way. This pattern: a function that receives the continuation (often called a 'callback') from the main computation and returns only by calling the continuation is called a *coroutine*.
 
@@ -346,7 +346,7 @@ Marginalize(cpsBinomial)
 We can now do marginal inference by enumeration of an arbitrary (finite) computation! As long as we're willing to write it in CPS... which can be painful. Fortunately CPS can be done automatically, to relieve the programmer of the burden, while still enabling the coroutine method.
 
 
-# Continuation-passing transform
+## Continuation-passing transform
 
 Program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants. 
 
@@ -431,7 +431,7 @@ print(EnumerateLikelyFirst(binomial, numexec))
 ~~~
  
 
-# Caching
+## Caching
 
 Because the return value from `Enumerate(foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution. 
 
