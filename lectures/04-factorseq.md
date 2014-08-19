@@ -60,10 +60,9 @@ Notice that if we allow `Enumerate` only a few executions (the last argument) it
 The PCFG is very similar to the HMM, except it has an underlying tree (instead of linear) structure.
 
 ~~~
-
 var transition = function(symbol) {
-  var rules = {'start': {rhs: [['NP', 'V', 'NP'], ['NP', 'V']], probs: [0.8, 0.2]},
-  		    'NP': {rhs: [['A', 'NP'], ['N']], probs: [0.8, 0.2]} }
+  var rules = {'start': {rhs: [['NP', 'V', 'NP'], ['NP', 'V']], probs: [0.4, 0.6]},
+               'NP': {rhs: [['A', 'NP'], ['N']], probs: [0.4, 0.6]} }
   return rules[symbol].rhs[ discrete(rules[symbol].probs) ]
 }
 
@@ -73,32 +72,43 @@ var preTerminal = function(symbol) {
 
 var terminal = function(symbol) {
   var rules = {'N': {words: ['John', 'soup'], probs: [0.6, 0.4]},
-  		    'V': {words: ['loves', 'hates', 'runs'], probs: [0.3, 0.3, 0.4]},
-		    'A': {words: ['tall', 'salty'], probs: [0.5, 0.5]} }
+               'V': {words: ['loves', 'hates', 'runs'], probs: [0.3, 0.3, 0.4]},
+               'A': {words: ['tall', 'salty'], probs: [0.6, 0.4]} }
   return rules[symbol].words[ discrete(rules[symbol].probs) ]
 }
 
 
 var pcfg = function(symbol) {
-    preTerminal(symbol) ? [terminal(symbol)] : expand(transition(symbol))
+  preTerminal(symbol) ? [terminal(symbol)] : expand(transition(symbol))
 }
 
-var expand(symbols) {
-    return symbols.length==0 ? [] : pcfg(symbols[0]).concat(expand(symbols.slice(1)))
+var expand = function(symbols) {
+  if(symbols.length==0) {
+    return []
+  } else {
+    var f = pcfg(symbols[0])
+    return f.concat(expand(symbols.slice(1)))
+  }
 }
 
-Enumerate(function(){
+
+var arrayEq = function(a, b){
+  return a.length == 0 ? true : a[0]==b[0] & arrayEq(a.slice(1), b.slice(1))
+}
+
+print(Enumerate(function(){
             var y = pcfg("start")
-            factor(y.slice(0,2) == "hi there".split(" ") ?0:-Infinity) //yield starts with "hi there"
-            return y[2] //distribution on next word?
-          }, 100)
+            factor(arrayEq(y.slice(0,2), ["tall", "John"]) ?0:-Infinity) //yield starts with "hi there"
+            return y[2]?y[2]:"" //distribution on next word?
+          }, 20))
 ~~~
 
+This program computes the probability distribution on the next word of a sentence that starts 'tall John...'. It finds a few parses that start this way... but this grammar was specially chosen to place the highest probability on such sentences. Try looking for completions of 'salty soup...' and you will be less happy.
 
 
 # Decomposing and interleaving factors
 
-To see how we can provide evidence earlier in the computation execution, first consider a simpler model:
+To see how we can provide evidence earlier in the execution for models such as the above, first consider a simpler model:
 
 ~~~
 var binomial = function(){
@@ -160,14 +170,17 @@ var hmmRecur = function(n, states, observations){
 }
 
 var hmm = function(n) {
-  var s = init()
-  return hmmRecur(n,[s],[observe(s)])
+  return hmmRecur(n,[true],[])
 }
 
-var trueobs = [true, true, true]
+var trueobs = [false, false, false]
+
+var arrayEq = function(a, b){
+  return a.length == 0 ? true : a[0]==b[0] & arrayEq(a.slice(1), b.slice(1))
+}
 
 print(Enumerate(function(){
-  var r = hmm(2)
+  var r = hmm(3)
   factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )
   return r.states
 }, 100))
@@ -177,12 +190,23 @@ Similarly the PCFG can be written as:
 
 ~~~
 var pcfg = function(symbol, yieldsofar) {
-    return terminal(symbol) ? yieldsofar.concat([symbol]) : expand(transition(symbol), yieldsofar)
+  return preTerminal(symbol) ? yieldsofar.concat([terminal(symbol)]) : expand(transition(symbol), yieldsofar)
 }
 
-var expand(symbols, yieldsofar) {
-    return symbols.length==0 ? yieldsofar : expand(symbols.slice(1), pcfg(symbols[0], yieldsofar))
+var expand = function(symbols, yieldsofar) {
+  return symbols.length==0 ? yieldsofar : expand(symbols.slice(1), pcfg(symbols[0], yieldsofar))
 }
+
+
+var arrayEq = function(a, b){
+  return a.length == 0 ? true : a[0]==b[0] & arrayEq(a.slice(1), b.slice(1))
+}
+
+print(Enumerate(function(){
+            var y = pcfg("start",[])
+            factor(arrayEq(y.slice(0,2), ["tall", "John"]) ?0:-Infinity) //yield starts with "hi there"
+            return y[2]?y[2]:"" //distribution on next word?
+          }, 20))
 ~~~
 
 
@@ -192,7 +216,7 @@ var expand(symbols, yieldsofar) {
 We can now decompose and move factors. In the HMM we first observe that the factor `factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )` can be seen as `factor(r.observations[0]==trueobs[0] ? 0 : -Infinity); factor(r.observations[1]==trueobs[1] ? 0 : -Infinity); ...`. Then we observe that these factors can be moved 'up' into the recursion to give:
 
 ~~~
-var trueobs = [true, true, true]
+var trueobs = [false, false, false]
 
 var hmmRecur = function(n, states, observations){
   var newstate = transition(states[0])
@@ -205,14 +229,11 @@ var hmmRecur = function(n, states, observations){
 }
 
 var hmm = function(n) {
-  var s = init()
-  var obs = observe(s)
-  factor(obs==trueobs[0] ? 0 : -Infinity)
-  return hmmRecur(n,[s],[obs])
+  return hmmRecur(n,[true],[])
 }
 
 print(Enumerate(function(){
-  var r = hmm(2)
+  var r = hmm(3)
   return r.states
 }, 100))
 ~~~
@@ -225,7 +246,25 @@ Try varying the number of executions explored, in this version and the original 
 Similarly for the PCFG:
 
 ~~~
+var pcfg = function(symbol, yieldsofar, trueyield) {
+  if(preTerminal(symbol)){
+    var t = terminal(symbol)
+    if(yieldsofar.length < trueyield.length){
+      factor(t==trueyield[yieldsofar.length] ?0:-Infinity)
+    }
+    return yieldsofar.concat([t])
+  } else {
+    return expand(transition(symbol), yieldsofar, trueyield) }
+}
 
+var expand = function(symbols, yieldsofar, trueyield) {
+  return symbols.length==0 ? yieldsofar : expand(symbols.slice(1), pcfg(symbols[0], yieldsofar, trueyield), trueyield)
+}
+
+print(Enumerate(function(){
+            var y = pcfg('start', [], ['tall', 'John'])
+            return y[2]?y[2]:"" //distribution on next word?
+          }, 20))
 ~~~
 
 
