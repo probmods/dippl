@@ -7,8 +7,6 @@ Inference:
 
 Browser integration:
 - script tag compilation / execution
-* run javascript code from appropriately tagged boxes (tag in md or in first line comment?).
-
 
 
 Lectures:
