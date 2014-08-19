@@ -205,6 +205,12 @@ var cpsBinomial = function(k){
 cpsBinomial(print)
 ~~~
 
+There are two things to note here: 
+
+First, we had to wrap the primitive function `sample` such that it takes a continuation. The same kind of wrapping is generally applied to primitive functions such as `+` and `*` that are defined outside of the code we are transforming. 
+
+Second, the sequence of definition statements was sequentialized in in a way similar to how we transformed function applications above: We evaluate the (cps-ed) version of the first statement and pass the result to a continuation function that then evaluates the (cps-ed) version of the second statement, which then calls the (cps-ed) version of the third statement. When `a`, `b`, and `c` are all evaluated, we can pass `a + b + c` to the global continuation function `k`.
+
 
 # Coroutines: functions that receive continuations
 
