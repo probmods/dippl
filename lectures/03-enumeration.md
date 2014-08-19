@@ -12,10 +12,10 @@ Consider the simple binomial example from [earlier](WebPPL.html).
 
 ~~~
 var binomial = function(){
-    var a = sample(bernoulliERP, [0.5])
-    var b = sample(bernoulliERP, [0.5])
-    var c = sample(bernoulliERP, [0.5])
-    return a + b + c
+  var a = sample(bernoulliERP, [0.5])
+  var b = sample(bernoulliERP, [0.5])
+  var c = sample(bernoulliERP, [0.5])
+  return a + b + c
 }
 
 Enumerate(binomial)
@@ -35,10 +35,10 @@ function ExploreFirst(comp) {
 }
 
 var binomial = function(){
-    var a = sampleFirst(bernoulliERP, [0.5])
-    var b = sampleFirst(bernoulliERP, [0.5])
-    var c = sampleFirst(bernoulliERP, [0.5])
-    return a + b + c
+  var a = sampleFirst(bernoulliERP, [0.5])
+  var b = sampleFirst(bernoulliERP, [0.5])
+  var c = sampleFirst(bernoulliERP, [0.5])
+  return a + b + c
 }
 
 ExploreFirst(binomial)
