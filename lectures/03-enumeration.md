@@ -139,7 +139,7 @@ print(factorial2(5, 1))
 cpsFactorial2(print, 5, 1)
 ~~~~
 
-A function is **tail-recursive** when the recursive call happens as the final action in a function, in which case it can happen without the function call stack growing. In continuation-passing style, there is no stack -- all functions are tail-recursive.
+A function is **tail-recursive** when the recursive call happens as the final action in a function, in which case it can happen without the function call stack growing. In continuation-passing style, there is no stack -- all function calls are tail calls, hence all recursive functions are tail-recursive.
 
 Continuation-passing style is useful because it allows us to manipulate the execution of the program in ways that would otherwise be difficult. For example, we can use CPS to implement exception handling.
 
