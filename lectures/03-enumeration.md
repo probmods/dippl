@@ -348,7 +348,9 @@ We can now do marginal inference by enumeration of an arbitrary (finite) computa
 
 # Continuation-passing transform
 
-Program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants:
+Program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants. 
+
+Note: in the following examples, `CpsTransform` is to be read as a macro that transforms source code, not as an object-level function.
 
 Function expressions take an additional argument, the continuation `k`:
 
@@ -360,7 +362,7 @@ function(x, y, ...){
 
 // After CPS
 function(k, x, y, ...){
-  // cpsTransform(body, "k")
+  CpsTransform(body, "k")
 }
 ~~~~
 
@@ -374,8 +376,8 @@ f(x)
 f(k, x)
 
 // After CPS (when f and x are compound expressions):
-cpsTransform(f, function(_f){
-  cpsTransform(x, function(_x){
+CpsTransform(f, function(_f){
+  CpsTransform(x, function(_x){
     _f(k, _x)
   })
 })
