@@ -4,8 +4,11 @@ title: Early, incremental evidence
 description: Inserting and commuting factor statements to get the right incremental sequencing.
 ---
 
+Many models that are important in applications have very large state spaces such that, when the model is naively written, no information becomes available to guide inference until the very end on the computation. This makes it very hard for sequential exploration strategies (such as enumeration and particle filtering) to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally we will consider a harder class of models with 'global' conditions.
 
-# The basic HMM
+# Unfolding data structures
+
+## The HMM
  
 All of the below assume that `transition` is a stochastic transition function from hidden states to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
 
@@ -17,35 +20,17 @@ var transition = function(s) {
 var observe = function(s) {
   return s ? flip(0.9) : flip(0.1)
 }
-
-var init = function() {
-  return flip(0.5)
-}
 ~~~
 
-And we will initially use this helper function to compare arrays:
+Here is a fairly standard version of the HMM:
 
 ~~~
-var arrayEq = function(a, b){
-  return a.length == 0 ? true : a[0]==b[0] & arrayEq(a.slice(1), b.slice(1))
-}
-~~~
-
-First here is a fairly standard, 'direct', version that never explicitly represents the partial state sequences:
-
-~~~
-var hmminit = function(){
-  var s = init(); 
-  return {states: [s], observations: [observe(s)]};
-}
-
 var hmm = function(n) {
-  var prev = (n==1) ? hmminit() : hmm(n-1)
+  var prev = (n==1) ? {states: [true], observations:[]} : hmm(n-1)
   var newstate = transition(prev.states[0])
   var newobs = observe(newstate)
-  var next = {states: prev.states.concat([newstate]),
-              observations: prev.observations.concat([newobs])}
-  return next
+  return {states: prev.states.concat([newstate]),
+          observations: prev.observations.concat([newobs])}
 }
 
 hmm(4)
@@ -55,52 +40,66 @@ We can condition on some observed states:
 
 ~~~
 //some true observations (the data we observe):
-var trueobs = [true, true, true]
+var trueobs = [false, false, false]
+
+var arrayEq = function(a, b){
+  return a.length == 0 ? true : a[0]==b[0] & arrayEq(a.slice(1), b.slice(1))
+}
 
 print(Enumerate(function(){
-  var r = hmm(2)
+  var r = hmm(3)
   factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )
   return r.states
 }, 100))
 ~~~
 
-We could also do inference with a particle filter (or other method):
+Notice that if we allow `Enumerate` only a few executions (the last argument) it will not find the correct state: it doesn't realize until 'the end' that the observations must match the `trueobs` and hence the hidden state is likely to have been `[false, false, false]`.
+
+## The PCFG
+
+The PCFG is very similar to the HMM, except it has an underlying tree (instead of linear) structure.
 
 ~~~
-var trueobs = [true, true, true]
 
-print(ParticleFilter(function(){
-  var r = hmm(2)
-  factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )
-  return r.states
-}, 500))
-~~~
-
-# Exposing the intermediate state
-
-This version is equivalent, but recurses the other way, and passes along the partial state sequences more explicitly:
-
-~~~
-var hmm_recur = function(n, states, observations){
-  var newstate = transition(states[0])
-  var newobs = observe(newstate)
-  var states = states.concat([newstate])
-  var observations = observations.concat([newobs])
-  return (n==1) ? {states: states, observations: observations} : 
-                  hmm_recur(n-1,states,observations)
+var transition = function(symbol) {
+  var rules = {'start': {rhs: [['NP', 'V', 'NP'], ['NP', 'V']], probs: [0.8, 0.2]},
+  		    'NP': {rhs: [['A', 'NP'], ['N']], probs: [0.8, 0.2]} }
+  return rules[symbol].rhs[ discrete(rules[symbol].probs) ]
 }
 
-var hmm = function(n) {
-  var s = init()
-  return hmm_recur(n,[s],[observe(s)])
+var preTerminal = function(symbol) {
+  return symbol=='N' | symbol=='V' | symbol=='A'
 }
 
-hmm(4)
+var terminal = function(symbol) {
+  var rules = {'N': {words: ['John', 'soup'], probs: [0.6, 0.4]},
+  		    'V': {words: ['loves', 'hates', 'runs'], probs: [0.3, 0.3, 0.4]},
+		    'A': {words: ['tall', 'salty'], probs: [0.5, 0.5]} }
+  return rules[symbol].words[ discrete(rules[symbol].probs) ]
+}
+
+
+var pcfg = function(symbol) {
+    preTerminal(symbol) ? [terminal(symbol)] : expand(transition(symbol))
+}
+
+var expand(symbols) {
+    return symbols.length==0 ? [] : pcfg(symbols[0]).concat(expand(symbols.slice(1)))
+}
+
+Enumerate(function(){
+            var y = pcfg("start")
+            factor(y.slice(0,2) == "hi there".split(" ") ?0:-Infinity) //yield starts with "hi there"
+            return y[2] //distribution on next word?
+          }, 100)
 ~~~
+
 
 
 # Decomposing and interleaving factors
 
+To see how we can provide evidence earlier in the computation execution, first consider a simpler model:
+
 ~~~
 var binomial = function(){
     var a = sample(bernoulliERP, [0.1])
@@ -113,7 +112,7 @@ var binomial = function(){
 print(Enumerate(binomial, 2))
 ~~~
 
-First, we can move the factor up, to the point when it's first dependency is bound:
+It is clear first of all that we can move the factor up, to the point when it's first dependency is bound. In general factor statements can be moved anywhere in the same control scope as they started (i.e. they must be reached in the same program executions and not cross a marginalization boundary). In this case:
 
 ~~~
 var binomial = function(){
@@ -127,7 +126,7 @@ var binomial = function(){
 print(Enumerate(binomial, 2))
 ~~~
 
-Next we can break this factor into an equivalent two factors, and again move one of them up:
+But we can do much better by noticing that this factor can be broken into an equivalent two factors, and again one can be moves up:
 
 ~~~
 var binomial = function(){
@@ -141,6 +140,98 @@ var binomial = function(){
 
 print(Enumerate(binomial, 2))
 ~~~
+
+Notice that this version will find the best execution very early!
+
+
+## Exposing the intermediate state for HMM and PCFG
+
+In order to apply the above tricks (decomposing and moving up factors) for the more complex models it helps to put them into a form that explicitly constructs the intermediate states.
+This version of the HMM is equivalent to the earlier one, but recurses the other way, passing along the partial state sequences:
+
+~~~
+var hmmRecur = function(n, states, observations){
+  var newstate = transition(states[0])
+  var newobs = observe(newstate)
+  var states = states.concat([newstate])
+  var observations = observations.concat([newobs])
+  return (n==1) ? {states: states, observations: observations} : 
+                  hmmRecur(n-1,states,observations)
+}
+
+var hmm = function(n) {
+  var s = init()
+  return hmmRecur(n,[s],[observe(s)])
+}
+
+var trueobs = [true, true, true]
+
+print(Enumerate(function(){
+  var r = hmm(2)
+  factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )
+  return r.states
+}, 100))
+~~~
+
+Similarly the PCFG can be written as:
+
+~~~
+var pcfg = function(symbol, yieldsofar) {
+    return terminal(symbol) ? yieldsofar.concat([symbol]) : expand(transition(symbol), yieldsofar)
+}
+
+var expand(symbols, yieldsofar) {
+    return symbols.length==0 ? yieldsofar : expand(symbols.slice(1), pcfg(symbols[0], yieldsofar))
+}
+~~~
+
+
+
+## Incrementalizing the HMM and PCFG
+
+We can now decompose and move factors. In the HMM we first observe that the factor `factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )` can be seen as `factor(r.observations[0]==trueobs[0] ? 0 : -Infinity); factor(r.observations[1]==trueobs[1] ? 0 : -Infinity); ...`. Then we observe that these factors can be moved 'up' into the recursion to give:
+
+~~~
+var trueobs = [true, true, true]
+
+var hmmRecur = function(n, states, observations){
+  var newstate = transition(states[0])
+  var newobs = observe(newstate)
+  factor(newobs==trueobs[observations.length] ? 0 : -Infinity)
+  var states = states.concat([newstate])
+  var observations = observations.concat([newobs])
+  return (n==1) ? {states: states, observations: observations} : 
+                  hmmRecur(n-1,states,observations)
+}
+
+var hmm = function(n) {
+  var s = init()
+  var obs = observe(s)
+  factor(obs==trueobs[0] ? 0 : -Infinity)
+  return hmmRecur(n,[s],[obs])
+}
+
+print(Enumerate(function(){
+  var r = hmm(2)
+  return r.states
+}, 100))
+~~~
+
+Try varying the number of executions explored, in this version and the original version, starting with just 1 and increasing... how do they differ?
+
+(There are two more optimizations we could do: If we incorporate the factor when we actually sample newobs, then we would only try observations consistent with trueobs. To do so we need to marginalize out `observe(..)` (to get an immediate ERP sample) and then use `sampleWithFactor(..)` to simultaneously sample and incorporate the factor -- but we haven't implemented `sampleWithFactor` yet in WebPPL. Second, we could achieve dynamic programming by inserting additional marginal operators at the boundary of `hmmRecur`, and caching them.)
+
+
+Similarly for the PCFG:
+
+~~~
+
+~~~
+
+
+
+# Global factors: inserting heuristics
+
 
 What if we can't decompose the factor into separate pieces? For instance in:
 

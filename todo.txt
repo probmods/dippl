@@ -1,30 +1,27 @@
 CPS:
-- think about smarter CPS that generates fewer garbage redexes..
+- getting rid of the stupid f(_?){…}(undefined) from CPS.
 
 Inference:
 - maybe implement the particle cascade just to see how it works?
-- high-level idioms for incremental factors. PCFG?
 
 Browser integration:
 - script tag compilation / execution
-* run javascript code from appropriately tagged boxes (tag in md or in first line comment?).
+- smart pages examples
 
 
 
 Lectures:
 
-- foundations?
-
 - sequentializing factors
   -merge hmm and lec04 pages:
-   -intro hmm
+   -intro hmm and pcfg
    -show breaking and moving factors in binomial
-   -show breaking and moving in hmm
+   -show breaking and moving in hmm and pcfg
+
    -talk about heuristic canceling factor pairs
    -do binomial example with heuristic pairs
    -do vision example (in this page or point to other one), compare non-incremental
 
-  -pcfg: basic and incrementalized (posterior predictive, since it’s easier)
 
   -in pragmatics:
    -incremental world construction with heuristic factor(meaning(utt,worldSoFar)?0:-10)
@@ -46,5 +43,12 @@ Lectures:
 - pcfgs…
 
 - shootout
+
+- foundations
+
+
+
+
+
 
 
