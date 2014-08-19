@@ -12,16 +12,7 @@ Browser integration:
 Lectures:
 
 - sequentializing factors
-  -merge hmm and lec04 pages:
-   -intro hmm and pcfg
-   -show breaking and moving factors in binomial
-   -show breaking and moving in hmm and pcfg
-
-   -talk about heuristic canceling factor pairs
-   -do binomial example with heuristic pairs
-   -do vision example (in this page or point to other one), compare non-incremental
-
-
+  -cooler vision example?
   -in pragmatics:
    -incremental world construction with heuristic factor(meaning(utt,worldSoFar)?0:-10)
    [-does this favor indirect composition where meaning can be computed before world?]

@@ -269,7 +269,7 @@ print(Enumerate(function(){
 
 
 
-# Global factors: inserting heuristics
+# Global factors: inserting canceling heuristic factors
 
 
 What if we can't decompose the factor into separate pieces? For instance in:
@@ -301,5 +301,7 @@ var binomial = function(){
 
 print(Enumerate(binomial, 2))
 ~~~
+
+This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For an example of this technique, see the [vision example](vision.html).
 
 
