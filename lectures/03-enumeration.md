@@ -271,14 +271,14 @@ currScore = 0
 function sample(cont, erp, params) {
   var sup = erp.support(params)
   sup.forEach(function(s){
-  var newscore = currScore + erp.score(s,params);
+  var newscore = currScore + erp.score(params, s);
   unexploredFutures.push({k: function(){cont(s)}, score: newscore})})
   runNext()
 }
 
 function runNext(){
   var next = unexploredFutures.pop()
-  currscore = next.score
+  currScore = next.score
   next.k()}
 
 returnHist = {}
