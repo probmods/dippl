@@ -407,7 +407,7 @@ The auto-updating form below shows the transform that we actually use for WebPPL
 
 
 
-# Best-first enumeration
+## Best-first enumeration
 
 Above we have maintained a first-in-last-out queue of continuations; this results in a depth-first search strategy over program executions. Often a more useful approach is to enumerate the highest priority continuation first, based on some heuristic notion of priority. For instance, using the score-so-far as priority results in a most-likely-first strategy. We can achieve this by simply changing the above code to use a priority queue (instead of `push` and `pop`). 
 
