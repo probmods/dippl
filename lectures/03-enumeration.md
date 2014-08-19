@@ -26,7 +26,7 @@ We can view `sample` and `factor` as simple 'side-computations' for exploring th
 ~~~
 // language: javascript
 
-function sampleFirst(erp, params) {
+function sample(erp, params) {
   return erp.support()[0]
 }
 
@@ -35,9 +35,9 @@ function ExploreFirst(comp) {
 }
 
 var binomial = function(){
-  var a = sampleFirst(bernoulliERP, [0.5])
-  var b = sampleFirst(bernoulliERP, [0.5])
-  var c = sampleFirst(bernoulliERP, [0.5])
+  var a = sample(bernoulliERP, [0.5])
+  var b = sample(bernoulliERP, [0.5])
+  var c = sample(bernoulliERP, [0.5])
   return a + b + c
 }
 
