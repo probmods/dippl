@@ -15,23 +15,36 @@ Lectures:
 
 - foundations?
 
-- Enumeration:
-  - first simple function implementation on sample, continues on first element of support.
-  - but… want to explore multiple returns from same sample… need re-enterable “futures”.
-  - introduce continuations, with examples.
-  - show sketch of enumeration *if* sample gets K — i.e. coroutine.
-  - CPS to make K available.
+- sequentializing factors
+  -merge hmm and lec04 pages:
+   -intro hmm
+   -show breaking and moving factors in binomial
+   -show breaking and moving in hmm
+   -talk about heuristic canceling factor pairs
+   -do binomial example with heuristic pairs
+   -do vision example (in this page or point to other one), compare non-incremental
 
-  - implementing enumeration for real…
+  -pcfg: basic and incrementalized (posterior predictive, since it’s easier)
+
+  -in pragmatics:
+   -incremental world construction with heuristic factor(meaning(utt,worldSoFar)?0:-10)
+   [-does this favor indirect composition where meaning can be computed before world?]
+
+   -extended integrated language
+   -incremental speaker where word string is constructed with heuristic factor:
+     factor( mean(map(completions(uttSoFar), function(c){return literalListener(c).score(world)})))
 
 
-  - using CPS, simple version w/o scores, with scores, priority queue
-  - pragmatics example
-  - caching (interpolation?)
 
+- Particle filter
+- Beam search??
+- PMCMC…
+- awesomer vision example
 
+- MH??
 
-- Particle filter…
+- pcfgs…
 
+- shootout
 
 
