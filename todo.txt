@@ -1,26 +1,29 @@
 CPS:
 - getting rid of the stupid f(_?){…}(undefined) from CPS.
+- get external function call business straightened out?
 
 Inference:
-- maybe implement the particle cascade just to see how it works?
+- implement the particle cascade just to see how it works.
+- benchmark against webchurch, maybe do some profiling
+- clean up and simplify codebase
+- automating some of the factor splitting, moving, inserting stuff?
 
-Browser integration:
+Integration:
 - script tag compilation / execution
 - smart pages examples
+- church to webppl compiler (based on webchurch or sweet macros)
+
+Ideas and examples:
+- incremental speaker where word string is constructed with heuristic factor:
+     factor( mean(map(completions(uttSoFar), function(c){return literalListener(c).score(world)})))
+- cooler vision example
+- idioms or constructs for managing heuristic factors (so that they will cancel eventually).
+- learning the best heuristic factors.
+
+
 
 
 Lectures:
-
-- sequentializing factors
-  -cooler vision example?
-  -in pragmatics:
-   -incremental world construction with heuristic factor(meaning(utt,worldSoFar)?0:-10)
-   [-does this favor indirect composition where meaning can be computed before world?]
-
-   -extended integrated language
-   -incremental speaker where word string is constructed with heuristic factor:
-     factor( mean(map(completions(uttSoFar), function(c){return literalListener(c).score(world)})))
-
 
 
 - Particle filter
@@ -29,8 +32,6 @@ Lectures:
 - awesomer vision example
 
 - MH??
-
-- pcfgs…
 
 - shootout
 

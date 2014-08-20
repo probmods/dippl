@@ -6,7 +6,7 @@ description: A Bayesian literal listener who conditions on the meaning of a sent
 
 We implement a Bayesian language comprehender on top of a syntactic-semantic parsing system based on (combinatory) categorial grammar.
 
-# The world and the listener
+## The world and the listener
 
 The literal listener simply infers likely worlds assuming the meaning is true in the world:
 
@@ -34,7 +34,7 @@ var worldPrior = function(objs) {
 }
 ~~~
 
-# The parser
+## The parser
 
 Notice that we have written the `meaning` function as taking the utterance and world and returning a (model-theoretic) denotation -- a truth value when the utterance is a sentence. The motivation for doing things this way, rather than breaking it up into a meaning function that builds an 'LF' form which is then separately applied to the world, is well described by the introduction to Jacobson (1999):
 
@@ -185,9 +185,9 @@ print(literalListener("all blond people are nice"))
 
 
 
-# Incremental world building 
+## Incremental world building 
 
-The above version of semantic parsing constructs an entire world *and* an entire meaning before trying to enforce that the meaning is true of the world. We would like to make either the world construction or the parsing more incremental... Below we give a version that uses the [canceling heuristic factors]() trick to encourage the world to be one in which the constructed meaning is true, incrementally as we add objects to the world.
+The above version of semantic parsing constructs an entire world *and* an entire meaning before trying to enforce that the meaning is true of the world. We would like to make either the world construction or the parsing more incremental... Below we give a version that uses the [canceling heuristic factors](04-factorseq.html#inserting-canceling-heuristic-factors) trick to encourage the world to be one in which the constructed meaning is true, incrementally as we add objects to the world.
 
 Two changes are involved. First we adapt the `worldPrior` to allow canceling factors. Second, this version constructs a function from world to truth value, which can then be used several times while the world is constructed. That is, we depart from direct compositionality, in building 'delayed' denotations that await the world.
 
