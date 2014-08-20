@@ -268,7 +268,7 @@ drawPoints(canvas, points)
 ~~~~
 
 
-## You could have invented particle filters
+## Importance sampling
 
 How can we estimate the marginal distribution for models such as the ones above?
 
@@ -407,82 +407,71 @@ var PriorSampler = function(cpsComp, numSamples){
 PriorSampler(runCpsHmm, 10);
 ~~~~
 
-The factors tell us that we should be sampling some paths more often, and some paths less often. Let's accumulate the factor weights with each sample. Also, let's call samples particles.
+The factors tell us that we should be sampling some paths more often, and some paths less often. If we knew the total factor for each path, we would know which paths we "oversampled" by how much, and which paths we "undersampled". 
 
-With weights:
+Let's accumulate the factor weights with each sample:
 
 ~~~~
 // language: javascript
 
-var cpsHmm = function(k, states, observations){
-  var prevState = states[states.length - 1];
-  sample(
-    function(state){
-      factor(
-        function(){
-          if (observations.length == 0) {
-            return k(states);
-          } else {
-            return cpsHmm(k, states.concat([state]), observations.slice(1));
-          }      
-        },        
-        (state == observations[0]) ? 0 : -1);
-    },    
-    bernoulliERP, 
-    [prevState ? .9 : .1]);
-}
+var startCpsComp = undefined;
+var samples = [];
+var sampleIndex = 0;
 
-var runCpsHmm = function(k){
-  var observations = [true, true, true, true];
-  var startState = false;  
-  return cpsHmm(k, [startState], observations);
-}
-
-
-var restart = undefined;
-var particles = [];
-var activeParticle = 0;
-
-var factor = function(k, score){
-  particles[activeParticle].weight += score;
+var _factor = function(k, score){
+  samples[sampleIndex].score += score; // NEW
   k(undefined);
 }
 
-var exit = function(value){
+var priorExit = function(value){
   
-  particles[activeParticle].value = value;
+  // Store sampled value
+  samples[sampleIndex].value = value;
   
-  if (!(activeParticle == (particles.length - 1))){
-    activeParticle += 1;
-    return restart(exit);
+  if (sampleIndex < samples.length-1){
+    // If samples left, restart computation for next sample
+    sampleIndex += 1;
+    return startCpsComp(priorExit);
+  } else {  
+    // Print all samples
+    samples.forEach(jsPrint);
   }
-
-  particles.forEach(jsPrint);
 };
 
-var SampleWithWeights = function(cpsComp, numParticles){  
 
-  // Store continuation for beginning
-  restart = cpsComp;
-  
-  // Create initial particles
-  for (var i=0; i<numParticles; i++) {
-    var particle = {
-      weight: 0,
-      value: undefined
+var PriorSamplerWithWeights = function(cpsComp, numSamples){  
+
+  // Create placeholders for samples
+  for (var i=0; i<numSamples; i++) {
+    var sample = {
+      index: i,
+      value: undefined,
+      score: 0 // NEW
     };
-    particles.push(particle);
+    samples.push(sample);
   }
+  
   // Run computation from beginning
-  restart(exit);
+  startCpsComp = cpsComp;  
+  startCpsComp(priorExit);
 }
 
-SampleWithWeights(runCpsHmm, 10);
+
+PriorSamplerWithWeights(runCpsHmm, 10);
 ~~~~
 
-Importance sampling
+Looking at the results, the paths that we oversampled the most -- the paths with the lowest weights -- are paths that result in value `[false,false,false,false,false]`. This makes sense: this execution is very likely under the prior, but for our observations `[true, true, true, true]`, it is not a good explanation.
 
-.. for the Gaussian mixture model
+TODO: Importance sampling math
+
+TODO: Importance sampling for the Gaussian mixture model
+
+
+## Resampling
+
+What if we want samples instead?
+
+...
 
 Resampling at the end (importance sampling with resampling):
 
@@ -516,6 +505,8 @@ var exit = function(value){
 
 SampleWithWeights(runCpsHmm, 10);
 ~~~~
+
+## Particle filters
 
 Resampling at factors (particle filter):
 
