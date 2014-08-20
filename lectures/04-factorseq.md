@@ -6,9 +6,9 @@ description: Inserting and commuting factor statements to get the right incremen
 
 Many models that are important in applications have very large state spaces such that, when the model is naively written, no information becomes available to guide inference until the very end on the computation. This makes it very hard for sequential exploration strategies (such as enumeration and particle filtering) to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally we will consider a harder class of models with 'global' conditions.
 
-# Unfolding data structures
+## Unfolding data structures
 
-## The HMM
+### The HMM
  
 All of the below assume that `transition` is a stochastic transition function from hidden states to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
 
@@ -55,7 +55,7 @@ print(Enumerate(function(){
 
 Notice that if we allow `Enumerate` only a few executions (the last argument) it will not find the correct state: it doesn't realize until 'the end' that the observations must match the `trueobs` and hence the hidden state is likely to have been `[false, false, false]`.
 
-## The PCFG
+### The PCFG
 
 The PCFG is very similar to the HMM, except it has an underlying tree (instead of linear) structure.
 
@@ -106,7 +106,7 @@ print(Enumerate(function(){
 This program computes the probability distribution on the next word of a sentence that starts 'tall John...'. It finds a few parses that start this way... but this grammar was specially chosen to place the highest probability on such sentences. Try looking for completions of 'salty soup...' and you will be less happy.
 
 
-# Decomposing and interleaving factors
+## Decomposing and interleaving factors
 
 To see how we can provide evidence earlier in the execution for models such as the above, first consider a simpler model:
 
@@ -154,7 +154,7 @@ print(Enumerate(binomial, 2))
 Notice that this version will find the best execution very early!
 
 
-## Exposing the intermediate state for HMM and PCFG
+### Exposing the intermediate state for HMM and PCFG
 
 In order to apply the above tricks (decomposing and moving up factors) for the more complex models it helps to put them into a form that explicitly constructs the intermediate states.
 This version of the HMM is equivalent to the earlier one, but recurses the other way, passing along the partial state sequences:
@@ -211,7 +211,7 @@ print(Enumerate(function(){
 
 
 
-## Incrementalizing the HMM and PCFG
+### Incrementalizing the HMM and PCFG
 
 We can now decompose and move factors. In the HMM we first observe that the factor `factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )` can be seen as `factor(r.observations[0]==trueobs[0] ? 0 : -Infinity); factor(r.observations[1]==trueobs[1] ? 0 : -Infinity); ...`. Then we observe that these factors can be moved 'up' into the recursion to give:
 
@@ -269,7 +269,7 @@ print(Enumerate(function(){
 
 
 
-# Global factors: inserting canceling heuristic factors
+## Global factors: inserting canceling heuristic factors
 
 
 What if we can't decompose the factor into separate pieces? For instance in:
