@@ -23,7 +23,7 @@ function isErpWithSupport(x){
   return (isErp(x) && (x.support != undefined));
 }
 
-function print(k, x){
+function jsPrint(x){
   var resultDiv = $(activeCodeBox.parent().find(".resultDiv"));
   if (isErpWithSupport(x)){
     var params = Array.prototype.slice.call(arguments, 2);
@@ -34,6 +34,10 @@ function print(k, x){
   } else {
     resultDiv.append(document.createTextNode(x + "\n"));
   }
+}
+
+function print(k, x){
+  jsPrint(x);
   k();
 }
 
@@ -80,11 +84,11 @@ function DrawObject(width, height, visible){
   this.redraw();
 }
 
-DrawObject.prototype.newPath = function(){
+DrawObject.prototype.newPath = function(strokeWidth, opacity){
   var path = new this.paper.Path();
   path.strokeColor = 'black';
-  path.strokeWidth = 8;
-  path.opacity = 0.6;
+  path.strokeWidth = strokeWidth || 8;
+  path.opacity = opacity || 0.6;
   return path;
 };
 
@@ -92,8 +96,15 @@ DrawObject.prototype.newPoint = function(x, y){
   return new this.paper.Point(x, y);
 };
 
-DrawObject.prototype.line = function(x1, y1, x2, y2){
-  var path = this.newPath();
+DrawObject.prototype.circle = function(x, y, fillColor, radius){
+  var point = this.newPoint(x, y);
+  var circle = new this.paper.Path.Circle(point, radius || 50);
+  circle.fillColor = fillColor || 'black';
+  this.redraw();
+};
+
+DrawObject.prototype.line = function(x1, y1, x2, y2, strokeWidth, opacity){
+  var path = this.newPath(strokeWidth, opacity);
   path.moveTo(x1, y1);
   path.lineTo(this.newPoint(x2, y2));
   this.redraw();
@@ -207,10 +218,10 @@ function setupCodeBox(element){
     try {
       var compiled = webppl.compile(cm.getValue(), true);
       eval.call(window, compiled);
-    } catch (err) {
-      resultDiv.show();
-      resultDiv.append(document.createTextNode((err.stack)));
-      throw err;
+    // } catch (err) {
+    //   resultDiv.show();
+    //   resultDiv.append(document.createTextNode((err.stack)));
+      // throw err;
     } finally {
       // topK = oldTopK;
       // activeCodeBox = oldActiveCodeBox;
