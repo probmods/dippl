@@ -27,7 +27,7 @@ Here is a fairly standard version of the HMM:
 ~~~
 var hmm = function(n) {
   var prev = (n==1) ? {states: [true], observations:[]} : hmm(n-1)
-  var newstate = transition(prev.states[0])
+  var newstate = transition(prev.states[prev.states.length-1])
   var newobs = observe(newstate)
   return {states: prev.states.concat([newstate]),
           observations: prev.observations.concat([newobs])}
@@ -160,8 +160,16 @@ In order to apply the above tricks (decomposing and moving up factors) for the m
 This version of the HMM is equivalent to the earlier one, but recurses the other way, passing along the partial state sequences:
 
 ~~~
+var transition = function(s) {
+  return s ? flip(0.7) : flip(0.3)
+}
+
+var observe = function(s) {
+  return s ? flip(0.9) : flip(0.1)
+}
+
 var hmmRecur = function(n, states, observations){
-  var newstate = transition(states[0])
+  var newstate = transition(states[states.length-1])
   var newobs = observe(newstate)
   var states = states.concat([newstate])
   var observations = observations.concat([newobs])
@@ -216,10 +224,18 @@ print(Enumerate(function(){
 We can now decompose and move factors. In the HMM we first observe that the factor `factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )` can be seen as `factor(r.observations[0]==trueobs[0] ? 0 : -Infinity); factor(r.observations[1]==trueobs[1] ? 0 : -Infinity); ...`. Then we observe that these factors can be moved 'up' into the recursion to give:
 
 ~~~
+var transition = function(s) {
+  return s ? flip(0.7) : flip(0.3)
+}
+
+var observe = function(s) {
+  return s ? flip(0.9) : flip(0.1)
+}
+
 var trueobs = [false, false, false]
 
 var hmmRecur = function(n, states, observations){
-  var newstate = transition(states[0])
+  var newstate = transition(states[states.length-1])
   var newobs = observe(newstate)
   factor(newobs==trueobs[observations.length] ? 0 : -Infinity)
   var states = states.concat([newstate])
@@ -295,7 +311,7 @@ var observe = cache(function(s) {
 var trueobs = [false, false, false]
 
 var hmmRecur = function(n, states, observations){
-  var newstate = transition(states[0])
+  var newstate = transition(states[states.length-1])
 //  var newobs = sample(observe(newstate))
 //  factor(newobs==trueobs[observations.length] ? 0 : -Infinity)
   var newobs = sampleWithFactor(observe(newstate),[],
@@ -320,7 +336,7 @@ print(Enumerate(function(){
 
 
 
-## Global factors: inserting canceling heuristic factors
+## Inserting canceling heuristic factors
 
 
 What if we can't decompose the factor into separate pieces? For instance in:
@@ -353,6 +369,9 @@ var binomial = function(){
 print(Enumerate(binomial, 2))
 ~~~
 
-This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For an example of this technique, see the [vision example](vision.html).
+This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For examples of this technique, see the incremental versions of the [semantic parsing example](semanticparsing.html) and the [vision example](vision.html).
+
+There is no reason not to *learn* heuristic factors that help guide search, as long as they cancel by the end they won't compromise the correctness of the computed distribution (in the limit). While it wouldn't be worth the time to learn heuristic factors for a single marginalization, it may be very useful to do so across multiple related marginal distributions -- this is an example of *amortized* or *meta-* inference. (Note this is a topic of ongoing research by the authors....)
+
 
 
