@@ -60,7 +60,7 @@ Notice that if we allow `Enumerate` only a few executions (the last argument) it
 The PCFG is very similar to the HMM, except it has an underlying tree (instead of linear) structure.
 
 ~~~
-var transition = function(symbol) {
+var pcfgtransition = function(symbol) {
   var rules = {'start': {rhs: [['NP', 'V', 'NP'], ['NP', 'V']], probs: [0.4, 0.6]},
                'NP': {rhs: [['A', 'NP'], ['N']], probs: [0.4, 0.6]} }
   return rules[symbol].rhs[ discrete(rules[symbol].probs) ]
@@ -79,7 +79,7 @@ var terminal = function(symbol) {
 
 
 var pcfg = function(symbol) {
-  preTerminal(symbol) ? [terminal(symbol)] : expand(transition(symbol))
+  preTerminal(symbol) ? [terminal(symbol)] : expand(pcfgtransition(symbol))
 }
 
 var expand = function(symbols) {
@@ -198,7 +198,7 @@ Similarly the PCFG can be written as:
 
 ~~~
 var pcfg = function(symbol, yieldsofar) {
-  return preTerminal(symbol) ? yieldsofar.concat([terminal(symbol)]) : expand(transition(symbol), yieldsofar)
+  return preTerminal(symbol) ? yieldsofar.concat([terminal(symbol)]) : expand(pcfgtransition(symbol), yieldsofar)
 }
 
 var expand = function(symbols, yieldsofar) {
@@ -267,7 +267,7 @@ var pcfg = function(symbol, yieldsofar, trueyield) {
     }
     return yieldsofar.concat([t])
   } else {
-    return expand(transition(symbol), yieldsofar, trueyield) }
+    return expand(pcfgtransition(symbol), yieldsofar, trueyield) }
 }
 
 var expand = function(symbols, yieldsofar, trueyield) {
