@@ -74,9 +74,9 @@ This simple Rational Speech Acts model was introduced in Frank and Goodman (2012
 
 
 
-# Optimizing inference
+## Optimizing inference
 
-## Combining factor and sample
+### Combining factor and sample
 
 The search space in `speaker` and `literalListener` is needlessly big because the factors provide hard constraints on what the embedded listener/speaker can return. Indeed, `factor( v == sample(e) ?0:-Infinity)` for an ERP `e` is equivalent to `factor(e.score(v))`.
 
@@ -103,7 +103,7 @@ print(listener("some of the people are nice"))
 ~~~
 
 
-## Caching
+### Caching
 
 ~~~
 var literalListener = cache(function(utterance) {
@@ -140,7 +140,7 @@ print(listener("some of the people are nice"))
 
 
 
-# With semantic parsing
+## With semantic parsing
 
 What if we want more complex worlds, and don't want to hard code the meaning of sentences? The section on [semantic parsing](semantic parsing.html) shows how to implement a literal listener that does a CCG-like parsing process, to compute the meaning value of a sentence in a world by 'direct compositionality'. We can simply plug that parsing model in to the above pragmatic speaker and listener.
 (Note: still debugging this one...)
@@ -282,7 +282,7 @@ listener("some of the blond people are nice")
 
 
 <!---
-# With free indices
+## With free indices
 
 --->
 

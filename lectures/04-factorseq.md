@@ -369,7 +369,7 @@ var binomial = function(){
 print(Enumerate(binomial, 2))
 ~~~
 
-This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For examples of this technique, see the incremental versions of the [semantic parsing example](semanticparsing.html) and the [vision example](vision.html).
+This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For examples of this technique, see the [incremental semantic parsing example](semanticparsing.html#incremental-world-building) and the [vision example](vision.html).
 
 There is no reason not to *learn* heuristic factors that help guide search, as long as they cancel by the end they won't compromise the correctness of the computed distribution (in the limit). While it wouldn't be worth the time to learn heuristic factors for a single marginalization, it may be very useful to do so across multiple related marginal distributions -- this is an example of *amortized* or *meta-* inference. (Note this is a topic of ongoing research by the authors....)
 
