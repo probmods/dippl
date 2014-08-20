@@ -7,6 +7,11 @@ description: Simple parsing models. Sequential Monte Carlo techniques.
 
 ## Models with large state spaces
 
+For many models with large state spaces, enumeration is infeasible, even if we use smart prioritization. This is particularly clear for models with continuous random variables, where the state space is infinite. 
+
+Let's look at a few examples.
+
+
 ### Vision
 
 ~~~~
@@ -263,21 +268,27 @@ drawPoints(canvas, points)
 ~~~~
 
 
-## Importance sampling
+## You could have invented particle filters
 
-- for gaussian mixture model
-- add ImportanceSample alias for particle filtering that only allows a single factor
+How can we estimate the marginal distribution for models such as the ones above?
 
+If there are a large number of execution paths, it is clear that we cannot explore all paths individually. This leaves two possibilities: either we reason about paths more abstractly, or we explore only a subset of paths. In these notes, we focus on the second possibility[^1].
 
-## Particle filter
+[^1]: Dynamic Programming (caching) can be viewed as an instance of reasoning about many concrete paths at once.
 
-The HMM revisited:
+Previously, we have enumerated paths using depth-first search, breadth-first search, and a probability-based priority queue. However, this approach can result in an unrepresentative set of paths for models with large state spaces, and for uncountably infinite state spaces it isn't even clear what exactly we are enumerating.
+
+Random sampling is a promising alternative: if we could sample paths in proportion to their (unnormalized) probability, we could easily get a representative picture of the marginal distribution.
+
+Let's go back to the HMM and let's think about how we could make this work.
+
+Here is a simple HMM with binary states and observations:
 
 ~~~~
 var hmm = function(states, observations){
   var prevState = states[states.length - 1];
   var state = sample(bernoulliERP, [prevState ? .9 : .1]);
-  // factor((state == observations[0]) ? 0 : -1);
+  factor((state == observations[0]) ? 0 : -2);
   if (observations.length == 0) {
     return states;
   } else {
@@ -288,23 +299,25 @@ var hmm = function(states, observations){
 var observations = [true, true, true, true];
 var startState = false;
 
-print(hmm([startState], observations))
+print(Enumerate(
+  function(){
+    return hmm([startState], observations)
+  }
+))
 ~~~~
 
-The HMM in continuation-passing style:
+This HMM prefers subsequent states to be similar, and it prefers observations to be similar to the latent state. By far the most likely explanation for the observations `[true, true, true, true]` is that most of the latent states are `true` as well.
+
+As in [lecture 3](/esslli2014/lectures/03-enumeration.html), we are going to think about exploring the computation paths of this model in some detail. For this purpose, it will be helpful to have the HMM available in continuation-passing style:
 
 ~~~~
 // language: javascript
 
-var factor = function(k, score){
-  k(undefined);
-}
-
 var cpsHmm = function(k, states, observations){
   var prevState = states[states.length - 1];
-  sample(
+  _sample(
     function(state){
-      factor(
+      _factor(
         function(){
           if (observations.length == 0) {
             return k(states);
@@ -323,39 +336,75 @@ var runCpsHmm = function(k){
   var startState = false;  
   return cpsHmm(k, [startState], observations);
 }
-
-runCpsHmm(jsPrint);
 ~~~~
 
-Unweighted sampling:
+We use `_sample` and `_factor` so that we can redefine these functions without overwriting the webppl `sample` and `factor` functions. For now, we define sample to simply sample according to the random primitive's distribution, and factor to do nothing:
 
 ~~~~
 // language: javascript
 
-var runCpsHmm = function(k){
-  var observations = [true, true, true, true];
-  var startState = false;  
-  return cpsHmm(k, [startState], observations);
-}
-
-
-var factor = function(k, score){
+var _factor = function(k, score){
   k(undefined);
 }
 
-var exit = function(x){
-  jsPrint(x)
+var _sample = function(k, erp, params){
+  return sample(k, erp, params);
 }
+~~~~
 
-var SampleUnweighted = function(cpsComp, n){  
-  var samples = []
-  for (var i=0; i<n; i++){
-    samples.push(cpsComp(exit));
+If we run the HMM with these sample and factor functions, we see that we sample latent states that reflect the prior distribution of the hmm, but not the posterior distribution that takes into account observations using factors:
+
+~~~~
+// language: javascript
+
+runCpsHmm(jsPrint);
+~~~~
+
+Let's write some scaffolding so that we can take multiple samples from the prior -- i.e. without taking into account factors -- more easily:
+
+~~~~
+// language: javascript
+
+
+var startCpsComp = undefined;
+var samples = [];
+var sampleIndex = 0;
+
+
+var priorExit = function(value){
+  
+  // Store sampled value
+  samples[sampleIndex].value = value;
+  
+  if (sampleIndex < samples.length-1){
+    // If samples left, restart computation for next sample
+    sampleIndex += 1;
+    return startCpsComp(priorExit);
+  } else {  
+    // Print all samples
+    samples.forEach(jsPrint);
   }
-  return samples;
+};
+
+
+var PriorSampler = function(cpsComp, numSamples){  
+
+  // Create placeholders for samples
+  for (var i=0; i<numSamples; i++) {
+    var sample = {
+      index: i,
+      value: undefined
+    };
+    samples.push(sample);
+  }
+  
+  // Run computation from beginning
+  startCpsComp = cpsComp;  
+  startCpsComp(priorExit);
 }
 
-SampleUnweighted(runCpsHmm, 10)
+
+PriorSampler(runCpsHmm, 10);
 ~~~~
 
 The factors tell us that we should be sampling some paths more often, and some paths less often. Let's accumulate the factor weights with each sample. Also, let's call samples particles.
@@ -430,6 +479,10 @@ var SampleWithWeights = function(cpsComp, numParticles){
 
 SampleWithWeights(runCpsHmm, 10);
 ~~~~
+
+Importance sampling
+
+.. for the Gaussian mixture model
 
 Resampling at the end (importance sampling with resampling):
 
