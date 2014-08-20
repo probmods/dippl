@@ -264,7 +264,7 @@ print(Enumerate(function(){
           }, 20))
 ~~~
 
-## scoreWithFactor
+### scoreWithFactor
 
 It is fairly common, as above, to end up with a factor, providing some evidence, just after the sampled value it depends on. If we separate the `sample` and `factor` then we will often try to explore sample paths that the factor will shortly tell us are very bad. To account for this we introduce a compound operator `sampleWithFactor`, that takes the ERP distribution and parameters, like `sample`, and also takes a function that applies to the sampled value to compute a score for `factor`. By default, marginalization functions will simply treat `sampleWithFactor(diet,params,scoreFn)` as `var v = sample(dist,params); factor(scoreFn(v))`, however some implementations will use this information more efficiently. The WebPPL `Enumerate` operator immediately adds the additional score to the score for the state as it is added to the queue -- this means that the additional score is included when prioritizing which states to explore next.
 
