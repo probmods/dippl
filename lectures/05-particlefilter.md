@@ -423,7 +423,7 @@ var _factor = function(k, score){
   k(undefined);
 }
 
-var priorExit = function(value){
+var lwExit = function(value){
   
   // Store sampled value
   samples[sampleIndex].value = value;
@@ -431,15 +431,14 @@ var priorExit = function(value){
   if (sampleIndex < samples.length-1){
     // If samples left, restart computation for next sample
     sampleIndex += 1;
-    return startCpsComp(priorExit);
+    return startCpsComp(lwExit);
   } else {  
     // Print all samples
     samples.forEach(jsPrint);
   }
 };
 
-
-var PriorSamplerWithWeights = function(cpsComp, numSamples){  
+var LikelihoodWeighting = function(cpsComp, numSamples){  
 
   // Create placeholders for samples
   for (var i=0; i<numSamples; i++) {
@@ -453,11 +452,11 @@ var PriorSamplerWithWeights = function(cpsComp, numSamples){
   
   // Run computation from beginning
   startCpsComp = cpsComp;  
-  startCpsComp(priorExit);
+  startCpsComp(lwExit);
 }
 
 
-PriorSamplerWithWeights(runCpsHmm, 10);
+LikelihoodWeighting(runCpsHmm, 10);
 ~~~~
 
 Looking at the results, the paths that we oversampled the most -- the paths with the lowest weights -- are paths that result in value `[false,false,false,false,false]`. This makes sense: this execution is very likely under the prior, but for our observations `[true, true, true, true]`, it is not a good explanation.
@@ -469,51 +468,182 @@ TODO: Importance sampling for the Gaussian mixture model
 
 ## Resampling
 
-What if we want samples instead?
-
-...
-
-Resampling at the end (importance sampling with resampling):
+What if we simply want samples, not weighted samples? We can always turn a set of weighted samples into a set of unweighted samples by resampling (with replacement) from the set in proportion to the weights:
 
 ~~~~
 // language: javascript
 
-var resample = function(particles){
-  var weights = particles.map(
-    function(particle){return Math.exp(particle.weight);});
-  var newParticles = [];
-  for (var i=0; i<particles.length; i++){
-    j = multinomialSample(weights);
-    newParticles.push(particles[j]);
+var resample = function(samples){
+  var weights = samples.map(
+    function(sample){return Math.exp(sample.score);});
+  var newSamples = [];
+  for (var i=0; i<samples.length; i++){
+    var j = multinomialSample(weights);
+    newSamples.push(samples[j]);
   }
-  return newParticles;
+  return newSamples;
 }
+~~~~
 
-var exit = function(value){
+The only change to the algorithm is a resampling step at the end:
+
+~~~~
+// language: javascript
+
+var startCpsComp = undefined;
+var samples = [];
+var sampleIndex = 0;
+
+var lwrExit = function(value){
   
-  particles[activeParticle].value = value;
+  // Store sampled value
+  samples[sampleIndex].value = value;
   
-  if (!(activeParticle == (particles.length - 1))){
-    activeParticle += 1;
-    return restart(exit);
+  if (sampleIndex < samples.length-1){
+    // If samples left, restart computation for next sample
+    sampleIndex += 1;
+    return startCpsComp(lwrExit);
+  } else {  
+    samples = resample(samples); // NEW
+    // Print all samples
+    samples.forEach(jsPrint);
   }
-  console.log(particles);
-  particles = resample(particles);
-  console.log(particles);
-  particles.forEach(jsPrint);
 };
 
-SampleWithWeights(runCpsHmm, 10);
+var LikelihoodWeightingResampled = function(cpsComp, numSamples){  
+
+  // Create placeholders for samples
+  for (var i=0; i<numSamples; i++) {
+    var sample = {
+      index: i,
+      value: undefined,
+      score: 0
+    };
+    samples.push(sample);
+  }
+  
+  // Run computation from beginning
+  startCpsComp = cpsComp;  
+  startCpsComp(lwrExit);
+}
+
+
+LikelihoodWeightingResampled(runCpsHmm, 10);
 ~~~~
+
+As we increase the number of samples, the samples get closer to true posterior samples. In particular, the most common sampled latent state is `[false,true,true,true,true]`, which is the best explanation for starting state `false` and subsequent observations `[true,true,true,true]`.
+
 
 ## Particle filters
 
-Resampling at factors (particle filter):
+How can we improve upon likelihood weighting? Let's apply the idea from the lecture on [Early, incremental evidence](/esslli2014/lectures/04-factorseq.html): instead of waiting until the end to resample, we could resample earlier. In particular, we can resample at each factor.
+
+This requires a slight change in our approach: previously, we ran each sample until the end before we started the next one. Now, we want to run each sample until we hit the first factor statement; resample; run each sample up to the next factor statement; resample; and so on.
+
+To enable this, we store the continuation for going to store the continuation for each sample so that we can resume computation at the correct point. We are also going to rename (potentially incomplete) samples to "particles".
 
 ~~~~
+// language: javascript
+
+var _factor = function(k, score){
+  samples[sampleIndex].score += score;
+  samples[sampleIndex].continuation = k; // NEW
+  
+  if (sampleIndex < samples.length-1){
+    sampleIndex += 1;
+  } else {
+    samples = resample(samples);
+    sampleIndex = 0;
+  }  
+  
+  samples[sampleIndex].continuation();
+}
+
+var _sample = function(k, erp, params){
+  return sample(k, erp, params);
+}
+
+
+var resample = function(samples){
+  var weights = samples.map(
+    function(sample){return Math.exp(sample.score);});
+  var newSamples = [];
+  for (var i=0; i<samples.length; i++){
+    var j = multinomialSample(weights);
+    newSamples.push(samples[j]);
+  }
+  return newSamples;
+}
+
+
+
+var cpsHmm = function(k, states, observations){
+  var prevState = states[states.length - 1];
+  _sample(
+    function(state){
+      _factor(
+        function(){
+          if (observations.length == 0) {
+            return k(states);
+          } else {
+            return cpsHmm(k, states.concat([state]), observations.slice(1));
+          }      
+        },        
+        (state == observations[0]) ? 0 : -1);
+    },    
+    bernoulliERP, 
+    [prevState ? .9 : .1]);
+}
+
+var runCpsHmm = function(k){
+  var observations = [true, true, true, true];
+  var startState = false;  
+  return cpsHmm(k, [startState], observations);
+}
+
+
+
+var samples = [];
+var sampleIndex = 0;
+
+var pfExit = function(value){
+  
+  // Store sampled value
+  samples[sampleIndex].value = value;
+  
+  if (sampleIndex < samples.length-1){
+    // If samples unfinished, resume computation for next sample
+    sampleIndex += 1;
+    samples[sampleIndex].continuation(); // NEW
+  } else {
+    samples.forEach(jsPrint);
+  }
+};
+
+var SimpleParticleFilter = function(cpsComp, numSamples){  
+
+  // Create placeholders for samples
+  for (var i=0; i<numSamples; i++) {
+    var sample = {
+      index: i,
+      value: undefined,
+      score: 0,
+      continuation: function(){cpsComp(pfExit)} // NEW
+    };
+    samples.push(sample);
+  }
+  
+  // Run computation from beginning
+  samples[sampleIndex].continuation();
+};
+
+
+SimpleParticleFilter(runCpsHmm, 10);
 ~~~~
 
 ## Applications
+
+apply to models with actually large state spaces
 
 - Kalman filter
 - Incremental inference examples (from previous lecture)
