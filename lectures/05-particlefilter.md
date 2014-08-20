@@ -318,13 +318,13 @@ var cpsHmm = function(k, states, observations){
     [prevState ? .9 : .1]);
 }
 
-var observations = [true, true, true, true];
-var startState = false;
+var runCpsHmm = function(k){
+  var observations = [true, true, true, true];
+  var startState = false;  
+  return cpsHmm(k, [startState], observations);
+}
 
-cpsHmm(
-  jsPrint, 
-  [startState], 
-  observations)
+runCpsHmm(jsPrint);
 ~~~~
 
 Unweighted sampling:
@@ -358,10 +358,116 @@ var SampleUnweighted = function(cpsComp, n){
 SampleUnweighted(runCpsHmm, 10)
 ~~~~
 
-### Sequential importance sampling
+The factors tell us that we should be sampling some paths more often, and some paths less often. Let's accumulate the factor weights with each sample. Also, let's call samples particles.
 
-### Resampling
+With weights:
 
+~~~~
+// language: javascript
+
+var cpsHmm = function(k, states, observations){
+  var prevState = states[states.length - 1];
+  sample(
+    function(state){
+      factor(
+        function(){
+          if (observations.length == 0) {
+            return k(states);
+          } else {
+            return cpsHmm(k, states.concat([state]), observations.slice(1));
+          }      
+        },        
+        (state == observations[0]) ? 0 : -1);
+    },    
+    bernoulliERP, 
+    [prevState ? .9 : .1]);
+}
+
+var runCpsHmm = function(k){
+  var observations = [true, true, true, true];
+  var startState = false;  
+  return cpsHmm(k, [startState], observations);
+}
+
+
+var restart = undefined;
+var particles = [];
+var activeParticle = 0;
+
+var factor = function(k, score){
+  particles[activeParticle].weight += score;
+  k(undefined);
+}
+
+var exit = function(value){
+  
+  particles[activeParticle].value = value;
+  
+  if (!(activeParticle == (particles.length - 1))){
+    activeParticle += 1;
+    return restart(exit);
+  }
+
+  particles.forEach(jsPrint);
+};
+
+var SampleWithWeights = function(cpsComp, numParticles){  
+
+  // Store continuation for beginning
+  restart = cpsComp;
+  
+  // Create initial particles
+  for (var i=0; i<numParticles; i++) {
+    var particle = {
+      weight: 0,
+      value: undefined
+    };
+    particles.push(particle);
+  }
+  // Run computation from beginning
+  restart(exit);
+}
+
+SampleWithWeights(runCpsHmm, 10);
+~~~~
+
+Resampling at the end (importance sampling with resampling):
+
+~~~~
+// language: javascript
+
+var resample = function(particles){
+  var weights = particles.map(
+    function(particle){return Math.exp(particle.weight);});
+  var newParticles = [];
+  for (var i=0; i<particles.length; i++){
+    j = multinomialSample(weights);
+    newParticles.push(particles[j]);
+  }
+  return newParticles;
+}
+
+var exit = function(value){
+  
+  particles[activeParticle].value = value;
+  
+  if (!(activeParticle == (particles.length - 1))){
+    activeParticle += 1;
+    return restart(exit);
+  }
+  console.log(particles);
+  particles = resample(particles);
+  console.log(particles);
+  particles.forEach(jsPrint);
+};
+
+SampleWithWeights(runCpsHmm, 10);
+~~~~
+
+Resampling at factors (particle filter):
+
+~~~~
+~~~~
 
 ## Applications
 

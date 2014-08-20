@@ -32,7 +32,9 @@ function jsPrint(x){
     var resultDivSelector = "#" + resultDiv.attr('id');
     barChart(resultDivSelector, labels, counts);
   } else {
-    resultDiv.append(document.createTextNode(x + "\n"));
+    resultDiv.append(
+      document.createTextNode(
+        JSON.stringify(x) + "\n"));
   }
 }
 
