@@ -268,7 +268,7 @@ drawPoints(canvas, points)
 ~~~~
 
 
-## Importance sampling
+## Likelihood weighting
 
 How can we estimate the marginal distribution for models such as the ones above?
 
@@ -542,6 +542,10 @@ This requires a slight change in our approach: previously, we ran each sample un
 
 To enable this, we store the continuation for going to store the continuation for each sample so that we can resume computation at the correct point. We are also going to rename (potentially incomplete) samples to "particles".
 
+TODO: Is there a bug in the code below?
+
+TODO: Code folding
+
 ~~~~
 // language: javascript
 
@@ -643,21 +647,82 @@ SimpleParticleFilter(runCpsHmm, 10);
 
 ## Applications
 
-apply to models with actually large state spaces
+### Likelihood weighting: Gaussian mixture model
 
-- Kalman filter
-- Incremental inference examples (from previous lecture)
-- Computer vision
-  - remind of incremental factor heuristics pattern seen yesterday
-- Better vision example
+TODO
+
+~~~~
+~~~~
+
+### Particle filter: Semi-Markov random walk
+
+Let's generate some "true" observations first:
+
+~~~~
+var drawPositions = function(canvas, start, positions){
+  if (positions.length == 0) {
+    return [];
+  }
+  var next = positions[0];  
+  canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
+  drawPositions(canvas, next, positions.slice(1));
+}
+
+var canvas = Draw(400, 400, true)
 
 
-## Extensions
+var last = function(xs){
+  return xs[xs.length - 1];
+}
 
-### Residual resampling
+var secondLast = function(xs){
+  return xs[xs.length - 2];
+}
 
-- ...
+var map2 = function(ar1,ar2,fn) {
+  if (ar1.length==0 | ar2.length==0) {
+    return []
+  } else {
+    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
+  }
+};
 
-### PMCMC: Anytime particle filtering
 
-- ...
+var init = function(dim){
+  return repeat(dim, function(){ return gaussian(200, 1) });
+}
+
+var transition = function(lastPos, secondLastPos){  
+  return map2(
+    lastPos,
+    secondLastPos,
+    function(lastX, secondLastX){ 
+      var momentum = (lastX - secondLastX) * .7;
+      return gaussian(lastX + momentum, 3); 
+    }
+  );
+};
+
+var semiMarkovWalk = function(n, dim) {
+  var prevStates = (n==2) ? [init(dim), init(dim)] : semiMarkovWalk(n-1, dim);
+  var newState = transition(last(prevStates), secondLast(prevStates));
+  return prevStates.concat([newState]);
+};
+
+var truePositions = semiMarkovWalk(100, 2);
+
+drawPositions(canvas, truePositions[0], truePositions.slice(1))
+~~~~
+
+Now infer the latent walk underneath:
+
+~~~~
+~~~~
+
+### Particle filter: Vision
+
+See the [vision page](/esslli2014/lectures/vision.html). Note the "incremental heuristic factors" pattern that we saw in the previous lecture.
+
+
+## Extension: Residual resampling
+
