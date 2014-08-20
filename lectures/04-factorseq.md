@@ -4,7 +4,7 @@ title: Early, incremental evidence
 description: Inserting and commuting factor statements to get the right incremental sequencing.
 ---
 
-Many models that are important in applications have very large state spaces such that, when the model is naively written, no information becomes available to guide inference until the very end on the computation. This makes it very hard for sequential exploration strategies (such as enumeration and particle filtering) to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally we will consider a harder class of models with 'global' conditions.
+Many models that are important in applications have very large state spaces such that, when the model is naively written, no information becomes available to guide inference until the very end of the computation. This makes it very hard for sequential exploration strategies (such as enumeration and particle filtering) to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally we will consider a harder class of models with 'global' conditions.
 
 # Unfolding data structures
 
@@ -240,9 +240,6 @@ print(Enumerate(function(){
 
 Try varying the number of executions explored, in this version and the original version, starting with just 1 and increasing... how do they differ?
 
-(There are two more optimizations we could do: If we incorporate the factor when we actually sample newobs, then we would only try observations consistent with trueobs. To do so we need to marginalize out `observe(..)` (to get an immediate ERP sample) and then use `sampleWithFactor(..)` to simultaneously sample and incorporate the factor -- but we haven't implemented `sampleWithFactor` yet in WebPPL. Second, we could achieve dynamic programming by inserting additional marginal operators at the boundary of `hmmRecur`, and caching them.)
-
-
 Similarly for the PCFG:
 
 ~~~
@@ -266,6 +263,60 @@ print(Enumerate(function(){
             return y[2]?y[2]:"" //distribution on next word?
           }, 20))
 ~~~
+
+## scoreWithFactor
+
+It is fairly common, as above, to end up with a factor, providing some evidence, just after the sampled value it depends on. If we separate the `sample` and `factor` then we will often try to explore sample paths that the factor will shortly tell us are very bad. To account for this we introduce a compound operator `sampleWithFactor`, that takes the ERP distribution and parameters, like `sample`, and also takes a function that applies to the sampled value to compute a score for `factor`. By default, marginalization functions will simply treat `sampleWithFactor(diet,params,scoreFn)` as `var v = sample(dist,params); factor(scoreFn(v))`, however some implementations will use this information more efficiently. The WebPPL `Enumerate` operator immediately adds the additional score to the score for the state as it is added to the queue -- this means that the additional score is included when prioritizing which states to explore next.
+
+The binomial example becomes:
+
+~~~
+var binomial = function(){
+    var a = sampleWithFactor(bernoulliERP, [0.1], function(v){return v?0:-Infinity})
+    var b = sampleWithFactor(bernoulliERP, [0.9], function(v){return v?0:-Infinity})
+    var c = sample(bernoulliERP, [0.1])
+    return a + b + c
+}
+
+print(Enumerate(binomial, 2))
+~~~
+
+More usefully, the for the HMM this trick allows us to ensure that each `newobs` will be equal to the observed `trueobs`. We need to first marginalize out `observe(..)` (to get an immediate ERP from which to sample) and then use `sampleWithFactor(..)` to simultaneously sample and incorporate the factor:
+
+~~~
+var transition = function(s) {
+  return s ? flip(0.7) : flip(0.3)
+}
+
+var observe = cache(function(s) {
+  Enumerate(function(){return s ? flip(0.9) : flip(0.1)})
+})
+
+var trueobs = [false, false, false]
+
+var hmmRecur = function(n, states, observations){
+  var newstate = transition(states[0])
+//  var newobs = sample(observe(newstate))
+//  factor(newobs==trueobs[observations.length] ? 0 : -Infinity)
+  var newobs = sampleWithFactor(observe(newstate),[],
+                                function(v){return v==trueobs[observations.length] ? 0 : -Infinity})
+  var states = states.concat([newstate])
+  var observations = observations.concat([newobs])
+  return (n==1) ? {states: states, observations: observations} :
+  hmmRecur(n-1,states,observations)
+}
+
+var hmm = function(n) {
+  return hmmRecur(n,[true],[])
+}
+
+print(Enumerate(function(){
+                var r = hmm(3)
+                return r.states
+                }, 500)  )       
+~~~
+
+(There is one more optimizations we could do for the HMM: we could achieve dynamic programming by inserting additional marginal operators at the boundary of `hmmRecur`, and caching them.)
 
 
 

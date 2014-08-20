@@ -13,10 +13,6 @@ Lectures:
 
 - sequentializing factors
   -cooler vision example?
-  -in pragmatics:
-   -incremental world construction with heuristic factor(meaning(utt,worldSoFar)?0:-10)
-   [-does this favor indirect composition where meaning can be computed before world?]
-
    -extended integrated language
    -incremental speaker where word string is constructed with heuristic factor:
      factor( mean(map(completions(uttSoFar), function(c){return literalListener(c).score(world)})))
