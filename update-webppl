@@ -1,19 +1,31 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Updating webppl to latest remote..."
+echo "Resetting webppl to latest remote..."
 cd assets/webppl
 git fetch origin
 git reset --hard origin/master
 
-echo "Creating commit in local and remote esslli repository..."
-cd ..
-git commit ./webppl -m "Updated webppl submodule"
-git push origin gh-pages
-
-echo "Compiling webppl for browser..."
-cd webppl
+echo "Compiling latest remote (and committing if changed)..."
 browserify -t brfs src/main.js > compiled/webppl.js
+if git diff --exit-code > /dev/null;
+then
+   echo "Compilation resulted in changes, committing webppl..."
+   git add compiled/webppl.js
+   git commit -m "Updated compiled version"
+   git push origin master
+else
+   echo "Compilation found no changes, skipping webppl commit..."
+fi
+
 cd ../..
+if git diff --exit-code > /dev/null;
+then
+   echo "Submodule changed, committing esslli2014..."
+   git commit assets/webppl -m "Updated webppl submodule"
+   git push origin gh-pages
+else
+   echo "Submodule unchanged, skipping esslli2014 commit..."
+fi
 
 echo "Done!"
