@@ -1,7 +1,7 @@
 ---
 layout: lecture
 title: Particle Filtering
-description: Simple parsing models. Sequential Monte Carlo techniques.
+description: Importance sampling and sequential Monte Carlo.
 ---
 
 
@@ -13,6 +13,15 @@ Let's look at a few examples.
 
 
 ### Vision
+
+In this example, we are trying to compute the posterior distribution on lines based on a factor that encourages that the lines approximately match the target image:
+
+~~~~
+var targetImage = Draw(50, 50, true);
+loadImage(targetImage, "/esslli2014/assets/img/box.png")
+~~~~
+
+Let's look at the samples that enumeration explores first:
 
 ~~~~
 var targetImage = Draw(50, 50, false);
@@ -44,13 +53,18 @@ var makeLines = function(n, lines, prevScore){
   return (n==1) ? newLines : makeLines(n-1, newLines, newScore);
 }
 
-Enumerate(
+var lineDist = EnumerateDepthFirst(
   function(){
     var lines = makeLines(4, [], 0);
     var finalGeneratedImage = Draw(50, 50, true);
 	drawLines(finalGeneratedImage, lines);    
-   }, 100)
+    return lines;
+   }, 10)
+
+print(lineDist)
 ~~~~
+
+We first explore all images where *all* lines start at the bottom-rightmost pixel, and one of the lines ends a few pixels further up. This is probably not the ideal exploration strategy.
 
 
 ### Gaussian random walk
@@ -659,14 +673,20 @@ TODO
 Let's generate some "true" observations first:
 
 ~~~~
-var drawPositions = function(canvas, start, positions){
-  if (positions.length == 0) {
-    return [];
-  }
+var drawLines = function(canvas, start, positions){
+  if (positions.length == 0) { return []; }
   var next = positions[0];  
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
-  drawPositions(canvas, next, positions.slice(1));
+  drawLines(canvas, next, positions.slice(1));
 }
+
+var drawPoints = function(canvas, positions){
+  if (positions.length == 0) { return []; }
+  var next = positions[0];  
+  canvas.circle(next[0], next[1], "red", 2);    
+  drawPoints(canvas, positions.slice(1));
+}
+
 
 var canvas = Draw(400, 400, true)
 
@@ -687,9 +707,22 @@ var map2 = function(ar1,ar2,fn) {
   }
 };
 
+var observe = function(pos){
+  return map(
+    pos,
+    function(x){ return gaussian(x, 5); }
+  );
+};
 
 var init = function(dim){
-  return repeat(dim, function(){ return gaussian(200, 1) });
+  var state1 = repeat(dim, function(){ return gaussian(200, 1) });
+  var state2 = repeat(dim, function(){ return gaussian(200, 1) });
+  var states = [state1, state2];
+  var observations = map(states, observe);
+  return {
+    states: states,
+    observations: observations
+  }
 }
 
 var transition = function(lastPos, secondLastPos){  
@@ -704,14 +737,20 @@ var transition = function(lastPos, secondLastPos){
 };
 
 var semiMarkovWalk = function(n, dim) {
-  var prevStates = (n==2) ? [init(dim), init(dim)] : semiMarkovWalk(n-1, dim);
+  var prevData = (n == 2) ? init(dim) : semiMarkovWalk(n-1, dim);
+  var prevStates = prevData.states;
+  var prevObservations = prevData.observations;
   var newState = transition(last(prevStates), secondLast(prevStates));
-  return prevStates.concat([newState]);
+  var newObservation = observe(newState);
+  return {
+    states: prevStates.concat([newState]),
+    observations: prevObservations.concat([newObservation])
+  }
 };
 
-var truePositions = semiMarkovWalk(100, 2);
+var trueData = semiMarkovWalk(100, 2);
 
-drawPositions(canvas, truePositions[0], truePositions.slice(1))
+drawPoints(canvas, trueData.observations)
 ~~~~
 
 Now infer the latent walk underneath:
