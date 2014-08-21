@@ -363,7 +363,7 @@ var runCpsHmm = function(k){
 }
 ~~~~
 
-We use `_sample` and `_factor` so that we can redefine these functions without overwriting the webppl `sample` and `factor` functions. For now, we define sample to simply sample according to the random primitive's distribution, and factor to do nothing:
+We use `_sample` and `_factor` so that we can redefine these functions without overwriting the WebPPL `sample` and `factor` functions. For now, we define sample to simply sample according to the random primitive's distribution, and factor to do nothing:
 
 ~~~~
 // language: javascript
@@ -636,6 +636,11 @@ var runCpsHmm = function(k){
 
 var _sample = function(k, erp, params){
   return sample(k, erp, params);
+}
+
+var _factor = function(k, score){
+  samples[sampleIndex].score += score; // NEW
+  k(undefined);
 }
 
 var resample = function(samples){
