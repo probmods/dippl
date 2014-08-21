@@ -66,7 +66,7 @@ var lineDist = EnumerateDepthFirst(
 print(lineDist)
 ~~~~
 
-We first explore all images where *all* lines start at the bottom-rightmost pixel, and one of the lines ends a few pixels further up. Looking at the histogram, we see that all of these images are equally bad -- none of the lines overlap with the lines in the target image. This is probably not the ideal exploration strategy.
+We first explore all images where *all* lines start at the bottom-rightmost pixel, and one of the lines ends a few pixels further up. Looking at the histogram, we see that all of these images are equally bad -- none of the lines overlap with the lines in the target image. This is probably not the ideal exploration strategy for a state space that contains more than a trillion possible program executions.
 
 
 ### Gaussian random walk
