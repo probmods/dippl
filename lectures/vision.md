@@ -1,7 +1,7 @@
 ---
 layout: example
 title: Computer vision
-description: Render to canvas, condition on output
+description: Infer latent structure that renders to a target image
 ---
 
 Drawing a line:
