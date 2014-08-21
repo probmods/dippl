@@ -175,6 +175,8 @@ drawLines(canvas, positions[0], positions.slice(1))
 
 ### Hidden Semi-Markov model
 
+We have previously seen [Hidden Markov models](/esslli2014/lectures/04-factorseq.html). There, the latent state was unobserved and we only got to observe a stochastic function of the latent state at each time step. We can apply the same principle to semi-Markov models. The model below could be used (for example) to model radar observations of the flight path of a plane.
+
 ~~~~
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
@@ -244,7 +246,17 @@ semiMarkovWalk(100, 2);
 
 ### Gaussian mixture
 
+How else could we model points observed in 2D space? We could posit that there are two clusters around which the points tend to center:
+
 ~~~~
+var drawPoints = function(canvas, points){
+  if (points.length > 0) {
+    var next = points[0];    
+    canvas.circle(next[0], next[1], "black", 2);    
+    drawPoints(canvas, points.slice(1));
+  }
+}
+
 var map2 = function(ar1,ar2,fn) {
   if (ar1.length==0 | ar2.length==0) {
     return []
@@ -252,6 +264,9 @@ var map2 = function(ar1,ar2,fn) {
     return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
   }
 };
+
+
+// Model
 
 var makeGaussian = function(dim){
   var means = repeat(dim, function(){uniform(20, 380)});
@@ -262,7 +277,6 @@ var makeGaussian = function(dim){
 }
   
 var mixtureWeight = uniform(0, 1);
-
 var gaussian1 = makeGaussian(2);
 var gaussian2 = makeGaussian(2);
 
@@ -274,18 +288,12 @@ var gaussianMixture = function(){
   }
 }
 
-var canvas = Draw(400, 400, true);
-
 var points = repeat(100, gaussianMixture);
 
-var drawPoints = function(canvas, points){
-  if (points.length > 0) {
-    var next = points[0];    
-    canvas.circle(next[0], next[1], "black", 2);    
-    drawPoints(canvas, points.slice(1));
-  }
-}
 
+// Draw model output
+
+var canvas = Draw(400, 400, true);
 drawPoints(canvas, points)
 ~~~~
 
@@ -300,7 +308,7 @@ If there are a large number of execution paths, it is clear that we cannot explo
 
 Previously, we have enumerated paths using depth-first search, breadth-first search, and a probability-based priority queue. However, this approach can result in an unrepresentative set of paths for models with large state spaces, and for uncountably infinite state spaces it isn't even clear what exactly we are enumerating.
 
-Random sampling is a promising alternative: if we could sample paths in proportion to their (unnormalized) probability, we could easily get a representative picture of the marginal distribution.
+Random sampling is a promising alternative: if we could sample paths in proportion to their posterior probability -- i.e. taking into account factor weights -- we could easily get a representative picture of the marginal distribution.
 
 Let's go back to the HMM and let's think about how we could make this work.
 
@@ -330,7 +338,7 @@ print(Enumerate(
 
 This HMM prefers subsequent states to be similar, and it prefers observations to be similar to the latent state. By far the most likely explanation for the observations `[true, true, true, true]` is that most of the latent states are `true` as well.
 
-As in [lecture 3](/esslli2014/lectures/03-enumeration.html), we are going to think about exploring the computation paths of this model in some detail. For this purpose, it will be helpful to have the HMM available in continuation-passing style:
+As in [lecture 3](/esslli2014/lectures/03-enumeration.html), we are going to think about exploring the computation paths of this model. For this purpose, it will be helpful to have the HMM available in continuation-passing style:
 
 ~~~~
 // language: javascript
@@ -374,7 +382,7 @@ var _sample = function(k, erp, params){
 }
 ~~~~
 
-If we run the HMM with these sample and factor functions, we see that we sample latent states that reflect the prior distribution of the hmm, but not the posterior distribution that takes into account observations using factors:
+If we run the HMM with these sample and factor functions, we see that we sample latent states that reflect the prior distribution of the HMM, but not the posterior distribution that takes into account observations using factors:
 
 ~~~~
 // language: javascript
@@ -387,8 +395,7 @@ Let's write some scaffolding so that we can take multiple samples from the prior
 ~~~~
 // language: javascript
 
-
-var startCpsComp = undefined;
+var startCpsComp;
 var samples = [];
 var sampleIndex = 0;
 
@@ -429,14 +436,14 @@ var PriorSampler = function(cpsComp, numSamples){
 PriorSampler(runCpsHmm, 10);
 ~~~~
 
-The factors tell us that we should be sampling some paths more often, and some paths less often. If we knew the total factor for each path, we would know which paths we "oversampled" by how much, and which paths we "undersampled". 
+The factors tell us that we should be sampling some paths more often, and some paths less often. If we knew the total factor weight for each path, we would know which paths we "oversampled" by how much, and which paths we "undersampled". 
 
 Let's accumulate the factor weights with each sample:
 
 ~~~~
 // language: javascript
 
-var startCpsComp = undefined;
+var startCpsComp;
 var samples = [];
 var sampleIndex = 0;
 
@@ -477,15 +484,12 @@ var LikelihoodWeighting = function(cpsComp, numSamples){
   startCpsComp(lwExit);
 }
 
-
 LikelihoodWeighting(runCpsHmm, 10);
 ~~~~
 
 Looking at the results, the paths that we oversampled the most -- the paths with the lowest weights -- are paths that result in value `[false,false,false,false,false]`. This makes sense: this execution is very likely under the prior, but for our observations `[true, true, true, true]`, it is not a good explanation.
 
-TODO: Importance sampling math
-
-TODO: Importance sampling for the Gaussian mixture model
+At this point, we can already use our weighted samples to estimate properties of the marginal distribution. This is called [importance sampling](http://en.wikipedia.org/wiki/Importance_sampling) in general, and likelihood weighting in the case where the importance distribution is the prior.
 
 
 ## Resampling
