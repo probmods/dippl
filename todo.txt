@@ -9,6 +9,7 @@ Inference:
 - automating some of the factor splitting, moving, inserting stuff?
 
 Integration:
+- fix crazy box dependencies in lecture notes!
 - script tag compilation / execution
 - smart pages examples
 - church to webppl compiler (based on webchurch or sweet macros)

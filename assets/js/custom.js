@@ -1,5 +1,9 @@
 "use strict";
 
+//var comments = require("./cm-comments");
+//var folding = require("./cm-folding");
+
+
 var topK; // Top-level continuation
 var activeCodeBox;
 
@@ -175,6 +179,9 @@ function webpplObjectToText(x){
 
 var codeBoxCount = 0;
 
+CodeMirror.keyMap.default["Cmd-/"] = "toggleComment";
+CodeMirror.keyMap.default["Cmd-."] = function(cm){cm.foldCode(cm.getCursor(), myRangeFinder); };
+
 function setupCodeBox(element){
   var $element = $(element);
   var $code = $element.html();
@@ -190,6 +197,14 @@ function setupCodeBox(element){
       readOnly: false,
       extraKeys: {"Tab": "indentAuto"}
     });
+  
+  //fold "///fold: ... ///" parts:
+  var lastLine = cm.lastLine();
+  for(var i=0;i<=lastLine;i++) {
+    var txt = cm.getLine(i),
+    pos = txt.indexOf("///fold:");
+    if (pos==0) {cm.foldCode(CodeMirror.Pos(i,pos), tripleCommentRangeFinder);}
+  }
 
   var getLanguage = function(){
     if (cm.getValue().split("\n")[0] == "// language: javascript") {
