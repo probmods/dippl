@@ -18,15 +18,15 @@ var binomial = function(){
   return a + b + c
 }
 
-Enumerate(binomial)
+print(Enumerate(binomial))
 ~~~
 
-We can view `sample` and `factor` as simple 'side-computations' for exploring the main `binomial` computation. To make this concrete, let's implement `sample` as an ordinary function that always choose the first element of the support of any random choice. We will kick-off this exploration by calling `ExploreFirst`, which simply calls the computation.
+We can view `sample` and `factor` as simple 'side-computations' for exploring the main `binomial` computation. To make this concrete, let's implement `sample` as an ordinary function that always choose the first element of the support of any random choice. We will kick-off this exploration by calling `ExploreFirst`, which simply calls the computation. (In the following we rename `sample` to `_sample` to avoid conflicting with the WebPPL built in `sample` function.)
 
 ~~~
 // language: javascript
 
-function sample(erp, params) {
+function _sample(erp, params) {
   return erp.support()[0]
 }
 
@@ -35,9 +35,9 @@ function ExploreFirst(comp) {
 }
 
 var binomial = function(){
-  var a = sample(bernoulliERP, [0.5])
-  var b = sample(bernoulliERP, [0.5])
-  var c = sample(bernoulliERP, [0.5])
+  var a = _sample(bernoulliERP, [0.5])
+  var b = _sample(bernoulliERP, [0.5])
+  var c = _sample(bernoulliERP, [0.5])
   return a + b + c
 }
 
@@ -214,14 +214,32 @@ Second, the sequence of definition statements was sequentialized in in a way sim
 
 ## Coroutines: functions that receive continuations
 
-Now we'll re-write the code above so that the `sample` function gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way. This pattern: a function that receives the continuation (often called a 'callback') from the main computation and returns only by calling the continuation is called a *coroutine*.
+Now we'll re-write the code above so that the `sample` function gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way. This pattern: a function that receives the continuation (often called a 'callback') from the main computation and returns only by calling the continuation is called a *coroutine*. (The above definition of `cpsBinomial`, using `_sample` again to avoid conflict with built ins, is above the fold.)
 
 ~~~
 // language: javascript
 
+///fold:
+function cpsBinomial(k){
+  _sample(
+    function(a){
+      _sample(
+        function(b){
+          _sample(
+            function(c){
+              k(a + b + c);
+            },
+            bernoulliERP, [0.5])
+        },
+        bernoulliERP, [0.5])
+    }, 
+    bernoulliERP, [0.5])
+}
+///
+
 unexploredFutures = []
 
-function sample(cont, erp, params) {
+function _sample(cont, erp, params) {
   var sup = erp.support(params)
   sup.forEach(function(s){unexploredFutures.push(function(){cont(s)})})
   unexploredFutures.pop()()
@@ -240,22 +258,6 @@ function Explore(cpsComp) {
   cpsComp(exit)
   return returnVals
 }
-
-function cpsBinomial(k){
-  sample(
-    function(a){
-      sample(
-        function(b){
-          sample(
-            function(c){
-              k(a + b + c);
-            },
-            bernoulliERP, [0.5])
-        },
-        bernoulliERP, [0.5])
-    }, 
-    bernoulliERP, [0.5])
-}
     
 Explore(cpsBinomial)
 ~~~
@@ -265,10 +267,28 @@ The above code explores all the executions of the computation, but it doesn't ke
 ~~~
 // language: javascript
 
+///fold:
+function cpsBinomial(k){
+  _sample(
+    function(a){
+      _sample(
+        function(b){
+          _sample(
+            function(c){
+              k(a + b + c);
+            },
+            bernoulliERP, [0.5])
+        },
+        bernoulliERP, [0.5])
+    }, 
+    bernoulliERP, [0.5])
+}
+///
+
 unexploredFutures = []
 currScore = 0
 
-function sample(cont, erp, params) {
+function _sample(cont, erp, params) {
   var sup = erp.support(params)
   sup.forEach(function(s){
   var newscore = currScore + erp.score(params, s);
@@ -301,12 +321,30 @@ Finally we need to deal with factor statements -- easy because they simply add a
 ~~~
 // language: javascript
 
+///fold:
+function cpsBinomial(k){
+  _sample(
+    function(a){
+      _sample(
+        function(b){
+          _sample(
+            function(c){
+              k(a + b + c);
+            },
+            bernoulliERP, [0.5])
+        },
+        bernoulliERP, [0.5])
+    }, 
+    bernoulliERP, [0.5])
+}
+///
+
 unexploredFutures = []
 currScore = 0
 
-function factor(s) { currScore += s}
+function _factor(s) { currScore += s}
 
-function sample(cont, erp, params) {
+function _sample(cont, erp, params) {
   var sup = erp.support(params)
   sup.forEach(function(s){
     var newscore = currScore + erp.score(params, s);
