@@ -828,11 +828,11 @@ var semiMarkovWalkConstrained = function(n, dim, trueObs) {
   }
 };
 
-var trueData = semiMarkovWalk(100, 2);
+var trueData = semiMarkovWalk(80, 2);
 
 var posterior = ParticleFilter(
   function(){
-    return semiMarkovWalkConstrained(100, 2, trueData.observations);
+    return semiMarkovWalkConstrained(80, 2, trueData.observations);
   },
   10) // Try playing with the number of samples!
 
