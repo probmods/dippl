@@ -687,10 +687,6 @@ var drawPoints = function(canvas, positions){
   drawPoints(canvas, positions.slice(1));
 }
 
-
-var canvas = Draw(400, 400, true)
-
-
 var last = function(xs){
   return xs[xs.length - 1];
 }
@@ -750,12 +746,101 @@ var semiMarkovWalk = function(n, dim) {
 
 var trueData = semiMarkovWalk(100, 2);
 
+var canvas = Draw(400, 400, true)
 drawPoints(canvas, trueData.observations)
 ~~~~
 
 Now infer the latent walk underneath:
 
 ~~~~
+var drawLines = function(canvas, start, positions){
+  if (positions.length == 0) { return []; }
+  var next = positions[0];  
+  canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
+  drawLines(canvas, next, positions.slice(1));
+}
+
+var drawPoints = function(canvas, positions){
+  if (positions.length == 0) { return []; }
+  var next = positions[0];  
+  canvas.circle(next[0], next[1], "red", 2);    
+  drawPoints(canvas, positions.slice(1));
+}
+
+
+var last = function(xs){
+  return xs[xs.length - 1];
+}
+
+var secondLast = function(xs){
+  return xs[xs.length - 2];
+}
+
+var map2 = function(ar1,ar2,fn) {
+  if (ar1.length==0 | ar2.length==0) {
+    return []
+  } else {
+    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
+  }
+};
+
+var observeConstrained = function(pos, trueObs){
+  return map2(
+    pos,
+    trueObs,
+    function(x, obs){ return gaussianFactor(x, 5, obs); }
+  );
+};
+
+var initConstrained = function(dim, trueObs){
+  var state1 = repeat(dim, function(){ return gaussian(200, 1) });
+  var obs1 = observeConstrained(state1, trueObs[0]);
+  var state2 = repeat(dim, function(){ return gaussian(200, 1) });
+  var obs2 = observeConstrained(state2, trueObs[1]);
+  return {
+    states: [state1, state2],
+    observations: [obs1, obs2]
+  }
+}
+
+var transition = function(lastPos, secondLastPos){  
+  return map2(
+    lastPos,
+    secondLastPos,
+    function(lastX, secondLastX){ 
+      var momentum = (lastX - secondLastX) * .7;
+      return gaussian(lastX + momentum, 3); 
+    }
+  );
+};
+
+var semiMarkovWalkConstrained = function(n, dim, trueObs) {
+  var prevData = ((n == 2) ? 
+                  initConstrained(dim, trueObs.slice(0, 2)) : 
+                  semiMarkovWalkConstrained(n-1, dim, trueObs.slice(0, trueObs.length-1)));
+  var prevStates = prevData.states;
+  var prevObservations = prevData.observations;
+  var newState = transition(last(prevStates), secondLast(prevStates));
+  var newObservation = observeConstrained(newState, trueObs[trueObs.length-1]);
+  return {
+    states: prevStates.concat([newState]),
+    observations: prevObservations.concat([newObservation])
+  }
+};
+
+var trueData = semiMarkovWalk(100, 2);
+
+var posterior = ParticleFilter(
+  function(){
+    return semiMarkovWalkConstrained(100, 2, trueData.observations);
+  },
+  10) // Try playing with the number of samples!
+
+var inferredStates = sample(posterior).states;
+var canvas = Draw(400, 400, true)
+
+drawPoints(canvas, trueData.observations)
+drawLines(canvas, inferredStates[0], inferredStates.slice(1))
 ~~~~
 
 ### Particle filter: Vision
