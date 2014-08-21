@@ -705,7 +705,7 @@ How can we improve upon likelihood weighting? Let's apply the idea from the lect
 
 This requires a slight change in our approach: previously, we ran each sample until the end before we started the next one. Now, we want to run each sample until we hit the first factor statement; resample; run each sample up to the next factor statement; resample; and so on.
 
-To enable this, we store the continuation for going to store the continuation for each sample so that we can resume computation at the correct point. We are also going to refer to (potentially incomplete) samples as "particles".
+To enable this, we store the continuation for each sample so that we can resume computation at the correct point. We are also going to refer to (potentially incomplete) samples as "particles".
 
 ~~~~
 // language: javascript
