@@ -1,7 +1,7 @@
 ---
 layout: example
 title: Pragmatic inference based on compositional semantic meanings
-description: A Bayesian literal listener who conditions on the meaning of a sentence. The meaning is computed by direct composition in a categorial grammar.
+description: Combining pragmatic reasoning with incremental semantic parsing.
 ---
 
 This model combines and extends the [pragmatics](pragmatics.html) and [semantic parsing](semanticparsing.html) examples.
