@@ -24,8 +24,10 @@ loadImage(targetImage, "/esslli2014/assets/img/box.png")
 Let's look at the samples that enumeration explores first:
 
 ~~~~
+///fold:
 var targetImage = Draw(50, 50, false);
 loadImage(targetImage, "/esslli2014/assets/img/box.png")
+///
 
 var drawLines = function(drawObj, lines){
   var line = lines[0];
@@ -72,6 +74,7 @@ We first explore all images where *all* lines start at the bottom-rightmost pixe
 Gaussian random walk models can be used e.g. to model financial time series data. Here we show a two-dimensional random walk:
 
 ~~~~
+///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
   var next = positions[0];  
@@ -82,9 +85,7 @@ var drawLines = function(canvas, start, positions){
 var last = function(xs){
   return xs[xs.length - 1];
 }
-
-
-// Random walk model
+///
 
 var init = function(dim){
   return repeat(dim, function(){ return gaussian(200, 1) });
@@ -117,6 +118,7 @@ drawLines(canvas, positions[0], positions.slice(1))
 For many systems, the Markov assumption -- each point only depends on the previous point -- does not quite hold. In such cases, we can introduce dependence on multiple previous time steps. For example, the model below uses a momentum term that depends on the last two time steps:
 
 ~~~~
+///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
   var next = positions[0];  
@@ -139,9 +141,7 @@ var map2 = function(ar1,ar2,fn) {
     return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
   }
 };
-
-
-// Model
+///
 
 var init = function(dim){
   return repeat(dim, function(){ return gaussian(200, 1) });
@@ -178,6 +178,7 @@ drawLines(canvas, positions[0], positions.slice(1))
 We have previously seen [Hidden Markov models](/esslli2014/lectures/04-factorseq.html). There, the latent state was unobserved and we only got to observe a stochastic function of the latent state at each time step. We can apply the same principle to semi-Markov models. The model below could be used (for example) to model radar observations of the flight path of a plane.
 
 ~~~~
+///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
   var next = positions[0];  
@@ -201,13 +202,8 @@ var map2 = function(ar1,ar2,fn) {
   }
 };
 
-
-// Drawing
-
 var canvas = Draw(400, 400, true)
-
-
-// Model
+///
 
 var init = function(dim){
   return repeat(dim, function(){ return gaussian(200, 1) });
@@ -241,7 +237,7 @@ var semiMarkovWalk = function(n, dim) {
 
 semiMarkovWalk(100, 2);
 
-"done"
+print("done")
 ~~~~
 
 ### Gaussian mixture
@@ -249,6 +245,7 @@ semiMarkovWalk(100, 2);
 How else could we model points observed in 2D space? We could posit that there are two clusters around which the points tend to center:
 
 ~~~~
+///fold:
 var drawPoints = function(canvas, points){
   if (points.length > 0) {
     var next = points[0];    
@@ -264,9 +261,7 @@ var map2 = function(ar1,ar2,fn) {
     return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
   }
 };
-
-
-// Model
+///
 
 var makeGaussian = function(dim){
   var means = repeat(dim, function(){uniform(20, 380)});
@@ -387,6 +382,40 @@ If we run the HMM with these sample and factor functions, we see that we sample 
 ~~~~
 // language: javascript
 
+///fold:
+var cpsHmm = function(k, states, observations){
+  var prevState = states[states.length - 1];
+  _sample(
+    function(state){
+      _factor(
+        function(){
+          if (observations.length == 0) {
+            return k(states);
+          } else {
+            return cpsHmm(k, states.concat([state]), observations.slice(1));
+          }      
+        },        
+        (state == observations[0]) ? 0 : -1);
+    },    
+    bernoulliERP, 
+    [prevState ? .9 : .1]);
+}
+
+var runCpsHmm = function(k){
+  var observations = [true, true, true, true];
+  var startState = false;  
+  return cpsHmm(k, [startState], observations);
+}
+
+var _factor = function(k, score){
+  k(undefined);
+}
+
+var _sample = function(k, erp, params){
+  return sample(k, erp, params);
+}
+///
+
 runCpsHmm(jsPrint);
 ~~~~
 
@@ -394,6 +423,40 @@ Let's write some scaffolding so that we can take multiple samples from the prior
 
 ~~~~
 // language: javascript
+
+///fold:
+var cpsHmm = function(k, states, observations){
+  var prevState = states[states.length - 1];
+  _sample(
+    function(state){
+      _factor(
+        function(){
+          if (observations.length == 0) {
+            return k(states);
+          } else {
+            return cpsHmm(k, states.concat([state]), observations.slice(1));
+          }      
+        },        
+        (state == observations[0]) ? 0 : -1);
+    },    
+    bernoulliERP, 
+    [prevState ? .9 : .1]);
+}
+
+var runCpsHmm = function(k){
+  var observations = [true, true, true, true];
+  var startState = false;  
+  return cpsHmm(k, [startState], observations);
+}
+
+var _factor = function(k, score){
+  k(undefined);
+}
+
+var _sample = function(k, erp, params){
+  return sample(k, erp, params);
+}
+///
 
 var startCpsComp;
 var samples = [];
@@ -442,6 +505,36 @@ Let's accumulate the factor weights with each sample:
 
 ~~~~
 // language: javascript
+
+///fold:
+var cpsHmm = function(k, states, observations){
+  var prevState = states[states.length - 1];
+  _sample(
+    function(state){
+      _factor(
+        function(){
+          if (observations.length == 0) {
+            return k(states);
+          } else {
+            return cpsHmm(k, states.concat([state]), observations.slice(1));
+          }      
+        },        
+        (state == observations[0]) ? 0 : -1);
+    },    
+    bernoulliERP, 
+    [prevState ? .9 : .1]);
+}
+
+var runCpsHmm = function(k){
+  var observations = [true, true, true, true];
+  var startState = false;  
+  return cpsHmm(k, [startState], observations);
+}
+
+var _sample = function(k, erp, params){
+  return sample(k, erp, params);
+}
+///
 
 var startCpsComp;
 var samples = [];
@@ -516,6 +609,47 @@ The only change to the algorithm is a resampling step at the end:
 ~~~~
 // language: javascript
 
+///fold:
+var cpsHmm = function(k, states, observations){
+  var prevState = states[states.length - 1];
+  _sample(
+    function(state){
+      _factor(
+        function(){
+          if (observations.length == 0) {
+            return k(states);
+          } else {
+            return cpsHmm(k, states.concat([state]), observations.slice(1));
+          }      
+        },        
+        (state == observations[0]) ? 0 : -1);
+    },    
+    bernoulliERP, 
+    [prevState ? .9 : .1]);
+}
+
+var runCpsHmm = function(k){
+  var observations = [true, true, true, true];
+  var startState = false;  
+  return cpsHmm(k, [startState], observations);
+}
+
+var _sample = function(k, erp, params){
+  return sample(k, erp, params);
+}
+
+var resample = function(samples){
+  var weights = samples.map(
+    function(sample){return Math.exp(sample.score);});
+  var newSamples = [];
+  for (var i=0; i<samples.length; i++){
+    var j = multinomialSample(weights);
+    newSamples.push(samples[j]);
+  }
+  return newSamples;
+}
+///
+
 var startCpsComp = undefined;
 var samples = [];
 var sampleIndex = 0;
@@ -566,33 +700,23 @@ How can we improve upon likelihood weighting? Let's apply the idea from the lect
 
 This requires a slight change in our approach: previously, we ran each sample until the end before we started the next one. Now, we want to run each sample until we hit the first factor statement; resample; run each sample up to the next factor statement; resample; and so on.
 
-To enable this, we store the continuation for going to store the continuation for each sample so that we can resume computation at the correct point. We are also going to rename (potentially incomplete) samples to "particles".
-
-TODO: Is there a bug in the code below?
-
-TODO: Code folding
+To enable this, we store the continuation for going to store the continuation for each sample so that we can resume computation at the correct point. We are also going to refer to (potentially incomplete) samples as "particles".
 
 ~~~~
 // language: javascript
 
-var _factor = function(k, score){
-  samples[sampleIndex].score += score;
-  samples[sampleIndex].continuation = k; // NEW
-  
-  if (sampleIndex < samples.length-1){
-    sampleIndex += 1;
-  } else {
-    samples = resample(samples);
-    sampleIndex = 0;
-  }  
-  
-  samples[sampleIndex].continuation();
-}
-
+///fold:
 var _sample = function(k, erp, params){
   return sample(k, erp, params);
 }
 
+var copySample = function(s){
+  return {
+    value: s.value,
+    score: 0,
+    continuation: s.continuation
+  }
+}
 
 var resample = function(samples){
   var weights = samples.map(
@@ -600,12 +724,10 @@ var resample = function(samples){
   var newSamples = [];
   for (var i=0; i<samples.length; i++){
     var j = multinomialSample(weights);
-    newSamples.push(samples[j]);
+    newSamples.push(copySample(samples[j]));
   }
   return newSamples;
 }
-
-
 
 var cpsHmm = function(k, states, observations){
   var prevState = states[states.length - 1];
@@ -630,11 +752,27 @@ var runCpsHmm = function(k){
   var startState = false;  
   return cpsHmm(k, [startState], observations);
 }
-
+///
 
 
 var samples = [];
 var sampleIndex = 0;
+
+
+var _factor = function(k, score){
+  samples[sampleIndex].score += score;
+  samples[sampleIndex].continuation = k; // NEW
+  
+  if (sampleIndex < samples.length-1){
+    sampleIndex += 1;
+  } else {
+    samples = resample(samples);
+    sampleIndex = 0;
+  }  
+  
+  samples[sampleIndex].continuation();
+}
+
 
 var pfExit = function(value){
   
@@ -650,12 +788,12 @@ var pfExit = function(value){
   }
 };
 
+
 var SimpleParticleFilter = function(cpsComp, numSamples){  
 
   // Create placeholders for samples
   for (var i=0; i<numSamples; i++) {
     var sample = {
-      index: i,
       value: undefined,
       score: 0,
       continuation: function(){cpsComp(pfExit)} // NEW
@@ -668,23 +806,25 @@ var SimpleParticleFilter = function(cpsComp, numSamples){
 };
 
 
-SimpleParticleFilter(runCpsHmm, 10);
+SimpleParticleFilter(runCpsHmm, 20);
 ~~~~
 
-## Applications
+<!-- ## Applications -->
 
-### Likelihood weighting: Gaussian mixture model
+<!-- ### Likelihood weighting: Gaussian mixture model -->
 
-TODO
+<!-- TODO -->
+
+<!-- ~~~~ -->
+<!-- ~~~~ -->
+
+
+## A particle filter for the semi-Markov random walk
+
+We are going to generate true observations by running the Hidden semi-Markov model described above:
 
 ~~~~
-~~~~
-
-### Particle filter: Semi-Markov random walk
-
-Let's generate some "true" observations first:
-
-~~~~
+///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
   var next = positions[0];  
@@ -755,16 +895,17 @@ var semiMarkovWalk = function(n, dim) {
     observations: prevObservations.concat([newObservation])
   }
 };
+///
 
 var trueData = semiMarkovWalk(100, 2);
-
 var canvas = Draw(400, 400, true)
 drawPoints(canvas, trueData.observations)
 ~~~~
 
-Now infer the latent walk underneath:
+Now let's infer the latent walk underneath:
 
 ~~~~
+///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
   var next = positions[0];  
@@ -778,7 +919,6 @@ var drawPoints = function(canvas, positions){
   canvas.circle(next[0], next[1], "red", 2);    
   drawPoints(canvas, positions.slice(1));
 }
-
 
 var last = function(xs){
   return xs[xs.length - 1];
@@ -795,6 +935,19 @@ var map2 = function(ar1,ar2,fn) {
     return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
   }
 };
+///
+
+var transition = function(lastPos, secondLastPos){  
+  return map2(
+    lastPos,
+    secondLastPos,
+    function(lastX, secondLastX){ 
+      var momentum = (lastX - secondLastX) * .7;
+      return gaussian(lastX + momentum, 3); 
+    }
+  );
+};
+
 
 var observeConstrained = function(pos, trueObs){
   return map2(
@@ -815,21 +968,11 @@ var initConstrained = function(dim, trueObs){
   }
 }
 
-var transition = function(lastPos, secondLastPos){  
-  return map2(
-    lastPos,
-    secondLastPos,
-    function(lastX, secondLastX){ 
-      var momentum = (lastX - secondLastX) * .7;
-      return gaussian(lastX + momentum, 3); 
-    }
-  );
-};
-
 var semiMarkovWalkConstrained = function(n, dim, trueObs) {
-  var prevData = ((n == 2) ? 
-                  initConstrained(dim, trueObs.slice(0, 2)) : 
-                  semiMarkovWalkConstrained(n-1, dim, trueObs.slice(0, trueObs.length-1)));
+  var prevData = (
+    (n == 2) ? 
+    initConstrained(dim, trueObs.slice(0, 2)) : 
+    semiMarkovWalkConstrained(n-1, dim, trueObs.slice(0, trueObs.length-1)));
   var prevStates = prevData.states;
   var prevObservations = prevData.observations;
   var newState = transition(last(prevStates), secondLast(prevStates));
@@ -840,25 +983,32 @@ var semiMarkovWalkConstrained = function(n, dim, trueObs) {
   }
 };
 
-var trueData = semiMarkovWalk(80, 2);
 
-var posterior = ParticleFilter(
+// Run model using particle filter
+
+var numSteps = 80;
+var trueObservations = semiMarkovWalk(numSteps, 2).observations;
+
+var posteriorSampler = ParticleFilter(
   function(){
-    return semiMarkovWalkConstrained(80, 2, trueData.observations);
+    return semiMarkovWalkConstrained(numSteps, 2, trueObservations);
   },
   10) // Try playing with the number of samples!
 
-var inferredStates = sample(posterior).states;
-var canvas = Draw(400, 400, true)
+var inferredStates = sample(posteriorSampler).states;
 
-drawPoints(canvas, trueData.observations)
+
+// Draw model output
+
+var canvas = Draw(400, 400, true)
+drawPoints(canvas, trueObservations)
 drawLines(canvas, inferredStates[0], inferredStates.slice(1))
 ~~~~
 
-### Particle filter: Vision
+### Particle filter for vision
 
 See the [vision page](/esslli2014/lectures/vision.html). Note the "incremental heuristic factors" pattern that we saw in the previous lecture.
 
 
-## Extension: Residual resampling
+<!-- ## Extension: Residual resampling -->
 
