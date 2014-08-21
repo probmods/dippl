@@ -1,7 +1,7 @@
 ---
 layout: lecture
 title: Particle Filtering
-description: Importance sampling and sequential Monte Carlo.
+description: Models with continuous variables, importance sampling, and sequential Monte Carlo.
 ---
 
 
@@ -64,24 +64,27 @@ var lineDist = EnumerateDepthFirst(
 print(lineDist)
 ~~~~
 
-We first explore all images where *all* lines start at the bottom-rightmost pixel, and one of the lines ends a few pixels further up. This is probably not the ideal exploration strategy.
+We first explore all images where *all* lines start at the bottom-rightmost pixel, and one of the lines ends a few pixels further up. Looking at the histogram, we see that all of these images are equally bad -- none of the lines overlap with the lines in the target image. This is probably not the ideal exploration strategy.
 
 
 ### Gaussian random walk
 
+Gaussian random walk models can be used e.g. to model financial time series data. Here we show a two-dimensional random walk:
+
 ~~~~
-var drawPositions = function(canvas, start, positions){
-  if (positions.length == 0) {
-    return [];
-  }
+var drawLines = function(canvas, start, positions){
+  if (positions.length == 0) { return []; }
   var next = positions[0];  
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
-  drawPositions(canvas, next, positions.slice(1));
+  drawLines(canvas, next, positions.slice(1));
 }
 
-var canvas = Draw(400, 400, true)
+var last = function(xs){
+  return xs[xs.length - 1];
+}
 
 
+// Random walk model
 
 var init = function(dim){
   return repeat(dim, function(){ return gaussian(200, 1) });
@@ -94,10 +97,6 @@ var transition = function(pos){
   );
 };
 
-var last = function(xs){
-  return xs[xs.length - 1];
-}
-
 var gaussianRandomWalk = function(n, dim) {
   var prevStates = (n==1) ? [init(dim)] : gaussianRandomWalk(n-1, dim);
   var newState = transition(last(prevStates));
@@ -106,23 +105,24 @@ var gaussianRandomWalk = function(n, dim) {
 
 var positions = gaussianRandomWalk(100, 2);
 
-drawPositions(canvas, positions[0], positions.slice(1))
+
+// Draw model output
+
+var canvas = Draw(400, 400, true)
+drawLines(canvas, positions[0], positions.slice(1))
 ~~~~
 
 ### Semi-Markov random walk
 
+For many systems, the Markov assumption -- each point only depends on the previous point -- does not quite hold. In such cases, we can introduce dependence on multiple previous time steps. For example, the model below uses a momentum term that depends on the last two time steps:
+
 ~~~~
-var drawPositions = function(canvas, start, positions){
-  if (positions.length == 0) {
-    return [];
-  }
+var drawLines = function(canvas, start, positions){
+  if (positions.length == 0) { return []; }
   var next = positions[0];  
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
-  drawPositions(canvas, next, positions.slice(1));
+  drawLines(canvas, next, positions.slice(1));
 }
-
-var canvas = Draw(400, 400, true)
-
 
 var last = function(xs){
   return xs[xs.length - 1];
@@ -140,6 +140,8 @@ var map2 = function(ar1,ar2,fn) {
   }
 };
 
+
+// Model
 
 var init = function(dim){
   return repeat(dim, function(){ return gaussian(200, 1) });
@@ -164,23 +166,22 @@ var semiMarkovWalk = function(n, dim) {
 
 var positions = semiMarkovWalk(100, 2);
 
-drawPositions(canvas, positions[0], positions.slice(1))
-~~~~
 
-### Semi-Hidden Markov model
-
-~~~~
-var drawPositions = function(canvas, start, positions){
-  if (positions.length == 0) {
-    return [];
-  }
-  var next = positions[0];  
-  canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
-  drawPositions(canvas, next, positions.slice(1));
-}
+// Draw model output
 
 var canvas = Draw(400, 400, true)
+drawLines(canvas, positions[0], positions.slice(1))
+~~~~
 
+### Hidden Semi-Markov model
+
+~~~~
+var drawLines = function(canvas, start, positions){
+  if (positions.length == 0) { return []; }
+  var next = positions[0];  
+  canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
+  drawLines(canvas, next, positions.slice(1));
+}
 
 var last = function(xs){
   return xs[xs.length - 1];
@@ -198,6 +199,13 @@ var map2 = function(ar1,ar2,fn) {
   }
 };
 
+
+// Drawing
+
+var canvas = Draw(400, 400, true)
+
+
+// Model
 
 var init = function(dim){
   return repeat(dim, function(){ return gaussian(200, 1) });
@@ -229,9 +237,9 @@ var semiMarkovWalk = function(n, dim) {
   return prevStates.concat([newState]);
 };
 
-var positions = semiMarkovWalk(100, 2);
+semiMarkovWalk(100, 2);
 
-// drawPositions(canvas, positions[0], positions.slice(1))
+"done"
 ~~~~
 
 ### Gaussian mixture
