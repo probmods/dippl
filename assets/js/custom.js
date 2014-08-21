@@ -1,9 +1,5 @@
 "use strict";
 
-//var comments = require("./cm-comments");
-//var folding = require("./cm-folding");
-
-
 var topK; // Top-level continuation
 var activeCodeBox;
 
@@ -197,7 +193,7 @@ function setupCodeBox(element){
       readOnly: false,
       extraKeys: {"Tab": "indentAuto"}
     });
-  
+
   //fold "///fold: ... ///" parts:
   var lastLine = cm.lastLine();
   for(var i=0;i<=lastLine;i++) {
@@ -215,8 +211,8 @@ function setupCodeBox(element){
   };
 
   var resultDiv = $('<div/>',
-                    { "id": "result_" + codeBoxCount,
-                      "class": "resultDiv" });
+    { "id": "result_" + codeBoxCount,
+      "class": "resultDiv" });
 
   var showResult = function(x){
     resultDiv.show();
@@ -355,3 +351,14 @@ function setupCpsForm(){
 }
 
 $(setupCpsForm);
+
+
+// Google analytics
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-54996-12', 'auto');
+ga('send', 'pageview');
