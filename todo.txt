@@ -7,6 +7,8 @@ Inference:
 - benchmark against webchurch, maybe do some profiling
 - clean up and simplify codebase
 - automating some of the factor splitting, moving, inserting stuff?
+- try beam search
+- implement rejuvenation via lightweight MH: naming transform and then particles have a past as well as future…
 
 Integration:
 - fix crazy box dependencies in lecture notes!
@@ -26,18 +28,9 @@ Ideas and examples:
 
 Lectures:
 
+- Andreas try: PMCMC and examples…
 
-- Particle filter
-- Beam search??
-- PMCMC…
-- awesomer vision example
-
-- MH??
-
-- shootout
-
-- foundations
-
+- Fallback plan, noah: talk about lightweight MH, then discussion.
 
 
 
