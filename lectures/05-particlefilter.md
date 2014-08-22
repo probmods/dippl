@@ -164,7 +164,7 @@ var semiMarkovWalk = function(n, dim) {
   return prevStates.concat([newState]);
 };
 
-var positions = semiMarkovWalk(100, 2);
+var positions = semiMarkovWalk(80, 2);
 
 
 // Draw model output
@@ -373,7 +373,7 @@ var _factor = function(k, score){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, erp, params);
+  return sample(k, "addr", erp, params);
 }
 ~~~~
 
@@ -454,7 +454,7 @@ var _factor = function(k, score){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, erp, params);
+  return sample(k, "addr", erp, params);
 }
 ///
 
@@ -532,7 +532,7 @@ var runCpsHmm = function(k){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, erp, params);
+  return sample(k, "addr", erp, params);
 }
 ///
 
@@ -635,7 +635,7 @@ var runCpsHmm = function(k){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, erp, params);
+  return sample(k, "addr", erp, params);
 }
 
 var _factor = function(k, score){
@@ -712,7 +712,7 @@ To enable this, we store the continuation for each sample so that we can resume 
 
 ///fold:
 var _sample = function(k, erp, params){
-  return sample(k, erp, params);
+  return sample(k, "addr", erp, params);
 }
 
 var copySample = function(s){
@@ -814,15 +814,6 @@ var SimpleParticleFilter = function(cpsComp, numSamples){
 SimpleParticleFilter(runCpsHmm, 20);
 ~~~~
 
-<!-- ## Applications -->
-
-<!-- ### Likelihood weighting: Gaussian mixture model -->
-
-<!-- TODO -->
-
-<!-- ~~~~ -->
-<!-- ~~~~ -->
-
 
 ## A particle filter for the semi-Markov random walk
 
@@ -902,7 +893,7 @@ var semiMarkovWalk = function(n, dim) {
 };
 ///
 
-var trueData = semiMarkovWalk(100, 2);
+var trueData = semiMarkovWalk(70, 2);
 var canvas = Draw(400, 400, true)
 drawPoints(canvas, trueData.observations)
 ~~~~
