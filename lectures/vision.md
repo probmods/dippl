@@ -159,7 +159,6 @@ var finalImgSampler = MH(
     drawLines(finalGeneratedImage, lines);
     var newScore = -targetImage.distance(finalGeneratedImage)/1000; // Increase to 10000 to see more diverse samples
     factor(newScore);    
-	drawLines(finalGeneratedImage, lines);    
     // print(newScore);
     return lines
    }, 1000)
@@ -177,11 +176,17 @@ var targetImage = Draw(50, 50, true);
 loadImage(targetImage, "/esslli2014/assets/img/beach.png")
 ~~~~
 
-A richer image prior, and PMCMC as inference algorithm:
+A richer image prior:
 
 ~~~~
-var targetImage = Draw(50, 50, false);
+///fold:
+var targetImage = Draw(50, 50, true);
 loadImage(targetImage, "/esslli2014/assets/img/beach.png")
+
+var uniformDraw = function(xs){
+  var i = randomInteger(xs.length);
+  return xs[i];
+}
 
 var drawLines = function(drawObj, lines){
   var line = lines[0];
@@ -191,18 +196,23 @@ var drawLines = function(drawObj, lines){
   }
 }
 
-var uniformDraw = function(xs){
-  var i = randomInteger(xs.length);
-  return xs[i];
+var randomStrokeWidth = function(){
+  var widths = [2, 4, 8, 16];
+  return uniformDraw(widths);
+}
+
+var randomOpacity = function(){
+  var opacities = [0, 0.2, .5];
+  return uniformDraw(opacities);
 }
 
 var _getRandomColor = function(i) {
   if (i == 0){
     return "";
   } else {
-    var letters = '0123456789ABCDEF'.split('');
+    // var letters = '0123456789ABCDEF'.split('');
     var color = '#';
-    return letters[randomInteger(16)] + _getRandomColor(i-1);
+    return uniformDraw('04AF') + _getRandomColor(i-1);
   }
 }
 
@@ -210,41 +220,27 @@ var randomColor = function(){
   return "#" + _getRandomColor(6);
 }
 
-var randomStrokeWidth = function(){
-  var widths = [2, 4, 8, 16];
-  return uniformDraw(widths);
-}
-
-var randomOpacity = function(){
-  var opacities = [.3, .5, .7];
-  return uniformDraw(opacities);
-}
-
-var makeLines = function(n, lines, prevScore){
-  // Add a random line to the set of lines
+var makeLines = function(n, lines){
   var x1 = randomInteger(50);
   var y1 = randomInteger(50);    
   var x2 = randomInteger(50);
   var y2 = randomInteger(50);        
-  var strokeWidth = randomStrokeWidth();
-  var opacity = randomOpacity();
-  var color = randomColor();
+  var strokeWidth = randomStrokeWidth();  
+  var opacity = randomOpacity();    
+  var color = randomColor();      
   var newLines = lines.concat([[x1, y1, x2, y2, strokeWidth, opacity, color]]);
-  // Compute image from set of lines
-  var generatedImage = Draw(50, 50, false);
-  drawLines(generatedImage, newLines);
-  // Factor prefers images that are close to target image
-  var newScore = -targetImage.distance(generatedImage)/1000; // Increase to 10000 to see more diverse samples
-  factor(newScore - prevScore);
-  generatedImage.destroy();
-  // Generate remaining lines (unless done)
-  return (n==1) ? newLines : makeLines(n-1, newLines, newScore);
+  return (n==1) ? newLines : makeLines(n-1, newLines);
 }
+///
 
-PMCMC(
+MH(
   function(){
-    var lines = makeLines(10, [], 0);
+    var lines = makeLines(4, []);
     var finalGeneratedImage = Draw(50, 50, true);
-	drawLines(finalGeneratedImage, lines);
-   }, 20, 10)
+    drawLines(finalGeneratedImage, lines);
+    var newScore = -targetImage.distance(finalGeneratedImage)/1000; // Increase to 10000 to see more diverse samples
+    factor(newScore);    
+    // print(newScore);
+    return lines
+   }, 1000)
 ~~~~
