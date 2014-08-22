@@ -86,9 +86,9 @@ function DrawObject(width, height, visible){
   this.redraw();
 }
 
-DrawObject.prototype.newPath = function(strokeWidth, opacity){
+DrawObject.prototype.newPath = function(strokeWidth, opacity, color){
   var path = new this.paper.Path();
-  path.strokeColor = 'black';
+  path.strokeColor = color || 'black';
   path.strokeWidth = strokeWidth || 8;
   path.opacity = opacity || 0.6;
   return path;
@@ -105,8 +105,8 @@ DrawObject.prototype.circle = function(x, y, fillColor, radius){
   this.redraw();
 };
 
-DrawObject.prototype.line = function(x1, y1, x2, y2, strokeWidth, opacity){
-  var path = this.newPath(strokeWidth, opacity);
+DrawObject.prototype.line = function(x1, y1, x2, y2, strokeWidth, opacity, color){
+  var path = this.newPath(strokeWidth, opacity, color);
   path.moveTo(x1, y1);
   path.lineTo(this.newPoint(x2, y2));
   this.redraw();
@@ -146,7 +146,7 @@ DrawObject.prototype.destroy = function(){
 }
 
 function Draw(k, a, width, height, visible){
-  return k(new DrawObject(width, height, visible));
+  return setTimeout(function(){k(new DrawObject(width, height, visible));});
 }
 
 function loadImage(k, a, drawObject, url){
