@@ -220,7 +220,7 @@ Above we only reused the random choices made before the point of regeneration. I
 
 ~~~
 function _sample(cont, name, erp, params) {
-  var prev = oldTrace.find(function(t){return t.name == name})
+  var prev = findChoice(oldTrace, name)
   var val = prev==undefined ? erp.sample(params) : prev.val
   var choiceScore = erp.score(params,val)
   trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
@@ -228,21 +228,148 @@ function _sample(cont, name, erp, params) {
   currScore += choiceScore
   cont(val)
 }
+
+function findChoice(trace, name) {
+  for(var i = 0; i < trace.length; i++){
+    if(trace[i].name == name){return trace[i]}
+  }
+  return undefined  
+}
 ~~~
 
 Notice that, in addition to reusing existing sampled choices, we add the name and mark whether this choice has been sampled fresh. We must account for this in the MH acceptance calculation:
 
- function MHacceptProb(trace, oldTrace, regenFrom){
+~~~
+function MHacceptProb(trace, oldTrace, regenFrom){
   var fw = -Math.log(oldTrace.length)
-  trace.slice(regenFrom).map(function(s){fw += s.choiceScore})
+  trace.slice(regenFrom).map(function(s){fw += s.reused?0:s.choiceScore})
   var bw = -Math.log(trace.length)
-  oldTrace.slice(regenFrom).map(function(s){bw += s.choiceScore})
+  oldTrace.slice(regenFrom).map(function(s){
+    var nc = findChoice(trace, s.name)
+    bw += (!nc || !nc.reused) ? s.choiceScore : 0  })
+  var acceptance = Math.min(1, Math.exp(currScore - oldScore + bw - fw))
+  return acceptance
+}
+~~~
+
+Putting these pieces together (and adding names to the `_sample` calls in `cpsSkewBinomial`, under the fold):
+TODO:mark regen for resampling.. 
+
+~~~
+// language: javascript
+
+///fold:
+function cpsSkewBinomial(k){
+  _sample(
+    function(a){
+      _sample(
+        function(b){
+          _sample(
+            function(c){
+              _factor(
+                function(){
+                  k(a + b + c);
+                },
+                (a|b)?0:-1)
+            }, 'alice',
+            bernoulliERP, [0.5])
+        }, 'bob',
+        bernoulliERP, [0.5])
+    }, 'andreas',
+    bernoulliERP, [0.5])
+}
+///
+
+trace = []
+oldTrace = []
+currScore = 0
+oldScore = -Infinity
+oldVal = undefined
+regenFrom = 0
+
+iterations = 1000
+
+function _factor(k,s) { 
+  currScore += s
+  k()
+}
+
+function _sample(cont, name, erp, params) {
+  var prev = findChoice(oldTrace, name)
+  var val = prev==undefined ? erp.sample(params) : prev.val
+  var choiceScore = erp.score(params,val)
+  trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
+              erp: erp, params: params, name: name, reused: !(prev==undefined)})
+  currScore += choiceScore
+  cont(val)
+}
+
+function findChoice(trace, name) {
+  for(var i = 0; i < trace.length; i++){
+    if(trace[i].name == name){return trace[i]}
+  }
+  return undefined  
+}
+
+returnHist = {}
+
+function MHacceptProb(trace, oldTrace, regenFrom){
+  var fw = -Math.log(oldTrace.length)
+  trace.slice(regenFrom).map(function(s){fw += s.reused?0:s.choiceScore})
+  var bw = -Math.log(trace.length)
+  oldTrace.slice(regenFrom).map(function(s){
+    var nc = findChoice(trace, s.name)
+    bw += (!nc || !nc.reused) ? s.choiceScore : 0  })
   var acceptance = Math.min(1, Math.exp(currScore - oldScore + bw - fw))
   return acceptance
 }
 
-mark regen for resampling..
+function exit(val) {
+  if( iterations > 0 ) {
+    iterations -= 1
+    
+    //did we like this proposal?
+    var acceptance = MHacceptProb(trace, oldTrace, regenFrom)
+    acceptance = oldVal==undefined ?1:acceptance //just for init
+    if(!(Math.random()<acceptance)){
+      //if rejected, roll back trace, etc:
+      trace = oldTrace
+      currScore = oldScore
+      val = oldVal
+    }
+    
+    //now add val to hist:
+    returnHist[val] = (returnHist[val] || 0) + 1
+        
+    //make a new proposal:
+    regenFrom = Math.floor(Math.random() * trace.length)
+    var regen = trace[regenFrom]
+    oldTrace = trace
+    trace = trace.slice(0,regenFrom)
+    oldScore = currScore
+    currScore = regen.score
+    oldVal = val
+    
+    _sample(regen.k, regen.erp, regen.params)
+  }
+}
 
+function MH(cpsComp) {
+  cpsComp(exit)
+  
+  //normalize:
+  var norm = 0
+  for (var v in returnHist) {
+    norm += returnHist[v];
+  }
+  for (var v in returnHist) {
+    returnHist[v] = returnHist[v] / norm;
+  }
+  return returnHist
+}
+
+MH(cpsSkewBinomial)
+~~~
 
 ### The addressing transform
 
