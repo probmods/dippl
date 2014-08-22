@@ -110,3 +110,82 @@ ParticleFilter(
 	drawLines(finalGeneratedImage, lines);    
    }, 100)
 ~~~~
+
+A more colorful target image:
+
+~~~~
+var targetImage = Draw(50, 50, true);
+loadImage(targetImage, "/esslli2014/assets/img/beach.png")
+~~~~
+
+A richer image prior, and PMCMC as inference algorithm:
+
+~~~~
+var targetImage = Draw(50, 50, false);
+loadImage(targetImage, "/esslli2014/assets/img/beach.png")
+
+var drawLines = function(drawObj, lines){
+  var line = lines[0];
+  drawObj.line(line[0], line[1], line[2], line[3], line[4], line[5], line[6]);
+  if (lines.length > 1) {
+    drawLines(drawObj, lines.slice(1));
+  }
+}
+
+var uniformDraw = function(xs){
+  var i = randomInteger(xs.length);
+  return xs[i];
+}
+
+var _getRandomColor = function(i) {
+  if (i == 0){
+    return "";
+  } else {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    return letters[randomInteger(16)] + _getRandomColor(i-1);
+  }
+}
+
+var randomColor = function(){
+  return "#" + _getRandomColor(6);
+}
+
+var randomStrokeWidth = function(){
+  var widths = [2, 4, 8, 16];
+  return uniformDraw(widths);
+}
+
+var randomOpacity = function(){
+  var opacities = [.3, .5, .7];
+  return uniformDraw(opacities);
+}
+
+var makeLines = function(n, lines, prevScore){
+  // Add a random line to the set of lines
+  var x1 = randomInteger(50);
+  var y1 = randomInteger(50);    
+  var x2 = randomInteger(50);
+  var y2 = randomInteger(50);        
+  var strokeWidth = randomStrokeWidth();
+  var opacity = randomOpacity();
+  var color = randomColor();
+  var newLines = lines.concat([[x1, y1, x2, y2, strokeWidth, opacity, color]]);
+  // Compute image from set of lines
+  var generatedImage = Draw(50, 50, false);
+  drawLines(generatedImage, newLines);
+  // Factor prefers images that are close to target image
+  var newScore = -targetImage.distance(generatedImage)/1000; // Increase to 10000 to see more diverse samples
+  factor(newScore - prevScore);
+  generatedImage.destroy();
+  // Generate remaining lines (unless done)
+  return (n==1) ? newLines : makeLines(n-1, newLines, newScore);
+}
+
+PMCMC(
+  function(){
+    var lines = makeLines(10, [], 0);
+    var finalGeneratedImage = Draw(50, 50, true);
+	drawLines(finalGeneratedImage, lines);
+   }, 20, 10)
+~~~~
