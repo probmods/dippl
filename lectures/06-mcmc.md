@@ -219,12 +219,13 @@ MH(cpsSkewBinomial)
 Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. If we knew which sampled value was which, then we could look into the previous trace as the execution runs and reuse its values. That is, imagine that each call to `sample` was passed a (unique) name: `sample(name, erp, params)`. Then the sample function could try to look-up and reuse values:
 
 ~~~
-function _sample(cont, name, erp, params) {
-  var prev = oldTrace.find(function(t){return t.name == name})
-  var val = prev==undefined ? erp.sample(params) : prev.val
+function _sample(cont, name, erp, params, forceSample) {
+  var prev = findChoice(oldTrace, name)
+  var reuse = ! (prev==undefined | forceSample)
+  var val = reuse ? prev.val : erp.sample(params) 
   var choiceScore = erp.score(params,val)
   trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
-              erp: erp, params: params, name: name, reused: !(prev==undefined)})
+              erp: erp, params: params, name: name, reused: reuse})
   currScore += choiceScore
   cont(val)
 }
@@ -232,21 +233,146 @@ function _sample(cont, name, erp, params) {
 
 Notice that, in addition to reusing existing sampled choices, we add the name and mark whether this choice has been sampled fresh. We must account for this in the MH acceptance calculation:
 
- function MHacceptProb(trace, oldTrace, regenFrom){
+~~~
+function MHacceptProb(trace, oldTrace, regenFrom){
   var fw = -Math.log(oldTrace.length)
-  trace.slice(regenFrom).map(function(s){fw += s.choiceScore})
+  trace.slice(regenFrom).map(function(s){fw += s.reused?0:s.choiceScore})
   var bw = -Math.log(trace.length)
-  oldTrace.slice(regenFrom).map(function(s){bw += s.choiceScore})
+  oldTrace.slice(regenFrom).map(function(s){
+    var nc = findChoice(trace, s.name)
+    bw += (!nc || !nc.reused) ? s.choiceScore : 0  })
+  var acceptance = Math.min(1, Math.exp(currScore - oldScore + bw - fw))
+  return acceptance
+}
+~~~
+
+Putting these pieces together (and adding names to the `_sample` calls in `cpsSkewBinomial`, under the fold):
+
+~~~
+// language: javascript
+
+///fold:
+function cpsSkewBinomial(k){
+  _sample(
+    function(a){
+      _sample(
+        function(b){
+          _sample(
+            function(c){
+              _factor(
+                function(){
+                  k(a + b + c);
+                },
+                (a|b)?0:-1)
+            }, 'alice',
+            bernoulliERP, [0.5])
+        }, 'bob',
+        bernoulliERP, [0.5])
+    }, 'andreas',
+    bernoulliERP, [0.5])
+}
+///
+
+trace = []
+oldTrace = []
+currScore = 0
+oldScore = -Infinity
+oldVal = undefined
+regenFrom = 0
+
+iterations = 1000
+
+function _factor(k,s) { 
+  currScore += s
+  k()
+}
+
+function _sample(cont, name, erp, params, forceSample) {
+  var prev = findChoice(oldTrace, name)
+  var reuse = ! (prev==undefined | forceSample)
+  var val = reuse ? prev.val : erp.sample(params) 
+  var choiceScore = erp.score(params,val)
+  trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
+              erp: erp, params: params, name: name, reused: reuse})
+  currScore += choiceScore
+  cont(val)
+}
+
+function findChoice(trace, name) {
+  for(var i = 0; i < trace.length; i++){
+    if(trace[i].name == name){return trace[i]}
+  }
+  return undefined  
+}
+
+returnHist = {}
+
+function MHacceptProb(trace, oldTrace, regenFrom){
+  var fw = -Math.log(oldTrace.length)
+  trace.slice(regenFrom).map(function(s){fw += s.reused?0:s.choiceScore})
+  var bw = -Math.log(trace.length)
+  oldTrace.slice(regenFrom).map(function(s){
+    var nc = findChoice(trace, s.name)
+    bw += (!nc || !nc.reused) ? s.choiceScore : 0  })
   var acceptance = Math.min(1, Math.exp(currScore - oldScore + bw - fw))
   return acceptance
 }
 
-mark regen for resampling..
+function exit(val) {
+  if( iterations > 0 ) {
+    iterations -= 1
+    
+    //did we like this proposal?
+    var acceptance = MHacceptProb(trace, oldTrace, regenFrom)
+    acceptance = oldVal==undefined ?1:acceptance //just for init
+    if(!(Math.random()<acceptance)){
+      //if rejected, roll back trace, etc:
+      trace = oldTrace
+      currScore = oldScore
+      val = oldVal
+    }
+    
+    //now add val to hist:
+    returnHist[val] = (returnHist[val] || 0) + 1
+        
+    //make a new proposal:
+    regenFrom = Math.floor(Math.random() * trace.length)
+    var regen = trace[regenFrom]
+    oldTrace = trace
+    trace = trace.slice(0,regenFrom)
+    oldScore = currScore
+    currScore = regen.score
+    oldVal = val
+    
+    _sample(regen.k, regen.name, regen.erp, regen.params, true)
+  }
+}
+
+function MH(cpsComp) {
+  cpsComp(exit)
+  
+  //normalize:
+  var norm = 0
+  for (var v in returnHist) {
+    norm += returnHist[v];
+  }
+  for (var v in returnHist) {
+    returnHist[v] = returnHist[v] / norm;
+  }
+  return returnHist
+}
+
+MH(cpsSkewBinomial)
+~~~
+
+This version will now reuse most of the choices from the old trace in making a proposal. 
+
+Unfortunately it is impractical to add names by hand to distinguish calls to sample; fortunately there is a way to do this automatically!
 
 
 ### The addressing transform
 
-We can automatically transform programs such that a *stack address* is available at each point in the computation. This is simple -- all we need to do is add a global initialization `var address = ""` to our program, and transform function applications and function calls:
+We can automatically transform programs such that a *stack address* is available at each point in the computation (Wingate, Stuhlmueller, Goodman, 2011). This is simple -- all we need to do is add a global initialization `var address = ""` to our program, and transform function applications and function calls:
 
 Function expressions get an additional `address` argument:
 
@@ -280,3 +406,6 @@ The auto-updating form below shows the addressing transform that we actually use
     <textarea id="namingInput">f(x)</textarea>
     <textarea id="namingOutput"></textarea>
 </div>
+
+WebPPL uses this addressing transform to make names available for MH. Overall, two transformations happen to the original program, in order to make information available to the probabilistic primitives: the naming transform makes stack-addresses available, and the CPS transform then makes continuations available. 
+
