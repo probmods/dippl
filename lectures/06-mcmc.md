@@ -32,19 +32,15 @@ function cpsBinomial(k){
 ///
 
 trace = []
-currScore = 0
 iterations = 1000
 
 //function _factor(s) { currScore += s}
 
 function _sample(cont, erp, params) {
-  var continuation = function(){
-    var val = erp.sample(params)
-    currScore += erp.score(params,val)
-    cont(val)
-  }
-  trace.push({k: continuation, score: currScore})
-  continuation()
+  var val = erp.sample(params)
+  trace.push({k: cont, val: val,
+              erp: erp, params: params})
+  cont(val)
 }
 
 returnHist = {}
@@ -56,9 +52,10 @@ function exit(val) {
         
     //make a new proposal:
     var regenFrom = Math.floor(Math.random() * trace.length)
-    trace = trace.slice(0,regenFrom+1)
-    currScore = trace[regenFrom].score
-    trace[regenFrom].k()
+    var regen = trace[regenFrom]
+    trace = trace.slice(0,regenFrom)
+    
+    _sample(regen.k, regen.erp, regen.params)
   }
 }
 
@@ -79,7 +76,7 @@ function RandomWalk(cpsComp) {
 RandomWalk(cpsBinomial)
 ~~~
 
-We have successfully done a random walk around the space of executions... and it even matches the desired binomial distribution. However, we have not handled `factor` statements (or used the computation scores in any way). This will not match the desired distribution when the computation contains factors. The [Metropolis Hastings](http://en.wikipedia.org/wiki/Metropolis-Hastings_algorithm) algorithm gives a way to 'patch up' this random walk to get the right distribution: we add a step which accepts or rejects the new state.
+We have successfully done a random walk around the space of executions... and it even matches the desired binomial distribution. However, we have not handled `factor` statements (or used the computation scores in any way). This will not match the desired distribution when the computation contains factors (or when the number of random choices may change across executions). The [Metropolis Hastings](http://en.wikipedia.org/wiki/Metropolis-Hastings_algorithm) algorithm gives a way to 'patch up' this random walk to get the right distribution.
 
 Before we give the code, here's an example we'd like to compute:
 
@@ -95,7 +92,20 @@ var skewBinomial = function(){
 print(Enumerate(skewBinomial))
 ~~~
 
-Now the Metropolis-Hastings sampler:
+Now the Metropolis-Hastings sampler: we add to the earlier algorithm a step which accepts or rejects the new state. The probability of acceptance is given by:
+
+~~~
+function MHacceptProb(trace, oldTrace, regenFrom){
+  var fw = -Math.log(oldTrace.length)
+  trace.slice(regenFrom).map(function(s){fw += s.addScore})
+  var bw = -Math.log(trace.length)
+  oldTrace.slice(regenFrom).map(function(s){bw += s.addScore})
+  var acceptance = Math.min(1, Math.exp(currScore - oldScore + bw - fw))
+  return acceptance
+}
+~~~
+
+This somewhat opaque probability is constructed to guarantee that, in the limit, the random walk will sample from the desired distribution. The full algorithm:
 
 ~~~
 // language: javascript
