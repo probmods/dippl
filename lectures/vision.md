@@ -235,7 +235,7 @@ var makeLines = function(n, lines){
 
 MH(
   function(){
-    var lines = makeLines(4, []);
+    var lines = makeLines(8, []);
     var finalGeneratedImage = Draw(50, 50, true);
     drawLines(finalGeneratedImage, lines);
     var newScore = -targetImage.distance(finalGeneratedImage)/1000; // Increase to 10000 to see more diverse samples
