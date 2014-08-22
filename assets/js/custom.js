@@ -38,7 +38,7 @@ function jsPrint(x){
   }
 }
 
-function print(k, x){
+function print(k, a, x){
   jsPrint(x);
   k();
 }
@@ -145,11 +145,11 @@ DrawObject.prototype.destroy = function(){
   $(this.canvas).remove();
 }
 
-function Draw(k, width, height, visible){
+function Draw(k, a, width, height, visible){
   return k(new DrawObject(width, height, visible));
 }
 
-function loadImage(k, drawObject, url){
+function loadImage(k, a, drawObject, url){
   // Synchronous loading - only continue with computation once image is loaded
   var context = drawObject.canvas.getContext('2d');
   var imageObj = new Image();
@@ -331,26 +331,46 @@ function loadEditor(){
 $(loadEditor);
 
 
-// CPS form
+// CPS and addressing forms
 
-function updateCpsForm(){
+function updateTransformForm(inputId, outputId, transformer){
   try {
-    var cpsCode = webppl.cps($("#cpsInput").val());
-    $("#cpsOutput").val(cpsCode);
+    var cpsCode = transformer($(inputId).val());
+    $(outputId).val(cpsCode);
   } catch (err) {
   }
-  $("#cpsOutput").trigger('autosize.resize');
+  $(outputId).trigger('autosize.resize');
 }
 
-function setupCpsForm(){
-  $('#cpsInput').autosize();
-  $('#cpsOutput').autosize();
-  $('#cpsInput').bind('input propertychange', updateCpsForm);
-  $('#cpsInput').change();
-  updateCpsForm();
+function setupTransformForm(inputId, outputId, eventListener){
+  $(inputId).autosize();
+  $(outputId).autosize();
+  $(inputId).bind('input propertychange', eventListener);
+  $(inputId).change();
+  eventListener();
 }
+
+// CPS
+
+var updateCpsForm = function(){
+  updateTransformForm("#cpsInput", "#cpsOutput", webppl.cps);
+};
+var setupCpsForm = function(){
+  setupTransformForm("#cpsInput", "#cpsOutput", updateCpsForm);
+};
 
 $(setupCpsForm);
+
+// Naming
+
+var updateNamingForm = function(){
+  updateTransformForm("#namingInput", "#namingOutput", webppl.naming);
+};
+var setupNamingForm = function(){
+  setupTransformForm("#namingInput", "#namingOutput", updateNamingForm);
+};
+
+$(setupNamingForm);
 
 
 // Google analytics

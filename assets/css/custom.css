@@ -156,9 +156,9 @@ textarea#editorMarkdown {
 }
 
 
-/* CPS form */
+/* CPS and addressing live-updating forms */
 
-div#cpsTransform textarea {
+div#cpsTransform textarea, div#namingTransform textarea {
    width: 100%;
    min-height: 50px;
    border: 1px solid #ccc;
