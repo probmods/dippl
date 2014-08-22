@@ -406,3 +406,6 @@ The auto-updating form below shows the addressing transform that we actually use
     <textarea id="namingInput">f(x)</textarea>
     <textarea id="namingOutput"></textarea>
 </div>
+
+WebPPL uses this addressing transform to make names available for MH. Overall, two transformations happen to the original program, in order to make information available to the probabilistic primitives: the naming transform makes stack-addresses available, and the CPS transform then makes continuations available. 
+
