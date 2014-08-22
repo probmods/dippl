@@ -111,6 +111,65 @@ ParticleFilter(
    }, 100)
 ~~~~
 
+Inference using MCMC and with a model that can manipulate opacity and stroke width:
+
+~~~~
+///fold:
+var targetImage = Draw(50, 50, false);
+loadImage(targetImage, "/esslli2014/assets/img/box.png")
+
+var uniformDraw = function(xs){
+  var i = randomInteger(xs.length);
+  return xs[i];
+}
+
+var drawLines = function(drawObj, lines){
+  var line = lines[0];
+  drawObj.line(line[0], line[1], line[2], line[3], line[4], line[5]);
+  if (lines.length > 1) {
+    drawLines(drawObj, lines.slice(1));
+  }
+}
+
+var randomStrokeWidth = function(){
+  var widths = [2, 4, 8, 16];
+  return uniformDraw(widths);
+}
+
+var randomOpacity = function(){
+  var opacities = [0, .5];
+  return uniformDraw(opacities);
+}
+
+var makeLines = function(n, lines){
+  var x1 = randomInteger(50);
+  var y1 = randomInteger(50);    
+  var x2 = randomInteger(50);
+  var y2 = randomInteger(50);        
+  var strokeWidth = randomStrokeWidth();  
+  var opacity = randomOpacity();    
+  var newLines = lines.concat([[x1, y1, x2, y2, strokeWidth, opacity]]);
+  return (n==1) ? newLines : makeLines(n-1, newLines);
+}
+
+var finalImgSampler = MH(
+  function(){
+    var lines = makeLines(4, []);
+    var finalGeneratedImage = Draw(50, 50, true);
+    drawLines(finalGeneratedImage, lines);
+    var newScore = -targetImage.distance(finalGeneratedImage)/1000; // Increase to 10000 to see more diverse samples
+    factor(newScore);    
+	drawLines(finalGeneratedImage, lines);    
+    // print(newScore);
+    return lines
+   }, 1000)
+///
+
+var finalImage = Draw(100, 100, false);
+var finalLines = sample(finalImgSampler);
+drawLines(finalImage, finalLines);
+~~~~
+
 A more colorful target image:
 
 ~~~~
