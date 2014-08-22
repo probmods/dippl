@@ -246,10 +246,35 @@ mark regen for resampling..
 
 ### The addressing transform
 
+We can automatically transform programs such that a *stack address* is available at each point in the computation. This is simple -- all we need to do is add a global initialization `var address = ""` to our program, and transform function applications and function calls:
 
-### Naming transform in action
+Function expressions get an additional `address` argument:
 
-The auto-updating form below shows the naming transform that we actually use for WebPPL programs. Try it out:
+~~~
+// Before Addressing
+function(x, y, ...){
+  // body
+}
+
+// After Addressing
+function(address, x, y, ...){
+  AddressingTransform(body)
+}
+~~~
+
+Function calls extend the address argument (without mutation):
+
+~~~
+// Before Addressing
+f(x)
+
+// After Addressing
+f(address.concat('_1'), x);
+~~~
+
+Note that `'_1'` is an example of a unique symbol; we generate a different one for each syntactic function application.
+
+The auto-updating form below shows the addressing transform that we actually use for WebPPL programs. Try it out:
 
 <div id="namingTransform">
     <textarea id="namingInput">f(x)</textarea>
