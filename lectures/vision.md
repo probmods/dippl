@@ -1,7 +1,7 @@
 ---
 layout: example
 title: Computer vision
-description: Infer latent structure that renders to a target image
+description: Finding latent structure that renders to a target image.
 ---
 
 Drawing a line:
