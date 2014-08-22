@@ -38,7 +38,7 @@ function jsPrint(x){
   }
 }
 
-function print(k, x){
+function print(k, a, x){
   jsPrint(x);
   k();
 }
@@ -145,11 +145,11 @@ DrawObject.prototype.destroy = function(){
   $(this.canvas).remove();
 }
 
-function Draw(k, width, height, visible){
+function Draw(k, a, width, height, visible){
   return k(new DrawObject(width, height, visible));
 }
 
-function loadImage(k, drawObject, url){
+function loadImage(k, a, drawObject, url){
   // Synchronous loading - only continue with computation once image is loaded
   var context = drawObject.canvas.getContext('2d');
   var imageObj = new Image();
