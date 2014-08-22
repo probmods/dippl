@@ -97,9 +97,9 @@ Now the Metropolis-Hastings sampler: we add to the earlier algorithm a step whic
 ~~~
 function MHacceptProb(trace, oldTrace, regenFrom){
   var fw = -Math.log(oldTrace.length)
-  trace.slice(regenFrom).map(function(s){fw += s.addScore})
+  trace.slice(regenFrom).map(function(s){fw += s.choiceScore})
   var bw = -Math.log(trace.length)
-  oldTrace.slice(regenFrom).map(function(s){bw += s.addScore})
+  oldTrace.slice(regenFrom).map(function(s){bw += s.choiceScore})
   var acceptance = Math.min(1, Math.exp(currScore - oldScore + bw - fw))
   return acceptance
 }
@@ -148,10 +148,10 @@ function _factor(k,s) {
 
 function _sample(cont, erp, params) {
   var val = erp.sample(params)
-  var addScore = erp.score(params,val)
-  trace.push({k: cont, score: currScore, addScore: addScore, val: val,
+  var choiceScore = erp.score(params,val)
+  trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
               erp: erp, params: params})
-  currScore += addScore
+  currScore += choiceScore
   cont(val)
 }
 
@@ -159,9 +159,9 @@ returnHist = {}
 
 function MHacceptProb(trace, oldTrace, regenFrom){
   var fw = -Math.log(oldTrace.length)
-  trace.slice(regenFrom).map(function(s){fw += s.addScore})
+  trace.slice(regenFrom).map(function(s){fw += s.choiceScore})
   var bw = -Math.log(trace.length)
-  oldTrace.slice(regenFrom).map(function(s){bw += s.addScore})
+  oldTrace.slice(regenFrom).map(function(s){bw += s.choiceScore})
   var acceptance = Math.min(1, Math.exp(currScore - oldScore + bw - fw))
   return acceptance
 }
@@ -196,7 +196,7 @@ function exit(val) {
   }
 }
 
-function RandomWalk(cpsComp) {
+function MH(cpsComp) {
   cpsComp(exit)
   
   //normalize:
@@ -210,13 +210,40 @@ function RandomWalk(cpsComp) {
   return returnHist
 }
 
-RandomWalk(cpsSkewBinomial)
+MH(cpsSkewBinomial)
 ~~~
 
 
 ## Reusing more of the trace
 
-Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. 
+Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. If we knew which sampled value was which, then we could look into the previous trace as the execution runs and reuse its values. That is, imagine that each call to `sample` was passed a (unique) name: `sample(name, erp, params)`. Then the sample function could try to look-up and reuse values:
 
+~~~
+function _sample(cont, name, erp, params) {
+  var prev = oldTrace.find(function(t){return t.name == name})
+  var val = prev==undefined ? erp.sample(params) : prev.val
+  var choiceScore = erp.score(params,val)
+  trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
+              erp: erp, params: params, name: name, reused: !(prev==undefined)})
+  currScore += choiceScore
+  cont(val)
+}
+~~~
+
+Notice that, in addition to reusing existing sampled choices, we add the name and mark whether this choice has been sampled fresh. We must account for this in the MH acceptance calculation:
+
+ function MHacceptProb(trace, oldTrace, regenFrom){
+  var fw = -Math.log(oldTrace.length)
+  trace.slice(regenFrom).map(function(s){fw += s.choiceScore})
+  var bw = -Math.log(trace.length)
+  oldTrace.slice(regenFrom).map(function(s){bw += s.choiceScore})
+  var acceptance = Math.min(1, Math.exp(currScore - oldScore + bw - fw))
+  return acceptance
+}
+
+mark regen for resampling..
+
+
+### The addressing transform
 
 
