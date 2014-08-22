@@ -203,8 +203,11 @@ function setupCodeBox(element){
   }
 
   var getLanguage = function(){
-    if (cm.getValue().split("\n")[0] == "// language: javascript") {
+    var firstLine = cm.getValue().split("\n")[0];
+    if (firstLine == "// language: javascript") {
       return "javascript";
+    } else if (firstLine == "// static") {
+      return "static";
     } else {
       return "webppl";
     }
@@ -266,7 +269,10 @@ function setupCodeBox(element){
     });
 
   $element.parent().append(resultDiv);
-  $element.parent().append(runButton);
+
+  if (getLanguage() != "static"){
+    $element.parent().append(runButton);
+  }
 
   codeBoxCount += 1;
 }
@@ -382,3 +388,16 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 
 ga('create', 'UA-54996-12', 'auto');
 ga('send', 'pageview');
+
+
+// Date
+
+function setDate(){
+  var today = new Date();
+  var dd = today.getDate();
+  var mm = today.getMonth() + 1; //January is 0!
+  var yyyy = today.getFullYear();
+  $("#date").text(yyyy+'/'+mm+'/'+dd);
+}
+
+$(setDate);

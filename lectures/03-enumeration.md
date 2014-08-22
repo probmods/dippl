@@ -393,6 +393,8 @@ Note: in the following examples, `CpsTransform` is to be read as a macro that tr
 Function expressions take an additional argument, the continuation `k`:
 
 ~~~~
+// static
+
 // Before CPS
 function(x, y, ...){
   // body
@@ -407,6 +409,8 @@ function(k, x, y, ...){
 Function applications are sequentialized---we first evaluate the (cps-transformed) operator and pass it to a (continuation) function; this function evaluates the (cps-transformed) argument and passes it to a (continuation) function; that function applies operator to operands, passing the current top-level continuation as an additional continuation argument `k`:
 
 ~~~~
+// static
+
 // Before CPS
 f(x)
 
@@ -424,6 +428,8 @@ CpsTransform(f, function(_f){
 Constant values get passed to the current continuation:
 
 ~~~~
+// static
+
 // Before CPS:
 12
 

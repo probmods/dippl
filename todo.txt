@@ -15,6 +15,7 @@ Integration:
 - script tag compilation / execution
 - smart pages examples
 - church to webppl compiler (based on webchurch or sweet macros)
+- write test runner that checks that all boxes run independently
 
 Ideas and examples:
 - incremental speaker where word string is constructed with heuristic factor:
