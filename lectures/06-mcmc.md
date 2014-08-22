@@ -219,21 +219,15 @@ MH(cpsSkewBinomial)
 Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. If we knew which sampled value was which, then we could look into the previous trace as the execution runs and reuse its values. That is, imagine that each call to `sample` was passed a (unique) name: `sample(name, erp, params)`. Then the sample function could try to look-up and reuse values:
 
 ~~~
-function _sample(cont, name, erp, params) {
+function _sample(cont, name, erp, params, forceSample) {
   var prev = findChoice(oldTrace, name)
-  var val = prev==undefined ? erp.sample(params) : prev.val
+  var reuse = ! (prev==undefined | forceSample)
+  var val = reuse ? prev.val : erp.sample(params) 
   var choiceScore = erp.score(params,val)
   trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
-              erp: erp, params: params, name: name, reused: !(prev==undefined)})
+              erp: erp, params: params, name: name, reused: reuse})
   currScore += choiceScore
   cont(val)
-}
-
-function findChoice(trace, name) {
-  for(var i = 0; i < trace.length; i++){
-    if(trace[i].name == name){return trace[i]}
-  }
-  return undefined  
 }
 ~~~
 
@@ -253,7 +247,6 @@ function MHacceptProb(trace, oldTrace, regenFrom){
 ~~~
 
 Putting these pieces together (and adding names to the `_sample` calls in `cpsSkewBinomial`, under the fold):
-TODO:mark regen for resampling.. 
 
 ~~~
 // language: javascript
@@ -294,12 +287,13 @@ function _factor(k,s) {
   k()
 }
 
-function _sample(cont, name, erp, params) {
+function _sample(cont, name, erp, params, forceSample) {
   var prev = findChoice(oldTrace, name)
-  var val = prev==undefined ? erp.sample(params) : prev.val
+  var reuse = ! (prev==undefined | forceSample)
+  var val = reuse ? prev.val : erp.sample(params) 
   var choiceScore = erp.score(params,val)
   trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
-              erp: erp, params: params, name: name, reused: !(prev==undefined)})
+              erp: erp, params: params, name: name, reused: reuse})
   currScore += choiceScore
   cont(val)
 }
@@ -350,7 +344,7 @@ function exit(val) {
     currScore = regen.score
     oldVal = val
     
-    _sample(regen.k, regen.erp, regen.params)
+    _sample(regen.k, regen.name, regen.erp, regen.params, true)
   }
 }
 
@@ -371,9 +365,14 @@ function MH(cpsComp) {
 MH(cpsSkewBinomial)
 ~~~
 
+This version will now reuse most of the choices from the old trace in making a proposal. 
+
+Unfortunately it is impractical to add names by hand to distinguish calls to sample; fortunately there is a way to do this automatically!
+
+
 ### The addressing transform
 
-We can automatically transform programs such that a *stack address* is available at each point in the computation. This is simple -- all we need to do is add a global initialization `var address = ""` to our program, and transform function applications and function calls:
+We can automatically transform programs such that a *stack address* is available at each point in the computation (Wingate, Stuhlmueller, Goodman, 2011). This is simple -- all we need to do is add a global initialization `var address = ""` to our program, and transform function applications and function calls:
 
 Function expressions get an additional `address` argument:
 
