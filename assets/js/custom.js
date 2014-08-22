@@ -331,26 +331,46 @@ function loadEditor(){
 $(loadEditor);
 
 
-// CPS form
+// CPS and addressing forms
 
-function updateCpsForm(){
+function updateTransformForm(inputId, outputId, transformer){
   try {
-    var cpsCode = webppl.cps($("#cpsInput").val());
-    $("#cpsOutput").val(cpsCode);
+    var cpsCode = transformer($(inputId).val());
+    $(outputId).val(cpsCode);
   } catch (err) {
   }
-  $("#cpsOutput").trigger('autosize.resize');
+  $(outputId).trigger('autosize.resize');
 }
 
-function setupCpsForm(){
-  $('#cpsInput').autosize();
-  $('#cpsOutput').autosize();
-  $('#cpsInput').bind('input propertychange', updateCpsForm);
-  $('#cpsInput').change();
-  updateCpsForm();
+function setupTransformForm(inputId, outputId, eventListener){
+  $(inputId).autosize();
+  $(outputId).autosize();
+  $(inputId).bind('input propertychange', eventListener);
+  $(inputId).change();
+  eventListener();
 }
+
+// CPS
+
+var updateCpsForm = function(){
+  updateTransformForm("#cpsInput", "#cpsOutput", webppl.cps);
+};
+var setupCpsForm = function(){
+  setupTransformForm("#cpsInput", "#cpsOutput", updateCpsForm);
+};
 
 $(setupCpsForm);
+
+// Naming
+
+var updateNamingForm = function(){
+  updateTransformForm("#namingInput", "#namingOutput", webppl.naming);
+};
+var setupNamingForm = function(){
+  setupTransformForm("#namingInput", "#namingOutput", updateNamingForm);
+};
+
+$(setupNamingForm);
 
 
 // Google analytics

@@ -220,3 +220,11 @@ Above we only reused the random choices made before the point of regeneration. I
 
 
 
+### Naming transform in action
+
+The auto-updating form below shows the naming transform that we actually use for WebPPL programs. Try it out:
+
+<div id="namingTransform">
+    <textarea id="namingInput">f(x)</textarea>
+    <textarea id="namingOutput"></textarea>
+</div>
