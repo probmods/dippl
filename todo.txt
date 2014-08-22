@@ -32,6 +32,9 @@ Lectures:
 
 - Fallback plan, noah: talk about lightweight MH, then discussion.
 
+- Also:
+  - (im-)practical applications
+  - comparison to Church (and other PPLs?)
 
 
 

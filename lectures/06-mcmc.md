@@ -1,0 +1,212 @@
+---
+layout: lecture
+title: Markov Chain Monte Carlo
+description: Trace-based implementation of MCMC.
+---
+
+A popular way to estimate a difficult distribution is to sample from it by constructing a random walk that will visit each state in proportion to it's probability -- this is called [Markov chain Monte Carlo](http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo). 
+
+## A random walk over executions
+
+Imagine doing a random walk around the space of execution traces of a computation. Before we worry about getting the right distribution, let's just make *any* random walk. To do so we will record the continuation at each `sample` call, making a trace of the computation. We can then generate a next computation by randomly choosing a choice and re-generating the computation from that point. Adapting the code we used for [enumeration](03-enumeration.html):
+
+~~~
+// language: javascript
+
+///fold:
+function cpsBinomial(k){
+  _sample(
+    function(a){
+      _sample(
+        function(b){
+          _sample(
+            function(c){
+              k(a + b + c);
+            },
+            bernoulliERP, [0.5])
+        },
+        bernoulliERP, [0.5])
+    }, 
+    bernoulliERP, [0.5])
+}
+///
+
+trace = []
+currScore = 0
+iterations = 1000
+
+//function _factor(s) { currScore += s}
+
+function _sample(cont, erp, params) {
+  var continuation = function(){
+    var val = erp.sample(params)
+    currScore += erp.score(params,val)
+    cont(val)
+  }
+  trace.push({k: continuation, score: currScore})
+  continuation()
+}
+
+returnHist = {}
+
+function exit(val) {
+  returnHist[val] = (returnHist[val] || 0) + 1
+  if( iterations > 0 ) {
+    iterations -= 1
+        
+    //make a new proposal:
+    var regenFrom = Math.floor(Math.random() * trace.length)
+    trace = trace.slice(0,regenFrom+1)
+    currScore = trace[regenFrom].score
+    trace[regenFrom].k()
+  }
+}
+
+function RandomWalk(cpsComp) {
+  cpsComp(exit)
+  
+  //normalize:
+  var norm = 0
+  for (var v in returnHist) {
+    norm += returnHist[v];
+  }
+  for (var v in returnHist) {
+    returnHist[v] = returnHist[v] / norm;
+  }
+  return returnHist
+}
+
+RandomWalk(cpsBinomial)
+~~~
+
+We have successfully done a random walk around the space of executions... and it even matches the desired binomial distribution. However, we have not handled `factor` statements (or used the computation scores in any way). This will not match the desired distribution when the computation contains factors. The [Metropolis Hastings](http://en.wikipedia.org/wiki/Metropolis-Hastings_algorithm) algorithm gives a way to 'patch up' this random walk to get the right distribution: we add a step which accepts or rejects the new state.
+
+Before we give the code, here's an example we'd like to compute:
+
+~~~
+var skewBinomial = function(){
+  var a = sample(bernoulliERP, [0.5])
+  var b = sample(bernoulliERP, [0.5])
+  var c = sample(bernoulliERP, [0.5])
+  factor( (a|b)?0:-1 )
+  return a + b + c
+}
+
+print(Enumerate(skewBinomial))
+~~~
+
+Now the Metropolis-Hastings sampler:
+
+~~~
+// language: javascript
+
+///fold:
+function cpsSkewBinomial(k){
+  _sample(
+    function(a){
+      _sample(
+        function(b){
+          _sample(
+            function(c){
+              _factor(
+                function(){
+                  k(a + b + c);
+                },
+                (a|b)?0:-1)
+            },
+            bernoulliERP, [0.5])
+        },
+        bernoulliERP, [0.5])
+    }, 
+    bernoulliERP, [0.5])
+}
+///
+
+trace = []
+oldTrace = []
+currScore = 0
+oldScore = -Infinity
+oldVal = undefined
+regenFrom = 0
+
+iterations = 1000
+
+function _factor(k,s) { 
+  currScore += s
+  k()
+}
+
+function _sample(cont, erp, params) {
+  var val = erp.sample(params)
+  var addScore = erp.score(params,val)
+  trace.push({k: cont, score: currScore, addScore: addScore, val: val,
+              erp: erp, params: params})
+  currScore += addScore
+  cont(val)
+}
+
+returnHist = {}
+
+function MHacceptProb(trace, oldTrace, regenFrom){
+  var fw = -Math.log(oldTrace.length)
+  trace.slice(regenFrom).map(function(s){fw += s.addScore})
+  var bw = -Math.log(trace.length)
+  oldTrace.slice(regenFrom).map(function(s){bw += s.addScore})
+  var acceptance = Math.min(1, Math.exp(currScore - oldScore + bw - fw))
+  return acceptance
+}
+
+function exit(val) {
+  if( iterations > 0 ) {
+    iterations -= 1
+    
+    //did we like this proposal?
+    var acceptance = MHacceptProb(trace, oldTrace, regenFrom)
+    acceptance = oldVal==undefined ?1:acceptance //just for init
+    if(!(Math.random()<acceptance)){
+      //if rejected, roll back trace, etc:
+      trace = oldTrace
+      currScore = oldScore
+      val = oldVal
+    }
+    
+    //now add val to hist:
+    returnHist[val] = (returnHist[val] || 0) + 1
+        
+    //make a new proposal:
+    regenFrom = Math.floor(Math.random() * trace.length)
+    var regen = trace[regenFrom]
+    oldTrace = trace
+    trace = trace.slice(0,regenFrom)
+    oldScore = currScore
+    currScore = regen.score
+    oldVal = val
+    
+    _sample(regen.k, regen.erp, regen.params)
+  }
+}
+
+function RandomWalk(cpsComp) {
+  cpsComp(exit)
+  
+  //normalize:
+  var norm = 0
+  for (var v in returnHist) {
+    norm += returnHist[v];
+  }
+  for (var v in returnHist) {
+    returnHist[v] = returnHist[v] / norm;
+  }
+  return returnHist
+}
+
+RandomWalk(cpsSkewBinomial)
+~~~
+
+
+## Reusing more of the trace
+
+Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. 
+
+
+
