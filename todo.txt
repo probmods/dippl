@@ -5,10 +5,9 @@ CPS:
 Inference:
 - implement the particle cascade just to see how it works.
 - benchmark against webchurch, maybe do some profiling
-- clean up and simplify codebase
+- clean up and simplify codebase — split ERPs and inference fns into own files.
 - automating some of the factor splitting, moving, inserting stuff?
 - try beam search
-- implement rejuvenation via lightweight MH: naming transform and then particles have a past as well as future…
 
 Integration:
 - fix crazy box dependencies in lecture notes!

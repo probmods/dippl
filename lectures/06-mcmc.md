@@ -409,3 +409,8 @@ The auto-updating form below shows the addressing transform that we actually use
 
 WebPPL uses this addressing transform to make names available for MH. Overall, two transformations happen to the original program, in order to make information available to the probabilistic primitives: the naming transform makes stack-addresses available, and the CPS transform then makes continuations available. 
 
+## Particle filters with rejuvenation
+
+One flaw with [particle filtering](05-particlefilter.html) is that there is no way to adjust the 'past' of the particles. This can result in poor performance for some models. MCMC in contrast is all about local adjustment to the execution history. These methods can be combined in what is often called particle filtering with *rejuvenation*: after each time the particles are resampled the MH operator is applied to each particle, adjusting the 'history so far' of the particle. To do so we must keep track of the trace of each particle, and we must change the above implementation of MH to stop when the latest point executed by the particle is reached. In WebPPL this algorithm is available as `ParticleFilterRejuv`.
+
+<!-- TODO: mixture model.. -->
