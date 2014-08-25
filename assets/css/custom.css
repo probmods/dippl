@@ -76,6 +76,21 @@ h3 {
   font-size: 1.5em;
 }
 
+div.main {
+  text-align: center;
+  margin-top: 4em;
+  margin-bottom: 3.5em;
+}
+
+div.main h1 {
+  margin-bottom: .5em;
+  line-height: 1.4em;
+}
+
+div.main span.authors {
+  font-size: 1.35em;
+}
+
 
 /* Code boxes */
 

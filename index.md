@@ -3,17 +3,18 @@ layout: default
 title: Probabilistic Programming Languages
 ---
 
-<div class="page-header">
-  <h1>Probabilistic Programming Languages</h1>
+<div class="main">
+  <h1>The Design and Implementation of Probabilistic Programming Languages</h1>
+  <span class="authors">Noah D. Goodman and Andreas Stuhlmüller</span>
 </div>
 
-These are notes from the [ESSLLI 2014](http://www.esslli2014.info) class on Probabilistic Programming Languages, by Noah D. Goodman and Andreas Stuhlmüller.
+These notes are based on the [ESSLLI 2014](http://www.esslli2014.info) class on Probabilistic Programming Languages.
 
-Please cite this book as: N. D. Goodman and A. Stuhlmüller (electronic). Probabilistic Programming Languages. Retrieved <span id="date"></span> from `http://probmods.github.io/esslli2014/`.
+Please cite this book as: N. D. Goodman and A. Stuhlmüller (electronic). The Design and Implementation of Probabilistic Programming Languages. Retrieved <span id="date"></span> from `http://probmods.github.io/esslli2014/`.
 
 {% assign sorted_pages = site.pages | sort:"name" %}
 
-### Lectures
+### Chapters
 
 {% for p in sorted_pages %}
     {% if p.layout == 'lecture' %}
