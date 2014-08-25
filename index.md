@@ -28,15 +28,18 @@ Please cite this book as: N. D. Goodman and A. Stuhlmüller (electronic). The De
 
 {% for p in sorted_pages %}
     {% if p.layout == 'example' %}
-- Example: [{{ p.title }}]({{ site.baseurl }}{{ p.url }})<br>
+- [{{ p.title }}]({{ site.baseurl }}{{ p.url }})<br>
     <em>{{ p.description }}</em>
     {% endif %}
 {% endfor %}
 
 ### Open source
 
-- [Lecture notes](https://github.com/probmods/esslli2014)
-- [WebPPL](https://github.com/probmods/webppl)
+- [Book content](https://github.com/probmods/esslli2014)<br>
+  *Markdown code for the book chapters*
+
+- [WebPPL](https://github.com/probmods/webppl)<br>
+  *A probabilistic programming language for the web*
 
 ### Acknowledgments
 

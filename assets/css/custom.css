@@ -64,7 +64,7 @@ body .navbar-default .navbar-nav li a:hover {
 
 h1 {
   margin-top: 1em;
-  font-size: 2.5em;
+  font-size: 2.4em;
 }
 
 h2 {
@@ -89,6 +89,14 @@ div.main h1 {
 
 div.main span.authors {
   font-size: 1.35em;
+}
+
+a.navbar-brand {
+  font-weight: 100;
+}
+
+a.navbar-brand strong {
+   font-weight: 500;
 }
 
 
