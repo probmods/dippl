@@ -10,7 +10,7 @@ title: Probabilistic Programming Languages
 
 These notes are based on the [ESSLLI 2014](http://www.esslli2014.info) class on Probabilistic Programming Languages.
 
-Please cite this book as: N. D. Goodman and A. Stuhlmüller (electronic). The Design and Implementation of Probabilistic Programming Languages. Retrieved <span id="date"></span> from `http://probmods.github.io/esslli2014/`.
+Please cite this book as: N. D. Goodman and A. Stuhlmüller (electronic). The Design and Implementation of Probabilistic Programming Languages. Retrieved <span id="date"></span> from `http://probmods.github.io/dippl/`.
 
 {% assign sorted_pages = site.pages | sort:"name" %}
 
