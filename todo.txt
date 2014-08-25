@@ -1,5 +1,4 @@
 CPS:
-- getting rid of the stupid f(_?){…}(undefined) from CPS.
 - get external function call business straightened out?
 
 Inference:
