@@ -8,7 +8,14 @@ title: The Design and Implementation of Probabilistic Programming Languages
   <span class="authors">Noah D. Goodman and Andreas Stuhlmüller</span>
 </div>
 
-**About:** Probabilistic programing languages (PPLs) unify techniques for formal description of computation and those for representation and use of uncertain knowledge. PPLs have seen recent interest from artificial intelligence, programming languages, cognitive science, and natural languages communities. This book explains techniques for implementing PPLs by lightweight embedding into a host language. We illustrate by designing and implementing a small PPL embedded in Javascript -- WebPPL. We show how to implement several algorithms for universal probabilistic inference including: priority-based enumeration with caching, particle filtering, and Markov chain Monte Carlo. To implement these algorithms we use continuations and coroutines to expose the information needed by the algorithms, without requiring any support by the host language. We illustrate these ideas with examples drawn from semantic parsing, natural language pragmatics, and procedural graphics.
+**About:** 
+Probabilistic programming languages (PPLs) unify techniques for the formal description of computation and for the representation and use of uncertain knowledge. 
+PPLs have seen recent interest from the artificial intelligence, programming languages, cognitive science, and natural languages communities.
+This book explains how to implement PPLs by lightweight embedding into a host language. 
+We illustrate this by designing and implementing *WebPPL*, a small PPL embedded in Javascript. 
+We show how to implement several algorithms for universal probabilistic inference, including priority-based enumeration with caching, particle filtering, and Markov chain Monte Carlo.
+We use program transformations to expose the information required by these algorithms, including continuations and stack addresses.
+We illustrate these ideas with examples drawn from semantic parsing, natural language pragmatics, and procedural graphics.
 
 **Citing:** Please cite this book as: 
 N. D. Goodman and A. Stuhlmüller (electronic). The Design and Implementation of Probabilistic Programming Languages. Retrieved <span id="date"></span> from `http://dippl.org`.
