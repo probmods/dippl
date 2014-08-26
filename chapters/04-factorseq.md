@@ -343,11 +343,11 @@ What if we can't decompose the factor into separate pieces? For instance in:
 
 ~~~
 var binomial = function(){
-    var a = sample(bernoulliERP, [0.1])
-    var b = sample(bernoulliERP, [0.9])
-    var c = sample(bernoulliERP, [0.1])
-    factor( (a|b|c) ? 0:-10)
-    return a + b + c
+  var a = sample(bernoulliERP, [0.1])
+  var b = sample(bernoulliERP, [0.9])
+  var c = sample(bernoulliERP, [0.1])
+  factor( (a|b|c) ? 0:-10)
+  return a + b + c
 }
 
 print(Enumerate(binomial, 2))
@@ -357,13 +357,13 @@ We can still insert 'heuristic' factors that will help the inference algorithm e
 
 ~~~
 var binomial = function(){
-    var a = sample(bernoulliERP, [0.1])
-    factor(a?0:-1)
-    var b = sample(bernoulliERP, [0.9])
-    factor(  ((a|b)?0:-1) - (a?0:-1))
-    var c = sample(bernoulliERP, [0.1])
-    factor( ((a|b|c) ? 0:-10) - ((a|b)?0:-1))
-    return a + b + c
+  var a = sample(bernoulliERP, [0.1])
+  factor(a?0:-1)
+  var b = sample(bernoulliERP, [0.9])
+  factor(  ((a|b)?0:-1) - (a?0:-1))
+  var c = sample(bernoulliERP, [0.1])
+  factor( ((a|b|c) ? 0:-10) - ((a|b)?0:-1))
+  return a + b + c
 }
 
 print(Enumerate(binomial, 2))
