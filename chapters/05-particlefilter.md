@@ -412,7 +412,7 @@ var _factor = function(k, score){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, erp, params);
+  return sample(k, "addr", erp, params);
 }
 ///
 
@@ -989,7 +989,7 @@ var posteriorSampler = ParticleFilter(
   function(){
     return semiMarkovWalkConstrained(numSteps, 2, trueObservations);
   },
-  10) // Try playing with the number of samples!
+  10) // Try reducing the number of samples to 1!
 
 var inferredStates = sample(posteriorSampler).states;
 
@@ -1003,7 +1003,7 @@ drawLines(canvas, inferredStates[0], inferredStates.slice(1))
 
 ### Particle filter for vision
 
-See the [vision page](/chapters/vision.html). Note the "incremental heuristic factors" pattern that we saw in the previous lecture.
+See the [vision page](/chapters/vision.html). Note the "incremental heuristic factors" pattern that we saw in the previous chapter.
 
 
 <!-- ## Extension: Residual resampling -->
