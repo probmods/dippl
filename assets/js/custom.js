@@ -270,7 +270,9 @@ function setupCodeBox(element){
 
   $element.parent().append(resultDiv);
 
-  if (getLanguage() != "static"){
+  if (getLanguage() == "static"){
+    cm.setValue(cm.getValue().split("\n").slice(1).join("\n").trim());
+  } else {
     $element.parent().append(runButton);
   }
 
