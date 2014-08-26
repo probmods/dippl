@@ -235,7 +235,7 @@ var semiMarkovWalk = function(n, dim) {
   return prevStates.concat([newState]);
 };
 
-semiMarkovWalk(100, 2);
+semiMarkovWalk(80, 2);
 
 print("done")
 ~~~~
