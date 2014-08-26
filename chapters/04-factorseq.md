@@ -126,11 +126,11 @@ It is clear first of all that we can move the factor up, to the point when it's 
 
 ~~~
 var binomial = function(){
-    var a = sample(bernoulliERP, [0.1])
-    var b = sample(bernoulliERP, [0.9])
-    factor( (a&b)?0:-Infinity)
-    var c = sample(bernoulliERP, [0.1])
-    return a + b + c
+  var a = sample(bernoulliERP, [0.1])
+  var b = sample(bernoulliERP, [0.9])
+  factor( (a&b)?0:-Infinity)
+  var c = sample(bernoulliERP, [0.1])
+  return a + b + c
 }
 
 print(Enumerate(binomial, 2))
