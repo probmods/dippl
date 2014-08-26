@@ -21,11 +21,11 @@ fi
 cd ../..
 if git diff --exit-code > /dev/null;
 then
-   echo "Submodule changed, committing esslli2014..."
+   echo "Submodule changed, committing dippl..."
    git commit assets/webppl -m "Updated webppl submodule"
    git push origin gh-pages
 else
-   echo "Submodule unchanged, skipping esslli2014 commit..."
+   echo "Submodule unchanged, skipping dippl commit..."
 fi
 
 echo "Done!"

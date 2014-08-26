@@ -18,7 +18,7 @@ In this example, we are trying to compute the posterior distribution on lines ba
 
 ~~~~
 var targetImage = Draw(50, 50, true);
-loadImage(targetImage, "/esslli2014/assets/img/box.png")
+loadImage(targetImage, "/assets/img/box.png")
 ~~~~
 
 Let's look at the samples that enumeration explores first:
@@ -26,7 +26,7 @@ Let's look at the samples that enumeration explores first:
 ~~~~
 ///fold:
 var targetImage = Draw(50, 50, false);
-loadImage(targetImage, "/esslli2014/assets/img/box.png")
+loadImage(targetImage, "/assets/img/box.png")
 ///
 
 var drawLines = function(drawObj, lines){

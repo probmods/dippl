@@ -6,8 +6,8 @@ A web book, available online at [dippl.org](http://dippl.org/)
 
 Installation:
 
-    git clone https://github.com/probmods/esslli2014.git
-    cd esslli2014
+    git clone https://github.com/probmods/dippl.git
+    cd dippl
     git submodule update --init --recursive
     npm install
     npm install -g browserify    

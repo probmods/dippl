@@ -1,5 +1,5 @@
 {
-  "name": "probprog-esslli2014",
+  "name": "dippl",
   "version": "0.0.0",
   "description": "",
   "main": "index.md",
@@ -16,10 +16,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/probmods/esslli2014.git"
+    "url": "git://github.com/probmods/dippl.git"
   },
   "bugs": {
-    "url": "https://github.com/probmods/esslli2014/issues"
+    "url": "https://github.com/probmods/dippl/issues"
   },
-  "homepage": "https://github.com/probmods/esslli2014"
+  "homepage": "https://github.com/probmods/dippl"
 }
