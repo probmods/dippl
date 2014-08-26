@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: chapter
 title: The WebPPL language
 description: A small probabilistic language embedded in Javascript.
 ---

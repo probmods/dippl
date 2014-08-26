@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: chapter
 title: Particle Filtering
 description: Models with continuous variables, importance sampling, and sequential Monte Carlo.
 ---
@@ -175,7 +175,7 @@ drawLines(canvas, positions[0], positions.slice(1))
 
 ### Hidden Semi-Markov model
 
-We have previously seen [Hidden Markov models](/esslli2014/lectures/04-factorseq.html). There, the latent state was unobserved and we only got to observe a stochastic function of the latent state at each time step. We can apply the same principle to semi-Markov models. The model below could be used (for example) to model radar observations of the flight path of a plane.
+We have previously seen [Hidden Markov models](/chapters/04-factorseq.html). There, the latent state was unobserved and we only got to observe a stochastic function of the latent state at each time step. We can apply the same principle to semi-Markov models. The model below could be used (for example) to model radar observations of the flight path of a plane.
 
 ~~~~
 ///fold:
@@ -333,7 +333,7 @@ print(Enumerate(
 
 This HMM prefers subsequent states to be similar, and it prefers observations to be similar to the latent state. By far the most likely explanation for the observations `[true, true, true, true]` is that most of the latent states are `true` as well.
 
-As in [lecture 3](/esslli2014/lectures/03-enumeration.html), we are going to think about exploring the computation paths of this model. For this purpose, it will be helpful to have the HMM available in continuation-passing style:
+As in [lecture 3](/chapters/03-enumeration.html), we are going to think about exploring the computation paths of this model. For this purpose, it will be helpful to have the HMM available in continuation-passing style:
 
 ~~~~
 // language: javascript
@@ -701,7 +701,7 @@ As we increase the number of samples, the samples get closer to true posterior s
 
 ## Particle filters
 
-How can we improve upon likelihood weighting? Let's apply the idea from the lecture on [Early, incremental evidence](/esslli2014/lectures/04-factorseq.html): instead of waiting until the end to resample, we could resample earlier. In particular, we can resample at each factor.
+How can we improve upon likelihood weighting? Let's apply the idea from the lecture on [Early, incremental evidence](/chapters/04-factorseq.html): instead of waiting until the end to resample, we could resample earlier. In particular, we can resample at each factor.
 
 This requires a slight change in our approach: previously, we ran each sample until the end before we started the next one. Now, we want to run each sample until we hit the first factor statement; resample; run each sample up to the next factor statement; resample; and so on.
 
@@ -1003,7 +1003,7 @@ drawLines(canvas, inferredStates[0], inferredStates.slice(1))
 
 ### Particle filter for vision
 
-See the [vision page](/esslli2014/lectures/vision.html). Note the "incremental heuristic factors" pattern that we saw in the previous lecture.
+See the [vision page](/chapters/vision.html). Note the "incremental heuristic factors" pattern that we saw in the previous lecture.
 
 
 <!-- ## Extension: Residual resampling -->

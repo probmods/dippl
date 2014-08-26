@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: chapter
 title: Exploring the executions of a random computation
 description: Implementing marginal inference by enumeration using continuations, coroutines, and CPS.
 ---

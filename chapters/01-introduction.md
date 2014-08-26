@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: chapter
 title: Introduction
 description: Course overview and brief introduction.
 ---

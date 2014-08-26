@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: chapter
 title: Markov Chain Monte Carlo
 description: Trace-based implementation of MCMC.
 ---

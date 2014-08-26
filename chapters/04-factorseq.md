@@ -1,5 +1,5 @@
 ---
-layout: lecture
+layout: chapter
 title: Early, incremental evidence
 description: Inserting and commuting factor statements to get the right incremental sequencing.
 ---

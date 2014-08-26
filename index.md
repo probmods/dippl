@@ -18,7 +18,7 @@ N. D. Goodman and A. Stuhlmüller (electronic). The Design and Implementation of
 ### Chapters
 
 {% for p in sorted_pages %}
-    {% if p.layout == 'lecture' %}
+    {% if p.layout == 'chapter' %}
 - [{{ p.title }}]({{ site.baseurl }}{{ p.url }})<br>
     <em>{{ p.description }}</em>
     {% endif %}
