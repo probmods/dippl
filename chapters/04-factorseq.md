@@ -112,11 +112,11 @@ To see how we can provide evidence earlier in the execution for models such as t
 
 ~~~
 var binomial = function(){
-    var a = sample(bernoulliERP, [0.1])
-    var b = sample(bernoulliERP, [0.9])
-    var c = sample(bernoulliERP, [0.1])
-    factor( (a&b)?0:-Infinity)
-    return a + b + c
+  var a = sample(bernoulliERP, [0.1])
+  var b = sample(bernoulliERP, [0.9])
+  var c = sample(bernoulliERP, [0.1])
+  factor( (a&b)?0:-Infinity)
+  return a + b + c
 }
 
 print(Enumerate(binomial, 2))
@@ -140,12 +140,12 @@ But we can do much better by noticing that this factor can be broken into an equ
 
 ~~~
 var binomial = function(){
-    var a = sample(bernoulliERP, [0.1])
-    factor( a?0:-Infinity)
-    var b = sample(bernoulliERP, [0.9])
-    factor( b?0:-Infinity)
-    var c = sample(bernoulliERP, [0.1])
-    return a + b + c
+  var a = sample(bernoulliERP, [0.1])
+  factor( a?0:-Infinity)
+  var b = sample(bernoulliERP, [0.9])
+  factor( b?0:-Infinity)
+  var c = sample(bernoulliERP, [0.1])
+  return a + b + c
 }
 
 print(Enumerate(binomial, 2))
@@ -260,9 +260,9 @@ Similarly for the PCFG:
 
 ~~~
 var pcfg = function(symbol, yieldsofar, trueyield) {
-  if(preTerminal(symbol)){
+  if (preTerminal(symbol)){
     var t = terminal(symbol)
-    if(yieldsofar.length < trueyield.length){
+    if (yieldsofar.length < trueyield.length){
       factor(t==trueyield[yieldsofar.length] ?0:-Infinity)
     }
     return yieldsofar.concat([t])
@@ -288,10 +288,10 @@ The binomial example becomes:
 
 ~~~
 var binomial = function(){
-    var a = sampleWithFactor(bernoulliERP, [0.1], function(v){return v?0:-Infinity})
-    var b = sampleWithFactor(bernoulliERP, [0.9], function(v){return v?0:-Infinity})
-    var c = sample(bernoulliERP, [0.1])
-    return a + b + c
+  var a = sampleWithFactor(bernoulliERP, [0.1], function(v){return v?0:-Infinity})
+  var b = sampleWithFactor(bernoulliERP, [0.9], function(v){return v?0:-Infinity})
+  var c = sample(bernoulliERP, [0.1])
+  return a + b + c
 }
 
 print(Enumerate(binomial, 2))
@@ -337,7 +337,6 @@ print(Enumerate(function(){
 
 
 ## Inserting canceling heuristic factors
-
 
 What if we can't decompose the factor into separate pieces? For instance in:
 
