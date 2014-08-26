@@ -187,8 +187,9 @@ var listener = function(utterance) {
   }, 100)
 }
 
-//literalListener("some of the blond people are nice")
-listener("some of the blond people are nice")
-//speaker([{blond: true, nice: true, tall: false}])
+// literalListener("some of the blond people are nice")
+// speaker([{blond: true, nice: true, tall: false}])
+
+print(listener("some of the blond people are nice"))
 ~~~
 
