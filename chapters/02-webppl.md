@@ -56,7 +56,7 @@ With only the ability to sample from primitive distributions and do deterministi
 
 ~~~
 var geometric = function(p) {
-    return flip(p)?1+geometric(p):1
+  return flip(p)?1+geometric(p):1
 }
 
 geometric(0.5)
@@ -71,10 +71,10 @@ As an example consider a simple binomial distribution: the number of times that 
 
 ~~~
 var binomial = function(){
-    var a = sample(bernoulliERP, [0.5])
-    var b = sample(bernoulliERP, [0.5])
-    var c = sample(bernoulliERP, [0.5])
-    return a + b + c}
+  var a = sample(bernoulliERP, [0.5])
+  var b = sample(bernoulliERP, [0.5])
+  var c = sample(bernoulliERP, [0.5])
+  return a + b + c}
 
 var binomialERP = Enumerate(binomial)
 
@@ -87,11 +87,11 @@ What if we wanted to adjust the above `binomial` computation to favor executions
 
 ~~~
 var funnybinomial = function(){
-    var a = sample(bernoulliERP, [0.5])
-    var b = sample(bernoulliERP, [0.5])
-    var c = sample(bernoulliERP, [0.5])
-    factor( (a|b) ? 0 : -2)
-    return a + b + c}
+  var a = sample(bernoulliERP, [0.5])
+  var b = sample(bernoulliERP, [0.5])
+  var c = sample(bernoulliERP, [0.5])
+  factor( (a|b) ? 0 : -2)
+  return a + b + c}
 
 var funnybinomialERP = Enumerate(funnybinomial)
 
