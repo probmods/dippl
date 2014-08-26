@@ -277,7 +277,7 @@ var listener = function(utterance) {
   }, 100)
 }
 
-listener("some of the blond people are nice")
+print(listener("some of the blond people are nice"))
 ~~~
 
 
