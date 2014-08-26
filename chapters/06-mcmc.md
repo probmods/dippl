@@ -377,6 +377,8 @@ We can automatically transform programs such that a *stack address* is available
 Function expressions get an additional `address` argument:
 
 ~~~
+// static
+
 // Before Addressing
 function(x, y, ...){
   // body
@@ -391,6 +393,8 @@ function(address, x, y, ...){
 Function calls extend the address argument (without mutation):
 
 ~~~
+// static
+
 // Before Addressing
 f(x)
 
