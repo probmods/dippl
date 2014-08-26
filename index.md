@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Probabilistic Programming Languages
+title: The Design and Implementation of Probabilistic Programming Languages
 ---
 
 <div class="main">
