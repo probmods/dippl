@@ -1,7 +1,6 @@
-esslli2014
-==========
+## The Design and Implementation of Probabilistic Programming Languages
 
-ESSLLI 2014 Probabilistic programming languages course
+A web book, available online at [dippl.org](http://dippl.org/)
 
 [WebPPL](https://github.com/probmods/webppl) is included as a submodule.
 
