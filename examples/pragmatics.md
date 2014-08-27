@@ -142,7 +142,11 @@ print(listener("some of the people are nice"))
 
 ## With semantic parsing
 
-What if we want more complex worlds, and don't want to hard code the meaning of sentences? The section on [semantic parsing](semantic parsing.html) shows how to implement a literal listener that does a CCG-like parsing process, to compute the meaning value of a sentence in a world by 'direct compositionality'. We can simply plug that parsing model in to the above pragmatic speaker and listener.
+What if we want more complex worlds, and don't want to hard code the meaning of sentences? The section on [semantic parsing](semanticparsing.html) shows how to implement a literal listener that  computes the meaning value of a sentence by compositionally building it up from the meanings of words. We can simply plug that parsing model in to the above pragmatic speaker and listener, resulting in a [combined model](zSemanticPragmaticMashup.html).
+
+
+<!---
+
 (Note: still debugging this one...)
 
 ~~~
@@ -280,6 +284,7 @@ var listener = function(utterance) {
 print(listener("some of the blond people are nice"))
 ~~~
 
+--->
 
 <!---
 ## With free indices
