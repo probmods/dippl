@@ -57,6 +57,14 @@ var transition = function(s) {
 var observe = function(s) {
   return s ? flip(0.9) : flip(0.1)
 }
+
+var hmm = function(n) {
+  var prev = (n==1) ? {states: [true], observations:[]} : hmm(n-1)
+  var newstate = transition(prev.states[prev.states.length-1])
+  var newobs = observe(newstate)
+  return {states: prev.states.concat([newstate]),
+          observations: prev.observations.concat([newobs])}
+}
 ///
 
 //some true observations (the data we observe):
