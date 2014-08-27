@@ -176,9 +176,133 @@ To allow fancy movement and binding we would mix this with type-shifting operato
 
 
 ~~~
+///fold:
+
+var literalListener = function(utterance) {
+  Enumerate(function(){
+    var world = worldPrior()
+    var m = meaning(utterance, world)
+    factor(m?0:-Infinity)
+    return world
+  }, 100)
+}
+
+var makeObj = function(name) {
+  return {name: name, blond: flip(0.5), nice: flip(0.5)}
+}
+
+var worldPrior = function(objs) {
+  return [makeObj("Bob"), makeObj("Bill"), makeObj("Alice")]
+}
+
+// Split the string into words, lookup lexical meanings, 
+// delete words with vacuous meaning, then call combine_meanings..
+
+var meaning = function(utterance, world) {
+  return combine_meanings(
+    filter(map(utterance.split(" "),
+               function(w){return lexical_meaning(w, world)}),
+           function(m){return !(m.sem==undefined)}))
+}
+
+var lexical_meaning = function(word, world) {
+
+  var wordMeanings = {
+    
+    "blond" : {
+      sem: function(obj){return obj.blond},
+      syn: {dir:'L', int:'NP', out:'S'} },
+    
+    "nice" : {
+      sem: function(obj){return obj.nice},
+      syn: {dir:'L', int:'NP', out:'S'} },
+    
+    "Bob" : {
+      sem: find(world, function(obj){return obj.name=="Bob"}),
+      syn: 'NP' },
+    
+    "some" : {
+      sem: function(P){
+        return function(Q){return filter(filter(world, P), Q).length>0}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} },  
+    
+    "all" : {
+      sem: function(P){
+        return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} }
+  }
+
+  var meaning = wordMeanings[word];
+  return meaning == undefined?{sem: undefined, syn: ''}:meaning;
+}
+
+// We use this helper function to negate a predicate above:
+var neg = function(Q){
+  return function(x){return !Q(x)}
+}
+
+var combine_meaning = function(meanings) {
+  var possibleComb = canApply(meanings,0)
+  display(possibleComb)
+  var i = possibleComb[randomInteger(possibleComb.length)]
+  var s = meanings[i].syn
+  if (s.dir == 'L') {
+    var f = meanings[i].sem
+    var a = meanings[i-1].sem
+    var newmeaning = {sem: f(a), syn: s.out}
+    return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
+  }
+  if (s.dir == 'R') {
+    var f = meanings[i].sem
+    var a = meanings[i+1].sem
+    var newmeaning = {sem: f(a), syn: s.out}
+    return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
+  }
+}
+
+//make a list of the indexes that can (syntactically) apply.
+var canApply = function(meanings,i) {
+  if(i==meanings.length){
+    return []
+  }
+  var s = meanings[i].syn
+  if (s.hasOwnProperty('dir')){ //a functor
+    var a = ((s.dir == 'L')?syntaxMatch(s.int, meanings[i-1].syn):false) |
+            ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
+    if(a){return [i].concat(canApply(meanings,i+1))}
+  }
+  return canApply(meanings,i+1)
+}
+
+
+// The syntaxMatch function is a simple recursion to 
+// check if two syntactic types are equal.
+var syntaxMatch = function(s,t) {
+  return !s.hasOwnProperty('dir') ? s==t :
+  s.dir==t.dir & syntaxMatch(s.int,t.int) & syntaxMatch(s.out,t.out)
+}
+
+
+// Recursively do the above until only one meaning is 
+// left, return it's semantics.
+var combine_meanings = function(meanings){
+  return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
+}
+
+///
+
 //literalListener("Bob is nice")
 //literalListener("some blond are nice")
 //literalListener("some blond people are nice")
+
 print(literalListener("all blond people are nice"))
 ~~~
 
@@ -367,7 +491,142 @@ var combine_meanings = function(meanings){
 ~~~
 
 ~~~
-literalListener("all blond people are nice")
+///fold:
+
+var literalListener = function(utterance) {
+  Enumerate(function(){
+            var m = meaning(utterance)
+            var world = worldPrior(3,m)
+            factor(m(world)?0:-Infinity)
+            return world
+            }, 100)
+}
+
+
+var makeObj = function() {
+  return {blond: flip(0.5), nice: flip(0.5), tall: flip(0.5)}
+}
+
+var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
+  var worldSoFar = worldSoFar==undefined ? [] : worldSoFar
+  var prevFactor = prevFactor==undefined ? 0 : prevFactor
+  if(nObjLeft==0) {
+    factor(-prevFactor)
+    return worldSoFar
+  } else {
+    var newObj = makeObj()
+    var newWorld = worldSoFar.concat([newObj])
+    var newFactor = meaningFn(newWorld)?0:-100
+    factor(newFactor - prevFactor)
+    return worldPrior(nObjLeft-1, meaningFn, newWorld, newFactor)
+  }
+}
+
+var meaning = function(utterance) {
+  return combine_meanings(
+    filter(map(utterance.split(" "),
+               function(w){return lexical_meaning(w)}),
+           function(m){return !(m.sem==undefined)}))
+}
+
+
+var lexical_meaning = function(word) {
+
+  var wordMeanings = {
+    
+    "blond" : {
+      sem: function(world){return function(obj){return obj.blond}},
+      syn: {dir:'L', int:'NP', out:'S'} },
+    
+    "nice" : {
+      sem: function(world){return function(obj){return obj.nice}},
+      syn: {dir:'L', int:'NP', out:'S'} },
+    
+    "Bob" : {
+    sem: function(world){return find(world, function(obj){return obj.name=="Bob"})},
+      syn: 'NP' },
+    
+    "some" : {
+      sem: function(world){return function(P){return function(Q){return filter(filter(world, P), Q).length>0}}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} },  
+    
+    "all" : {
+      sem: function(world){return function(P){return function(Q){return filter(filter(world, P), neg(Q)).length==0}}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} }
+  }
+
+  var meaning = wordMeanings[word];
+  return meaning == undefined?{sem: undefined, syn: ''}:meaning;
+}
+
+// We use this helper function to negate a predicate above:
+var neg = function(Q){
+  return function(x){return !Q(x)}
+}
+
+
+//assume that both f and a will give their actual semantic value after being applied to a world. make a new meaning that passes on world arg.
+var applyWorldPassing = function(f,a) {
+  return function(w){return f(w)(a(w))}
+}
+
+var combine_meaning = function(meanings) {
+  var possibleComb = canApply(meanings,0)
+  var i = possibleComb[randomInteger(possibleComb.length)]
+  var s = meanings[i].syn
+  if (s.dir == 'L') {
+    var f = meanings[i].sem
+    var a = meanings[i-1].sem
+    var newmeaning = {sem: applyWorldPassing(f,a), syn: s.out}
+    return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
+  }
+  if (s.dir == 'R') {
+    var f = meanings[i].sem
+    var a = meanings[i+1].sem
+    var newmeaning = {sem: applyWorldPassing(f,a), syn: s.out}
+    return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
+  }
+}
+
+//make a list of the indexes that can (syntactically) apply.
+var canApply = function(meanings,i) {
+  if(i==meanings.length){
+    return []
+  }
+  var s = meanings[i].syn
+  if (s.hasOwnProperty('dir')){ //a functor
+    var a = ((s.dir == 'L')?syntaxMatch(s.int, meanings[i-1].syn):false) |
+            ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
+    if(a){return [i].concat(canApply(meanings,i+1))}
+  }
+  return canApply(meanings,i+1)
+}
+
+
+// The syntaxMatch function is a simple recursion to 
+// check if two syntactic types are equal.
+var syntaxMatch = function(s,t) {
+  return !s.hasOwnProperty('dir') ? s==t :
+  s.dir==t.dir & syntaxMatch(s.int,t.int) & syntaxMatch(s.out,t.out)
+}
+
+
+// Recursively do the above until only one meaning is 
+// left, return it's semantics.
+var combine_meanings = function(meanings){
+  return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
+}
+///
+
+print(literalListener("all blond people are nice"))
 ~~~
 
 You can see that this version finds possible interpretations much sooner that the previous version.
