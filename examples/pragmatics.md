@@ -20,6 +20,17 @@ var literalListener = function(utterance) {
 To flesh out this model, we need the `worldPrior`, the `utterancePrior`, and the `meaning` function which evaluates and utterance in a given world. We will start with a very simple scenario: there is a (known and fixed) set of 3 people, and an unknown number of these people (between 0 and 3) is nice. The three equally probable utterances are 'none/some/all of the people are nice', and these utterances get their standard (highly intuitive) meanings.
 
 ~~~
+///fold:
+var literalListener = function(utterance) {
+  Enumerate(function(){
+    var world = worldPrior()
+    var m = meaning(utterance, world)
+    factor(m?0:-Infinity)
+    return world
+  })
+}
+///
+
 var worldPrior = function() {
   var num_nice_people = randomInteger(4) //3 people.. 0-3 can be nice.
   return num_nice_people
@@ -48,6 +59,37 @@ If you evaluate the above code box, you will see that the inferred meaning of "s
 We can move to a more Gricean listener who assumes that the speaker has chosen an utterance to convey the intended state of the world: 
 
 ~~~
+///fold:
+var literalListener = function(utterance) {
+  Enumerate(function(){
+    var world = worldPrior()
+    var m = meaning(utterance, world)
+    factor(m?0:-Infinity)
+    return world
+  })
+}
+
+var worldPrior = function() {
+  var num_nice_people = randomInteger(4) //3 people.. 0-3 can be nice.
+  return num_nice_people
+}
+
+var utterancePrior = function() {
+  var utterances = ["some of the people are nice",
+                    "all of the people are nice",
+                    "none of the people are nice"]
+  var i = randomInteger(utterances.length)
+  return utterances[i]
+}
+
+var meaning = function(utt,world) {
+  return utt=="some of the people are nice"? world>0 :
+         utt=="all of the people are nice"? world==3 :
+         utt=="none of the people are nice"? world==0 :
+         true
+}
+///
+
 var speaker = function(world) {
   Enumerate(function(){
     var utterance = utterancePrior()
@@ -81,6 +123,37 @@ This simple Rational Speech Acts model was introduced in Frank and Goodman (2012
 The search space in `speaker` and `literalListener` is needlessly big because the factors provide hard constraints on what the embedded listener/speaker can return. Indeed, `factor( v == sample(e) ?0:-Infinity)` for an ERP `e` is equivalent to `factor(e.score(v))`.
 
 ~~~
+///fold:
+var literalListener = function(utterance) {
+  Enumerate(function(){
+    var world = worldPrior()
+    var m = meaning(utterance, world)
+    factor(m?0:-Infinity)
+    return world
+  })
+}
+
+var worldPrior = function() {
+  var num_nice_people = randomInteger(4) //3 people.. 0-3 can be nice.
+  return num_nice_people
+}
+
+var utterancePrior = function() {
+  var utterances = ["some of the people are nice",
+                    "all of the people are nice",
+                    "none of the people are nice"]
+  var i = randomInteger(utterances.length)
+  return utterances[i]
+}
+
+var meaning = function(utt,world) {
+  return utt=="some of the people are nice"? world>0 :
+         utt=="all of the people are nice"? world==3 :
+         utt=="none of the people are nice"? world==0 :
+         true
+}
+///
+
 var speaker = function(world) {
   Enumerate(function(){
     var utterance = utterancePrior()
@@ -106,6 +179,28 @@ print(listener("some of the people are nice"))
 ### Caching
 
 ~~~
+///fold:
+var worldPrior = function() {
+  var num_nice_people = randomInteger(4) //3 people.. 0-3 can be nice.
+  return num_nice_people
+}
+
+var utterancePrior = function() {
+  var utterances = ["some of the people are nice",
+                    "all of the people are nice",
+                    "none of the people are nice"]
+  var i = randomInteger(utterances.length)
+  return utterances[i]
+}
+
+var meaning = function(utt,world) {
+  return utt=="some of the people are nice"? world>0 :
+         utt=="all of the people are nice"? world==3 :
+         utt=="none of the people are nice"? world==0 :
+         true
+}
+///
+
 var literalListener = cache(function(utterance) {
   Enumerate(function(){
     var world = worldPrior()
@@ -114,7 +209,6 @@ var literalListener = cache(function(utterance) {
     return world
   })
 })
-
 
 var speaker = cache(function(world) {
   Enumerate(function(){
