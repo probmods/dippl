@@ -817,7 +817,7 @@ SimpleParticleFilter(runCpsHmm, 20);
 
 ## A particle filter for the semi-Markov random walk
 
-We are going to generate true observations by running the Hidden semi-Markov model described above:
+As before, we are going to generate observations by running a Hidden semi-Markov model:
 
 ~~~~
 ///fold:
@@ -929,6 +929,36 @@ var map2 = function(ar1,ar2,fn) {
     return []
   } else {
     return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
+  }
+};
+
+var observe = function(pos){
+  return map(
+    pos,
+    function(x){ return gaussian(x, 5); }
+  );
+};
+
+var init = function(dim){
+  var state1 = repeat(dim, function(){ return gaussian(200, 1) });
+  var state2 = repeat(dim, function(){ return gaussian(200, 1) });
+  var states = [state1, state2];
+  var observations = map(states, observe);
+  return {
+    states: states,
+    observations: observations
+  }
+}
+
+var semiMarkovWalk = function(n, dim) {
+  var prevData = (n == 2) ? init(dim) : semiMarkovWalk(n-1, dim);
+  var prevStates = prevData.states;
+  var prevObservations = prevData.observations;
+  var newState = transition(last(prevStates), secondLast(prevStates));
+  var newObservation = observe(newState);
+  return {
+    states: prevStates.concat([newState]),
+    observations: prevObservations.concat([newObservation])
   }
 };
 ///
