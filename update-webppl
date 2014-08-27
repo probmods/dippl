@@ -8,7 +8,7 @@ git reset --hard origin/master
 
 echo "Compiling latest remote (and committing if changed)..."
 browserify -t brfs src/main.js > compiled/webppl.js
-if git diff --exit-code > /dev/null;
+if [[ `git status --porcelain` ]];
 then
    echo "Compilation resulted in changes, committing webppl..."
    git add compiled/webppl.js
@@ -19,7 +19,7 @@ else
 fi
 
 cd ../..
-if git diff --exit-code > /dev/null;
+if [[ `git status --porcelain` ]];
 then
    echo "Submodule changed, committing dippl..."
    git commit assets/webppl -m "Updated webppl submodule"
