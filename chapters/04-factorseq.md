@@ -25,6 +25,16 @@ var observe = function(s) {
 Here is a fairly standard version of the HMM:
 
 ~~~
+///fold:
+var transition = function(s) {
+  return s ? flip(0.7) : flip(0.3)
+}
+
+var observe = function(s) {
+  return s ? flip(0.9) : flip(0.1)
+}
+///
+
 var hmm = function(n) {
   var prev = (n==1) ? {states: [true], observations:[]} : hmm(n-1)
   var newstate = transition(prev.states[prev.states.length-1])
@@ -39,6 +49,16 @@ hmm(4)
 We can condition on some observed states:
 
 ~~~
+///fold:
+var transition = function(s) {
+  return s ? flip(0.7) : flip(0.3)
+}
+
+var observe = function(s) {
+  return s ? flip(0.9) : flip(0.1)
+}
+///
+
 //some true observations (the data we observe):
 var trueobs = [false, false, false]
 
@@ -160,6 +180,7 @@ In order to apply the above tricks (decomposing and moving up factors) for the m
 This version of the HMM is equivalent to the earlier one, but recurses the other way, passing along the partial state sequences:
 
 ~~~
+///fold:
 var transition = function(s) {
   return s ? flip(0.7) : flip(0.3)
 }
@@ -167,6 +188,7 @@ var transition = function(s) {
 var observe = function(s) {
   return s ? flip(0.9) : flip(0.1)
 }
+///
 
 var hmmRecur = function(n, states, observations){
   var newstate = transition(states[states.length-1])
@@ -197,6 +219,25 @@ print(Enumerate(function(){
 Similarly the PCFG can be written as:
 
 ~~~
+///fold:
+var pcfgtransition = function(symbol) {
+  var rules = {'start': {rhs: [['NP', 'V', 'NP'], ['NP', 'V']], probs: [0.4, 0.6]},
+               'NP': {rhs: [['A', 'NP'], ['N']], probs: [0.4, 0.6]} }
+  return rules[symbol].rhs[ discrete(rules[symbol].probs) ]
+}
+
+var preTerminal = function(symbol) {
+  return symbol=='N' | symbol=='V' | symbol=='A'
+}
+
+var terminal = function(symbol) {
+  var rules = {'N': {words: ['John', 'soup'], probs: [0.6, 0.4]},
+               'V': {words: ['loves', 'hates', 'runs'], probs: [0.3, 0.3, 0.4]},
+               'A': {words: ['tall', 'salty'], probs: [0.6, 0.4]} }
+  return rules[symbol].words[ discrete(rules[symbol].probs) ]
+}
+///
+
 var pcfg = function(symbol, yieldsofar) {
   return preTerminal(symbol) ? yieldsofar.concat([terminal(symbol)]) : expand(pcfgtransition(symbol), yieldsofar)
 }
@@ -224,6 +265,7 @@ print(Enumerate(function(){
 We can now decompose and move factors. In the HMM we first observe that the factor `factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )` can be seen as `factor(r.observations[0]==trueobs[0] ? 0 : -Infinity); factor(r.observations[1]==trueobs[1] ? 0 : -Infinity); ...`. Then we observe that these factors can be moved 'up' into the recursion to give:
 
 ~~~
+///fold:
 var transition = function(s) {
   return s ? flip(0.7) : flip(0.3)
 }
@@ -233,6 +275,7 @@ var observe = function(s) {
 }
 
 var trueobs = [false, false, false]
+///
 
 var hmmRecur = function(n, states, observations){
   var newstate = transition(states[states.length-1])
@@ -259,6 +302,25 @@ Try varying the number of executions explored, in this version and the original 
 Similarly for the PCFG:
 
 ~~~
+///fold:
+var pcfgtransition = function(symbol) {
+  var rules = {'start': {rhs: [['NP', 'V', 'NP'], ['NP', 'V']], probs: [0.4, 0.6]},
+               'NP': {rhs: [['A', 'NP'], ['N']], probs: [0.4, 0.6]} }
+  return rules[symbol].rhs[ discrete(rules[symbol].probs) ]
+}
+
+var preTerminal = function(symbol) {
+  return symbol=='N' | symbol=='V' | symbol=='A'
+}
+
+var terminal = function(symbol) {
+  var rules = {'N': {words: ['John', 'soup'], probs: [0.6, 0.4]},
+               'V': {words: ['loves', 'hates', 'runs'], probs: [0.3, 0.3, 0.4]},
+               'A': {words: ['tall', 'salty'], probs: [0.6, 0.4]} }
+  return rules[symbol].words[ discrete(rules[symbol].probs) ]
+}
+///
+
 var pcfg = function(symbol, yieldsofar, trueyield) {
   if (preTerminal(symbol)){
     var t = terminal(symbol)
