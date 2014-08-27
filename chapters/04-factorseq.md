@@ -300,6 +300,7 @@ print(Enumerate(binomial, 2))
 More usefully, the for the HMM this trick allows us to ensure that each `newobs` will be equal to the observed `trueobs`. We need to first marginalize out `observe(..)` (to get an immediate ERP from which to sample) and then use `sampleWithFactor(..)` to simultaneously sample and incorporate the factor:
 
 ~~~
+///fold:
 var transition = function(s) {
   return s ? flip(0.7) : flip(0.3)
 }
@@ -309,6 +310,7 @@ var observe = cache(function(s) {
 })
 
 var trueobs = [false, false, false]
+///
 
 var hmmRecur = function(n, states, observations){
   var newstate = transition(states[states.length-1])
