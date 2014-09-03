@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Computer vision and language
+description: Combining vision with semantics and pragmatics
 ---
 
 Combining vision with semantics and pragmatics
