@@ -133,7 +133,7 @@ pre {
    margin-right: .5em;
 }
 
-p code {
+p code, li code {
    color: #333;
    background-color: #fafafa;
    border: 1px solid #dcdcdc;

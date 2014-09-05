@@ -12,9 +12,26 @@ This page documents the language, illustrating with some very simple examples. F
 ## The language: A subset of Javascript
 
 Following the notation from the [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API) our language consists of the subset of Javascript that can be built from the following syntax elements:
-Program, BlockStatement, ExpressionStatement, ReturnStatement, EmptyStatement, IfStatement, VariableDeclaration, Identifier, Literal, FunctionExpression, CallExpression, ConditionalExpression, ArrayExpression, MemberExpression, BinaryExpression, UnaryExpression. (ObjectExpression is also allowed, but currently with the awkward restriction that object properties cannot be functions.)
 
-Note that there are no AssignmentExpressions or looping constructs. This is because a purely functional language is much easier to transform into Continuation Passing Style (CPS), which the WebPPL implementation uses to implement inference algorithms such as Enumeration and Particle Filtering.
+- *Program* - a complete program, consisting of a sequence of statements
+- *BlockStatement* - a sequence of statements surrounded by braces, e.g. `{ var x=1; var y=2; }`
+- *ExpressionStatement* - a statement containing a single expression, e.g. `3 + 4;`
+- *ReturnStatement* - e.g. `return 3;`;
+- *EmptyStatement* - a solitary semicolon: `;`
+- *IfStatement* - e.g. `if (x > 1) { return 1; } else { return 2; }`
+- *VariableDeclaration* - e.g. `var x = 5;`
+- *Identifier* - e.g. `x`
+- *Literal* - e.g. `3`
+- *FunctionExpression* - e.g. `function (x) { return x; }`
+- *CallExpression* - e.g. `f(x)`
+- *ConditionalExpression* - e.g. `x ? y : z`
+- *ArrayExpression* - e.g. `[1, 2, 3]`
+- *MemberExpression* - e.g. `Math.log`
+- *BinaryExpression* - e.g. `3 + 4`
+- *UnaryExpression* - e.g. `-5`
+- *ObjectExpression* - e.g. `{a: 1, b: 2}` (currently object properties cannot be functions)
+
+Note that there are no *AssignmentExpression*s or looping constructs. This is because a purely functional language is much easier to transform into Continuation Passing Style (CPS), which the WebPPL implementation uses to implement inference algorithms such as Enumeration and Particle Filtering.
 While these restrictions mean that common Javascript programming patterns aren't possible, this subset is still universal, because we allow recursive and higher-order functions. It encourages a functional style, similar to Haskel or LISP, that is pretty easy to use (once you get use to thinking functionally!).
 
 Here is a (very boring) program that uses most of the syntax we have available:
