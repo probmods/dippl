@@ -479,6 +479,7 @@ print(EnumerateLikelyFirst(binomial, numexec))
 
 Because the return value from `Enumerate(foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution. 
 
+Next chapter: [Early, incremental evidence](/chapters/04-factorseq.html)
 
 
 <!--

@@ -119,5 +119,4 @@ It is easier to build useful models (that, for instance, condition on data) with
 
 WebPPL has several inference operators, including `Enumerate` and `ParticleFilter`. These are all implemented by providing a co-routine that receives the current continuation at `sample` and `factor` statements. We explain these ideas and techniques in the next few sections. To get an idea what you can do with WebPPL take a look at the examples on [pragmatics](pragmatics.html), [semantic parsing](semanticparsing.html), and [computer graphics](vision.html); or for PPLs more generally, look at [forestdb.org](http://forestdb.org).
 
-
- 
+Next chapter: [Exploring the executions of a random computation](/chapters/03-enumeration.html)

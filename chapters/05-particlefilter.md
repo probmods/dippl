@@ -1035,6 +1035,6 @@ drawLines(canvas, inferredStates[0], inferredStates.slice(1))
 
 See the [vision page](/chapters/vision.html). Note the "incremental heuristic factors" pattern that we saw in the previous chapter.
 
+Next chapter: [Markov Chain Monte Carlo](/chapters/06-mcmc.html)
 
 <!-- ## Extension: Residual resampling -->
-

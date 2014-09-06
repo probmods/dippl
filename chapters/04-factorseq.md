@@ -444,5 +444,4 @@ This will work pretty much any time you have 'guesses' about what the final fact
 
 There is no reason not to *learn* heuristic factors that help guide search, as long as they cancel by the end they won't compromise the correctness of the computed distribution (in the limit). While it wouldn't be worth the time to learn heuristic factors for a single marginalization, it may be very useful to do so across multiple related marginal distributions -- this is an example of *amortized* or *meta-* inference. (Note this is a topic of ongoing research by the authors....)
 
-
-
+Next chapter: [Particle Filtering](/chapters/05-particlefilter.html)
