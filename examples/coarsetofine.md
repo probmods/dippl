@@ -307,7 +307,7 @@ var ctfFoo = function() {
 
   var cX = delta(cFooSampler());
   var cY = cMinus(cTimes(cX, delta(delta(2))));
-  var cScore = cExpectation(cY, function(x){return x;});
+  var cScore = cMean(cY);
   factor(cScore);
 
   var x = cX()();
