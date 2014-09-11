@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: hidden
 title: Computer vision and language
 description: Combining vision with semantics and pragmatics
 ---
