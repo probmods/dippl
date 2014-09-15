@@ -841,6 +841,202 @@ print(maxEntERP("b", abstractValue))
 Now we are ready to lift the primitives in the program above and build the coarse-to-fine model.
 
 ~~~~
+///fold:
+
+var makeERP = function(ps, vs){
+  return Enumerate(function(){return vs[discrete(ps)]});
+}
+
+var first = function(xs){return xs[0];};
+
+var second = function(xs){return xs[1];};
+
+var compose = function(f, g){
+  return function(x){
+    return f(g(x));
+  };
+};
+
+var zip = function(xs, ys){
+  if (xs.length == 0) {
+    return [];
+  } else {
+    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
+  }
+};
+
+var map2 = function(ar1,ar2,fn) {
+  if (ar1.length==0 | ar2.length==0) {
+    return [];
+  } else {
+    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
+  }
+};
+
+var sum = function(xs){
+  if (xs.length == 0) {
+    return 0;
+  } else {
+    return xs[0] + sum(xs.slice(1));
+  }
+};
+
+// span, applied to a predicate pred and a list xs, returns a tuple 
+// of elements that satisfy pred, and of the remainder of elements
+// that don't satisfy pred.
+
+var span = function(pred, xs, _xsY, _xsN){
+  var xsY = _xsY ? _xsY : [];
+  var xsN = _xsN ? _xsN : [];
+  if (xs.length == 0) {
+    return [xsY, xsN];
+  } else {
+    if (pred(xs[0])){
+      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
+    } else {
+      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
+    }
+  }
+};
+
+// groupBy takes an equivalenece function and a list, and returns
+// a list of lists that, when concatenated, contains all elements in
+// the original list and that is grouped by equivalence.
+
+var groupBy = function(eq, vs){
+  if (vs.length == 0) {
+    return [];
+  } else {
+    var x = vs[0];
+    var xs = vs.slice(1);
+    var tmp = span(function(b){return eq(x, b);}, xs);
+    var ys = tmp[0];
+    var zs = tmp[1];
+    return [[x].concat(ys)].concat(groupBy(eq, zs));
+  }
+};
+
+var indexOf = function(xs, x, j){
+  var i = (j == undefined) ? 0 : j;
+  if (xs[0] == x) {
+    return i;
+  } else {
+    return indexOf(xs.slice(1), x, i+1);
+  }
+}
+
+var coarsen = function(erp, abstractValue){
+
+  // Get concrete values and probabilities
+  
+  var allVs = erp.support([]);
+  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+
+  // Group distribution based on equivalence classes
+  // implied by abstractValue function
+
+  var groups = groupBy(
+    function(vp1, vp2){
+      return abstractValue[vp1[0]] == abstractValue[vp2[0]];
+    },
+    zip(allVs, allPs));
+  
+  var groupSymbols = map(
+    groups,
+    function(group){
+      // group[0][0]: first value in group
+      return abstractValue[group[0][0]]})
+
+  var groupedVs = map(
+    groups,
+    function(group){
+      return map(group, first);
+    });
+
+  var groupedPs = map(
+    groups,
+    function(group){
+      return map(group, second);
+    });
+
+  // Construct unconditional (abstract) sampler and
+  // conditional (concrete) sampler
+
+  var abstractPs = map(groupedPs, sum);
+  var abstractSampler = makeERP(abstractPs, groupSymbols);
+  
+  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+  var getConcreteSampler = function(abstractSymbol){
+    var i = indexOf(groupSymbols, abstractSymbol);
+    return groupERPs[i];
+  }
+  
+  return [abstractSampler, getConcreteSampler];
+
+}
+
+var preImage = function(cV, allVs, abstractValue){
+  if (allVs.length == 0) {
+    return []
+  } else {
+    var remainder = preImage(cV, allVs.slice(1), abstractValue);
+    if (cV == abstractValue[allVs[0]]) {
+      return [allVs[0]].concat(remainder);
+    } else {
+      return remainder;
+    }
+  }
+}
+
+var maxEntERP = function(cV, abstractValue){
+  var allVs = Object.keys(abstractValue);
+  // get all values that map to cV
+  var vs = preImage(cV, allVs, abstractValue);
+  // return uniform distribution on these values
+  return Enumerate(
+    function(){
+      return vs[randomInteger(vs.length)];
+    });
+}
+
+// Do we really not need to marginalize here?
+
+var lift1 = function(f, abstractValue){  
+  return function(cX){
+    var d1 = maxEntERP(cX, abstractValue); // could cache this
+    var x = sample(d1);
+    var out = f(x);
+    return abstractValue[out];
+  }
+}
+
+var lift2 = function(f, abstractValue){  
+  return function(cX, cY){
+    var d1 = maxEntERP(cX, abstractValue); // could cache this
+    var d2 = maxEntERP(cY, abstractValue); // could cache this
+    var x = sample(d1);
+    var y = sample(d2);
+    var out = f(x, y);
+    return abstractValue[out];
+  }
+}
+
+var lift3 = function(f, abstractValue){  
+  return function(cX, cY, cZ){
+    var d1 = maxEntERP(cX, abstractValue); // could cache this
+    var d2 = maxEntERP(cY, abstractValue); // could cache this
+    var d3 = maxEntERP(cZ, abstractValue); // could cache this
+    var x = sample(d1);
+    var y = sample(d2);
+    var z = sample(d3);
+    var out = f(x, y, z);
+    return abstractValue[out];
+  }
+}
+
+///
+
+
 // Abstraction map
 
 var abstractValue = {
@@ -908,6 +1104,7 @@ var ctfProgram = function(){
   var cScore = cTernary(cAnd(cOut1, cOut2), 
                         abstractValue[-1], 
                         abstractValue[-2]);
+  factor(cScore);
 
   var x = sample(conditionalERP1(cX));
   var y = sample(conditionalERP2(cY));
