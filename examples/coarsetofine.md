@@ -1121,3 +1121,10 @@ print(Enumerate(ctfProgram));
 ~~~~
 
 This distribution is the same as the distribution induced by the concrete program.
+
+Next steps:
+
+- Think about what this approach looks like for programs with conditioned random variables
+- Use hierarchical coarsening (more than two layers)
+- Apply this approach to a image-based model (use downsampled images on coarse layers). Here, we likely won't be able to construct the maximum entropy distributions explicitly
+- Write a program transform that automates the construction of the coarse-to-fine program. What does this look like for recursive programs such as the HMM?
