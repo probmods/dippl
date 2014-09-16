@@ -1128,3 +1128,33 @@ Next steps:
 - Use hierarchical coarsening (more than two layers)
 - Apply this approach to a image-based model (use downsampled images on coarse layers). Here, we likely won't be able to construct the maximum entropy distributions explicitly
 - Write a program transform that automates the construction of the coarse-to-fine program. What does this look like for recursive programs such as the HMM?
+
+## Dependent random variables
+
+Let's think about a program with conditioned random variables.
+
+~~~~
+var makeERP = function(ps, vs){
+  return Enumerate(function(){return vs[discrete(ps)]});
+}
+
+var chooseP = makeERP([.2, .2, .2, .2, .2], [.1, .3, .5, .7, .9])
+                      
+var program = function(){
+  var p = sample(chooseP);
+  var y = flip(p);
+  return y;
+}
+
+program()
+~~~~
+
+A basic issue in this case is that the refinement of dependent random variables is influenced by two factors: first, the refined previous (independent) random variable, and second, its own coarse-level constraint.
+
+What is required to make the math work out correctly? Applying the chain rule to the fine part of the ctf program must recover the original program. There are two naive paths to get there: 
+
+1. We can sample the fine-grained version of the independent random variable, then sample the fine-grained version of the dependent random variable, ignoring the coarse-grained version of the dependent random variable.
+
+2. We can sample the coarse-grained version of the dependent variable, then sample the fine-grained dependent variable dependent on its coarse-grained version, ignoring the fine-grained version of the independent random variable.
+
+A good answer probably involves a mixture of the two approaches.
