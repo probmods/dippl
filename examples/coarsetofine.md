@@ -1652,9 +1652,12 @@ Where is the problem (if any)?
 
 My guess is that the problem comes in when we uniformly sample an instantiation for the abstract value V at the coarse ERP. 
 
-> p(fine1, fine2) 
-> = p(coarse1)p(fine1|coarse1) p(fine2|fine1) // so far so good
-> = p(coarse1)p(fine1|coarse1) p(coarse2|coarse1) p(fine2|coarse2, fine1)
+~~~~
+// static
+// p(fine1, fine2) 
+// = p(coarse1)p(fine1|coarse1) p(fine2|fine1) // so far so good
+// = p(coarse1)p(fine1|coarse1) p(coarse2|coarse1) p(fine2|coarse2, fine1)
+~~~~
 
 In other words, the problem comes in when we sample `coarse2|coarse1`. My hunch is that we would need to know which erp `coarse1` comes from, so that we can use the "true" instantiation probabilities instead of the uniform instantiation probabilities.
 
@@ -2397,5 +2400,6 @@ FIXME: The abstraction for lifting is currently the identity for values that are
 The approach above will also work for indirect dependencies (i.e. dependencies that go through some intermediate function), since such programs can be desugared to independent random variables + factors in the same way.
 
 Next steps:
+
 - Consider optimizing the resulting program using `sampleWithFactor`
 - Think about whether clustering values (independent of distribution) will be useful in practice
