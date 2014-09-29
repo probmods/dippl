@@ -1524,3 +1524,878 @@ Next steps:
 
 - Prove that this is always correct
 - Indirect dependencies (where the erp parameter is transformed by a deterministic function first)
+
+
+## Dependent random variables, revisited
+
+I believe that the approach described in the previous section doesn't work in general. However, so far, I don't know yet why exactly that is. So, let's proceed as follows:
+
+1. Create a new fine-grained program
+2. Apply previous approach, see where it fails
+3. Apply new factor decomposition approach
+4. Consider optimizations for factor decomposition approach
+
+### The fine-grained program
+
+I think the previous fine-grained program was too simplistic to thoroughly test coarsening of dependent erps. In particular, on the coarse level, the dependent erp was a delta distribution. Let's try to write a more complex program, maybe reminiscent of how HMM states are sampled depending on the previous state.
+
+~~~~
+///fold:
+var ternary = function(test, then, other){
+  return test ? then : other;
+}
+
+var plus = function(x, y){
+  return x + y;
+}
+
+var makeERP = function(ps, vs){
+  return Enumerate(function(){return vs[discrete(ps)]});
+}
+///
+
+
+var erp0 = makeERP([.1, .2, .3, .4], ["a", "b", "c", "d"]);
+
+// could replace this with a real dependent erp
+var erp1 = function(x){
+  var dists = {
+    "a" : [.25, .25, .25, .25],
+    "b" : [.1, .2, .3, .4],
+    "c" : [.2, .2, .3, .3],
+    "d" : [.01, .1, .5, .39]
+  };
+  var vs = ["e", "f", "g", "h"];
+  var dist = dists[x];
+  var i = discrete(dist);
+  return vs[i];
+}
+
+var scores = {
+  "e" : -1,
+  "f" : -1.5,
+  "g" : -2,
+  "h" : -2.5
+}
+
+var getScore = function(x){
+  return scores[x];
+}
+                      
+var program = function(){  
+  var x = sample(erp0);
+  var y = erp1(x);
+  var score = getScore(y);
+  factor(score);
+  return y;
+}
+
+print(Enumerate(program))
+
+~~~~
+
+### Coarsening using the previous approach
+
+Now let's coarsen this program using the previous approach. Recall that the previous approach worked as follows:
+
+~~~~
+var instantiate = function(cV, abstractValue){
+  var allVs = Object.keys(abstractValue);
+  var vs = preImage(cV, allVs, abstractValue);
+  return vs[randomInteger(vs.length)];
+}
+
+var coarsenDependentERP = function(depERP, abstractValue){
+
+  // The params are coarse-grained values. However, 
+  // we need fine-grained parameter values to construct
+  // a real ERP. This can be achieved through sampling or
+  // marginalizing. We'll marginalize.
+  var getCoarseERP = function(params){
+    return Enumerate(
+      function(){
+        var fineParams = map(
+          params, 
+          function(cV){return instantiate(cV, abstractValue);});
+        return abstractValue[sample(depERP, fineParams)];
+      });
+  };
+
+  // Now params are fine-grained values, so we can build a 
+  // concrete independent erp; we just need to restrict the 
+  // support to values in the support of coarseValue.
+  var getFineERP = function(params, coarseValue){
+    return Enumerate(
+      function(){
+        var value = sample(depERP, params);
+        factor((abstractValue[value] == coarseValue) ? 0 : -Infinity);
+        return value;
+      });
+  };
+  
+  return [getCoarseERP, getFineERP];
+}
+~~~~
+
+In words:
+
+1. Take the dependent ERP and a value partitioning function
+2. Compute the coarse erp for an abstract (parameter) value V by:
+    1. sampling uniformly from the possible fine-grained instantiations of V
+    2. sampling from the fine-grained dependent erp using the sampled instantiation
+    3. returning the abstract value corresponding to the sampled instantiation
+3. Compute the fine-grained erp for a concrete (parameter) value v, and coarse return value X by:
+    1. sampling from the fine-grained dependent erp given parameter v
+    2. conditioning on the abstraction of this sampled value being equal to X
+
+Where is the problem (if any)?
+
+My guess is that the problem comes in when we uniformly sample an instantiation for the abstract value V at the coarse ERP. 
+
+> p(fine1, fine2) 
+> = p(coarse1)p(fine1|coarse1) p(fine2|fine1) // so far so good
+> = p(coarse1)p(fine1|coarse1) p(coarse2|coarse1) p(fine2|coarse2, fine1)
+
+In other words, the problem comes in when we sample `coarse2|coarse1`. My hunch is that we would need to know which erp `coarse1` comes from, so that we can use the "true" instantiation probabilities instead of the uniform instantiation probabilities.
+
+Let's verify whether this is actually a problem by applying this approach to the model above.
+
+~~~~
+///fold:
+var ternary = function(test, then, other){
+  return test ? then : other;
+}
+
+var plus = function(x, y){
+  return x + y;
+}
+
+var makeERP = function(ps, vs){
+  return Enumerate(function(){return vs[discrete(ps)]});
+}
+
+
+// Utils
+
+var first = function(xs){return xs[0];};
+
+var second = function(xs){return xs[1];};
+
+var compose = function(f, g){
+  return function(x){
+    return f(g(x));
+  };
+};
+
+var zip = function(xs, ys){
+  if (xs.length == 0) {
+    return [];
+  } else {
+    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
+  }
+};
+
+var map2 = function(ar1,ar2,fn) {
+  if (ar1.length==0 | ar2.length==0) {
+    return [];
+  } else {
+    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
+  }
+};
+
+var sum = function(xs){
+  if (xs.length == 0) {
+    return 0;
+  } else {
+    return xs[0] + sum(xs.slice(1));
+  }
+};
+
+// span, applied to a predicate pred and a list xs, returns a tuple 
+// of elements that satisfy pred, and of the remainder of elements
+// that don't satisfy pred.
+
+var span = function(pred, xs, _xsY, _xsN){
+  var xsY = _xsY ? _xsY : [];
+  var xsN = _xsN ? _xsN : [];
+  if (xs.length == 0) {
+    return [xsY, xsN];
+  } else {
+    if (pred(xs[0])){
+      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
+    } else {
+      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
+    }
+  }
+};
+
+// groupBy takes an equivalenece function and a list, and returns
+// a list of lists that, when concatenated, contains all elements in
+// the original list and that is grouped by equivalence.
+
+var groupBy = function(eq, vs){
+  if (vs.length == 0) {
+    return [];
+  } else {
+    var x = vs[0];
+    var xs = vs.slice(1);
+    var tmp = span(function(b){return eq(x, b);}, xs);
+    var ys = tmp[0];
+    var zs = tmp[1];
+    return [[x].concat(ys)].concat(groupBy(eq, zs));
+  }
+};
+
+var indexOf = function(xs, x, j){
+  var i = (j == undefined) ? 0 : j;
+  if (xs[0] == x) {
+    return i;
+  } else {
+    return indexOf(xs.slice(1), x, i+1);
+  }
+}
+
+
+// Coarsening
+
+var coarsen = function(erp, abstractValue){
+
+  // Get concrete values and probabilities
+  
+  var allVs = erp.support([]);
+  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+
+  // Group distribution based on equivalence classes
+  // implied by abstractValue function
+
+  var groups = groupBy(
+    function(vp1, vp2){
+      return abstractValue[vp1[0]] == abstractValue[vp2[0]];
+    },
+    zip(allVs, allPs));
+  
+  var groupSymbols = map(
+    groups,
+    function(group){
+      // group[0][0]: first value in group
+      return abstractValue[group[0][0]]})
+
+  var groupedVs = map(
+    groups,
+    function(group){
+      return map(group, first);
+    });
+
+  var groupedPs = map(
+    groups,
+    function(group){
+      return map(group, second);
+    });
+
+  // Construct unconditional (abstract) sampler and
+  // conditional (concrete) sampler
+
+  var abstractPs = map(groupedPs, sum);
+  var abstractSampler = makeERP(abstractPs, groupSymbols);
+  
+  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+  var getConcreteSampler = function(abstractSymbol){
+    var i = indexOf(groupSymbols, abstractSymbol);
+    return groupERPs[i];
+  }
+  
+  return [abstractSampler, getConcreteSampler];
+
+}
+
+var preImage = function(cV, allVs, abstractValue){
+  if (allVs.length == 0) {
+    return []
+  } else {
+    var remainder = preImage(cV, allVs.slice(1), abstractValue);
+    if (cV == abstractValue[allVs[0]]) {
+      return [allVs[0]].concat(remainder);
+    } else {
+      return remainder;
+    }
+  }
+}
+
+var maxEntERP = function(cV, abstractValue){
+  var allVs = Object.keys(abstractValue);
+  // get all values that map to cV
+  var vs = preImage(cV, allVs, abstractValue);
+  // return uniform distribution on these values
+  return Enumerate(
+    function(){
+      return vs[randomInteger(vs.length)];
+    });
+}
+
+
+// Coarsening for dependent erps
+
+var instantiate = function(cV, abstractValue){
+  var allVs = Object.keys(abstractValue);
+  var vs = preImage(cV, allVs, abstractValue);
+  console.log(cV);
+  return vs[randomInteger(vs.length)];
+}
+
+var coarsenDependentERP = function(depERPfunc, abstractValue){
+
+  // The params are coarse-grained values. However, 
+  // we need fine-grained parameter values to construct
+  // a real ERP. This can be achieved through sampling or
+  // marginalizing. We'll marginalize.
+  var getCoarseERP = function(cV){
+    return Enumerate(
+      function(){
+        var fineParams = instantiate(cV, abstractValue);
+        return abstractValue[depERPfunc(fineParams)];
+      });
+  };
+
+  // Now params are fine-grained values, so we can build a 
+  // concrete independent erp; we just need to restrict the 
+  // support to values in the support of coarseValue.
+  var getFineERP = function(params, coarseValue){
+    return Enumerate(
+      function(){
+        var value = depERPfunc(params);
+        factor((abstractValue[value] == coarseValue) ? 0 : -Infinity);
+        return value;
+      });
+  };
+  
+  return [getCoarseERP, getFineERP];
+}
+
+
+
+// Lifting
+
+var lift1 = function(f, abstractValue){  
+  return function(cX){
+    var d1 = maxEntERP(cX, abstractValue); // could cache this
+    var x = sample(d1);
+    var out = f(x);
+    return abstractValue[out];
+  }
+}
+
+var lift2 = function(f, abstractValue){  
+  return function(cX, cY){
+    var d1 = maxEntERP(cX, abstractValue); // could cache this
+    var d2 = maxEntERP(cY, abstractValue); // could cache this
+    var x = sample(d1);
+    var y = sample(d2);
+    var out = f(x, y);
+    return abstractValue[out];
+  }
+}
+
+var lift3 = function(f, abstractValue){  
+  return function(cX, cY, cZ){
+    var d1 = maxEntERP(cX, abstractValue); // could cache this
+    var d2 = maxEntERP(cY, abstractValue); // could cache this
+    var d3 = maxEntERP(cZ, abstractValue); // could cache this
+    var x = sample(d1);
+    var y = sample(d2);
+    var z = sample(d3);
+    var out = f(x, y, z);
+    return abstractValue[out];
+  }
+}
+
+
+///
+
+
+
+// Base-level erps
+
+var erp0 = makeERP([.1, .2, .3, .4], ["a", "b", "c", "d"]);
+
+var erp1 = function(x){
+  var dists = {
+    "a" : [.25, .25, .25, .25],
+    "b" : [.1, .2, .3, .4],
+    "c" : [.2, .2, .3, .3],
+    "d" : [.01, .1, .5, .39]
+  };
+  var vs = ["e", "f", "g", "h"];
+  var dist = dists[x];
+  var i = discrete(dist);
+  return vs[i];
+}
+
+// Base-level functions
+
+var scores = {
+  "e" : -1,
+  "f" : -1.5,
+  "g" : -2,
+  "h" : -2.5
+}
+
+var getScore = function(x){
+  return scores[x];
+}
+
+
+// Abstraction map
+
+var abstractValue = {
+  "a": 1,
+  "b": 1,
+  "c": 2,
+  "d": 2,
+  "e": 3,
+  "f": 3,
+  "g": 4,
+  "h": 4,
+  "-1": -1,
+  "-1.5": -1.5,
+  "-2": -2,
+  "-2.5": -2.5
+}
+
+
+// Coarse erps
+
+var tmp1 = coarsen(erp0, abstractValue);
+var cErp0 = tmp1[0];
+var fErp0 = tmp1[1];
+
+var tmp2 = coarsenDependentERP(erp1, abstractValue);
+var cErp1 = tmp2[0];
+var fErp1 = tmp2[1];
+
+// Lift primitive
+
+var cGetScore = lift1(getScore, abstractValue);
+
+                      
+var program = function(){  
+  
+  var cX = sample(cErp0);
+  var cY = sample(cErp1(cX));  
+  var cScore = cGetScore(cY);
+  factor(cScore);
+  
+  var x = sample(fErp0(cX));
+  var y = sample(fErp1(x, cY));
+  var score = getScore(y);
+  factor(score - cScore);
+  return y;
+}
+
+print(Enumerate(program))
+
+~~~~
+
+Yep, the distribution is in fact different from the distribution we would expect.
+
+### Coarsening using factor decomposition
+
+To make the distributions work out, we'll now apply a different approach:
+
+1. Rewrite the (fine-grained) program such that all erps are independent, and such that dependencies are only introduced using factors.
+2. Coarsen the decomposed program using the coarsening for independent erps that we know works.
+
+Here is the fine-grained program in factor decomposition form:
+
+~~~~
+///fold:
+var ternary = function(test, then, other){
+  return test ? then : other;
+}
+
+var plus = function(x, y){
+  return x + y;
+}
+
+var makeERP = function(ps, vs){
+  return Enumerate(function(){return vs[discrete(ps)]});
+}
+///
+
+
+// Random variables
+
+var erp0 = makeERP([.1, .2, .3, .4], ["a", "b", "c", "d"]);
+var erp1maxent = makeERP([.25, .25, .25, .25], ["e", "f", "g", "h"]);
+
+
+// Primitive functions
+
+var getErp1MaxEntScore = function(y){
+  return erp1maxent.score([], y);
+}
+
+var erp1 = function(x){
+  var dists = {
+    "a" : [.25, .25, .25, .25],
+    "b" : [.1, .2, .3, .4],
+    "c" : [.2, .2, .3, .3],
+    "d" : [.01, .1, .5, .39]
+  };
+  var vs = ["e", "f", "g", "h"];
+  var dist = dists[x];
+  return makeERP(dist, vs);
+}
+
+var getErp1Score = function(x, y){
+  return erp1(x).score([], y);
+}
+
+var getFactorScore = function(y){
+  var scores = {
+    "e" : -1,
+    "f" : -1.5,
+    "g" : -2,
+    "h" : -2.5
+  }  
+  return scores[y];
+}
+
+
+// Model
+                      
+var program = function(){  
+  var x = sample(erp0);
+  var y = sample(erp1maxent);
+  var score1 = getErp1Score(x, y) - getErp1MaxEntScore(y);
+  factor(score1);
+  var score2 = getFactorScore(y);
+  factor(score2);
+  return y;
+}
+
+print(Enumerate(program))
+~~~~
+
+Note that the distribution is the same as for the original program.
+
+Now that the program only contains independent erps and factors, we can compute the corresponding coarse-to-fine program:
+
+~~~~
+///fold:
+var makeERP = function(ps, vs){
+  return Enumerate(function(){return vs[discrete(ps)]});
+}
+
+var first = function(xs){return xs[0];};
+
+var second = function(xs){return xs[1];};
+
+var compose = function(f, g){
+  return function(x){
+    return f(g(x));
+  };
+};
+
+var zip = function(xs, ys){
+  if (xs.length == 0) {
+    return [];
+  } else {
+    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
+  }
+};
+
+var map2 = function(ar1,ar2,fn) {
+  if (ar1.length==0 | ar2.length==0) {
+    return [];
+  } else {
+    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
+  }
+};
+
+var sum = function(xs){
+  if (xs.length == 0) {
+    return 0;
+  } else {
+    return xs[0] + sum(xs.slice(1));
+  }
+};
+
+// span, applied to a predicate pred and a list xs, returns a tuple 
+// of elements that satisfy pred, and of the remainder of elements
+// that don't satisfy pred.
+
+var span = function(pred, xs, _xsY, _xsN){
+  var xsY = _xsY ? _xsY : [];
+  var xsN = _xsN ? _xsN : [];
+  if (xs.length == 0) {
+    return [xsY, xsN];
+  } else {
+    if (pred(xs[0])){
+      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
+    } else {
+      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
+    }
+  }
+};
+
+// groupBy takes an equivalenece function and a list, and returns
+// a list of lists that, when concatenated, contains all elements in
+// the original list and that is grouped by equivalence.
+
+var groupBy = function(eq, vs){
+  if (vs.length == 0) {
+    return [];
+  } else {
+    var x = vs[0];
+    var xs = vs.slice(1);
+    var tmp = span(function(b){return eq(x, b);}, xs);
+    var ys = tmp[0];
+    var zs = tmp[1];
+    return [[x].concat(ys)].concat(groupBy(eq, zs));
+  }
+};
+
+var indexOf = function(xs, x, j){
+  var i = (j == undefined) ? 0 : j;
+  if (xs[0] == x) {
+    return i;
+  } else {
+    return indexOf(xs.slice(1), x, i+1);
+  }
+}
+
+var coarsen = function(erp, abstractValue){
+
+  // Get concrete values and probabilities
+  
+  var allVs = erp.support([]);
+  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+
+  // Group distribution based on equivalence classes
+  // implied by abstractValue function
+
+  var groups = groupBy(
+    function(vp1, vp2){
+      return abstractValue[vp1[0]] == abstractValue[vp2[0]];
+    },
+    zip(allVs, allPs));
+  
+  var groupSymbols = map(
+    groups,
+    function(group){
+      // group[0][0]: first value in group
+      return abstractValue[group[0][0]]})
+
+  var groupedVs = map(
+    groups,
+    function(group){
+      return map(group, first);
+    });
+
+  var groupedPs = map(
+    groups,
+    function(group){
+      return map(group, second);
+    });
+
+  // Construct unconditional (abstract) sampler and
+  // conditional (concrete) sampler
+
+  var abstractPs = map(groupedPs, sum);
+  var abstractSampler = makeERP(abstractPs, groupSymbols);
+  
+  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+  var getConcreteSampler = function(abstractSymbol){
+    var i = indexOf(groupSymbols, abstractSymbol);
+    return groupERPs[i];
+  }
+  
+  return [abstractSampler, getConcreteSampler];
+
+}
+
+var preImage = function(cV, allVs, abstractValue){
+  if (allVs.length == 0) {
+    return []
+  } else {
+    var remainder = preImage(cV, allVs.slice(1), abstractValue);
+    if (cV == abstractValue[allVs[0]]) {
+      return [allVs[0]].concat(remainder);
+    } else {
+      return remainder;
+    }
+  }
+}
+
+var maxEntERP = function(cV, abstractValue){
+  var allVs = Object.keys(abstractValue);
+  // get all values that map to cV
+  var vs = preImage(cV, allVs, abstractValue);
+  // return uniform distribution on these values
+  return Enumerate(
+    function(){
+      return vs[randomInteger(vs.length)];
+    });
+}
+
+var contains = function(lst, val){
+  if (lst.length == 0) {
+    return false;
+  } else {
+    if (lst[0] == val){
+      return true;
+    } else {
+      return contains(lst.slice(1), val)
+    }
+  }
+}
+
+// Do we really not need to marginalize here?
+
+var lift1 = function(f, abstractValue){  
+  return function(cX){
+    var d1 = maxEntERP(cX, abstractValue); // could cache this
+    var x = sample(d1);
+    var out = f(x);
+    if (contains(Object.keys(abstractValue), out)){      
+      return abstractValue[out];
+    } else {
+      return out
+    }
+  }
+}
+
+var lift2 = function(f, abstractValue){  
+  return function(cX, cY){
+    var d1 = maxEntERP(cX, abstractValue); // could cache this
+    var d2 = maxEntERP(cY, abstractValue); // could cache this
+    var x = sample(d1);
+    var y = sample(d2);
+    var out = f(x, y);
+    if (contains(Object.keys(abstractValue), out)){      
+      return abstractValue[out];
+    } else {
+      return out
+    }
+  }
+}
+
+var lift3 = function(f, abstractValue){  
+  return function(cX, cY, cZ){
+    var d1 = maxEntERP(cX, abstractValue); // could cache this
+    var d2 = maxEntERP(cY, abstractValue); // could cache this
+    var d3 = maxEntERP(cZ, abstractValue); // could cache this
+    var x = sample(d1);
+    var y = sample(d2);
+    var z = sample(d3);
+    var out = f(x, y, z);
+    return abstractValue[out];
+  }
+}
+///
+
+
+// Abstraction map
+
+var abstractValue = {
+  "a": 1,
+  "b": 1,
+  "c": 2,
+  "d": 2,
+  "e": 3,
+  "f": 3,
+  "g": 4,
+  "h": 4,
+  "-1": -1,
+  "-1.5": -1.5,
+  "-2": -2,
+  "-2.5": -2.5
+}
+
+
+// Random variables
+
+var erp0 = makeERP([.1, .2, .3, .4], ["a", "b", "c", "d"]);
+var erp1maxent = makeERP([.25, .25, .25, .25], ["e", "f", "g", "h"]);
+
+
+// Coarsened random variables
+
+var tmp0 = coarsen(erp0, abstractValue);
+var cErp0 = tmp0[0];
+var fErp0 = tmp0[1];
+
+var tmp1 = coarsen(erp1maxent, abstractValue);
+var cErp1 = tmp1[0];
+var fErp1 = tmp1[1];
+
+
+// Primitive functions
+
+var getErp1MaxEntScore = function(y){
+  return erp1maxent.score([], y);
+}
+
+var erp1 = function(x){
+  var dists = {
+    "a" : [.25, .25, .25, .25],
+    "b" : [.1, .2, .3, .4],
+    "c" : [.2, .2, .3, .3],
+    "d" : [.01, .1, .5, .39]
+  };
+  var vs = ["e", "f", "g", "h"];
+  var dist = dists[x];
+  return makeERP(dist, vs);
+}
+
+var getErp1Score = function(x, y){
+  return erp1(x).score([], y);
+}
+
+var getFactorScore = function(y){
+  var scores = {
+    "e" : -1,
+    "f" : -1.5,
+    "g" : -2,
+    "h" : -2.5
+  }  
+  return scores[y];
+}
+
+
+// Coarsened primitives
+
+var cGetErp1MaxEntScore = lift1(getErp1MaxEntScore, abstractValue);
+var cGetErp1Score = lift2(getErp1Score, abstractValue);
+var cGetFactorScore = lift1(getFactorScore, abstractValue);
+
+
+// Model
+                      
+var program = function(){  
+  var cX = sample(cErp0);
+  var cY = sample(cErp1);
+  var cScore1 = cGetErp1Score(cX, cY) - cGetErp1MaxEntScore(cY);
+  factor(cScore1);
+  var cScore2 = cGetFactorScore(cY);
+  factor(cScore2);
+  
+  var x = sample(fErp0(cX));
+  var y = sample(fErp1(cY));
+  var score1 = getErp1Score(x, y) - getErp1MaxEntScore(y);
+  factor(score1 - cScore1);
+  var score2 = getFactorScore(y);
+  factor(score2 - cScore2);
+  return y;
+}
+
+print(Enumerate(program))
+~~~~
+
+FIXME: The abstraction for lifting is currently the identity for values that are not in the `abstractValue` table; this could easily lead to problems. We might want to consider special-casing scores.
+
+The approach above will also work for indirect dependencies (i.e. dependencies that go through some intermediate function), since such programs can be desugared to independent random variables + factors in the same way.
+
+Next steps:
+- Consider optimizing the resulting program using `sampleWithFactor`
+- Think about whether clustering values (independent of distribution) will be useful in practice
