@@ -47,6 +47,7 @@ function print(k, a, x){
 // Bar plots
 
 function barChart(containerSelector, labels, counts){
+  $(containerSelector).show();
   var svg = d3.select(containerSelector)
     .append("svg")
     .attr("class", "barChart");
