@@ -62,6 +62,7 @@ function barChart(containerSelector, labels, counts){
   chart.setBounds(80, 30, 480, 250);
   var xAxis = chart.addMeasureAxis("x", "Count");
   xAxis.title = null;
+  xAxis.tickFormat = ",.2f";
   var yAxis = chart.addCategoryAxis("y", "Label");
   yAxis.title = null;
   chart.addSeries("Count", dimple.plot.bar);
