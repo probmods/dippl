@@ -405,3 +405,24 @@ function setDate(){
 }
 
 $(setDate);
+
+
+// Special functions for webppl code boxes
+
+var invertMap = function (k, a, obj) {
+
+  var newObj = {};
+
+  for (var prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      var value = obj[prop];
+      if (newObj.hasOwnProperty(value)) {
+        newObj[value].push(prop);
+      } else {
+        newObj[value] = [prop];
+      }
+    }
+  }
+
+  return k(newObj);
+};
