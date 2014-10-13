@@ -1,0 +1,40 @@
+{
+  "name": "react-forms",
+  "main": "react-forms.js",
+  "version": "0.6.1",
+  "homepage": "http://prometheusresearch.github.io/react-forms/",
+  "authors": [
+    "Prometheus Research"
+  ],
+  "description": "Forms library for React",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "react",
+    "forms"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react": "~0.11.0"
+  },
+  "_release": "0.6.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.6.1",
+    "commit": "a27a4e25534e6f116c16ade1c775f724fc39f2b2"
+  },
+  "_source": "git://github.com/prometheusresearch/react-forms-build.git",
+  "_target": "~0.6.1",
+  "_originalSource": "react-forms",
+  "_direct": true
+}
