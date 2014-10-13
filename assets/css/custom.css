@@ -211,3 +211,10 @@ rect.dimple-bar {
   fill: #357594;
   stroke: #224E61;
 }
+
+
+/* Lists */
+
+div.container ul {
+   margin-bottom: 1em;
+}

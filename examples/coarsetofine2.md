@@ -1879,3 +1879,40 @@ The order in which the inference algorithm explores different executions has cha
 ## Merging random variables and factors
 
 The generated program could be improved by merging sample and factor statements that appear directly in sequence: instead of sampling and then scoring, we could adjust the sampling process directly.
+
+## Future work
+
+In our next steps, we would like to work out more realistic applications. Here are a few candidates:
+
+- **Computer vision**. In this application, we want to infer latent structure from real-world images such as those used in the [Tiny Images dataset](http://groups.csail.mit.edu/vision/TinyImages/). Imagine a fine-grained model that has a dependent random choice for each pixel. In the simplest version of this example, we simply learn a category for each images based on a mixture model with image prototypes, and each pixel variable is a noisy version of a prototype's corresponding pixel value. In more advanced versions, we could learn more latent structure and use more interesting generative processes (involving, e.g., the placement of parts). Components:
+
+    - Coarsening of multiple variables into a single variable
+    - Approximating/learning the conditional distributions of coarsened primitives
+    - Multi-stage coarsening
+
+- **Probabilistic Context-Free Grammars**. This is a structurally more interesting version of the HMM. For this application, we could find an existing (trained) PCFG such as the one used in the Stanford parser, write is as a probabilistic program, define a coarsening on nonterminal symbols, and use that to generate a coarse-to-fine model that can conditioned on coarsened sentences. More interesting versions of this application could use extensions of the PCFG such as the Infinite PCFG (using HDPs). Components:
+
+    - Understand coarsening in the setting where variables are not directly dependent, but influence the existence of other variables
+    - Automate the coarsening of recursive functions
+    - Understand how our approach to coarsening relates to existing coarse-to-fine NLP approaches (mainly [Petrov's work](http://www.petrovi.de/data/dissertation.pdf)).
+    - Multi-stage coarsening
+
+- **Language understanding**. We would like to apply coarse-to-fine to natural language understanding applications such as pragmatic inference and semantic parsing (and combinations of these). What this looks like depends on whether we can figure out coarsening for nested-query models. If yes, then a first version could simply coarsen a listener/speaker pragmatics model with a relatively large state space; if not, then semantic parsing may be a better fit. Components:
+
+    - Understand coarse-to-fine for models with nested conditioning
+
+Taken together, these applications suggest the following steps, not necessarily in this order:
+
+- Work out how to coarsen multiple variables into a single variable. How should we specify such coarsenings?
+
+- Work out how to efficiently approximate coarsened primitives for a fixed coarsening.
+
+- Automate the transform from a fine-grained model to a coarse-to-fine model. We can automate this first for single-stage coarsening for "flat" models (as in the restricted HMM example shown above), then for recursive models, and finally for multi-stage coarsening applied to recursive models. As part of this process, we may want to automatically merge sampling statements and factors.
+
+- Understand coarsening in the setting where variables are not directly depenedent, but influence the existence of other variables.
+
+- Work out coarsening for nested-query models.
+
+- Learn good coarsenings (e.g. using a particle filter lattice, re-weighting paths based on average importance weights). This could initially be explored in the flat HMM setting.
+
+- Understand how our approach relates to Galois Connections.
