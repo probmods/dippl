@@ -180,6 +180,16 @@ var codeBoxCount = 0;
 CodeMirror.keyMap.default["Cmd-/"] = "toggleComment";
 CodeMirror.keyMap.default["Cmd-."] = function(cm){cm.foldCode(cm.getCursor(), myRangeFinder); };
 
+//fold "///fold: ... ///" parts:
+function foldCode(cm){
+  var lastLine = cm.lastLine();
+  for(var i=0;i<=lastLine;i++) {
+    var txt = cm.getLine(i),
+    pos = txt.indexOf("///fold:");
+    if (pos==0) {cm.foldCode(CodeMirror.Pos(i,pos), tripleCommentRangeFinder);}
+  }
+}
+
 function setupCodeBox(element){
   var $element = $(element);
   var $code = $element.html();
@@ -196,13 +206,7 @@ function setupCodeBox(element){
       extraKeys: {"Tab": "indentAuto"}
     });
 
-  //fold "///fold: ... ///" parts:
-  var lastLine = cm.lastLine();
-  for(var i=0;i<=lastLine;i++) {
-    var txt = cm.getLine(i),
-    pos = txt.indexOf("///fold:");
-    if (pos==0) {cm.foldCode(CodeMirror.Pos(i,pos), tripleCommentRangeFinder);}
-  }
+  foldCode(cm);
 
   var getLanguage = function(){
     var firstLine = cm.getValue().split("\n")[0];

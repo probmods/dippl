@@ -2,12 +2,15 @@
 
 var cx = React.addons.classSet;
 
+var converter = new Showdown.converter();
+
+
+// Extend _.indexOf to work with functions instead of values
+// Based on http://stackoverflow.com/questions/12356642/
 
 var indexOfValue = _.indexOf; // save a reference to the core implementation
 
 _.mixin({
-
-    // Based on http://stackoverflow.com/questions/12356642/
 
     // return the index of the first array element passing a test
     indexOf: function(array, test) {
@@ -24,8 +27,10 @@ _.mixin({
 });
 
 
+// CodeMirror component for React
+// Based on https://github.com/brigand/react-edit/
+
 var CodeMirrorComponent = React.createClass({
-  // Based on https://github.com/brigand/react-edit/
 
   updateCode: function(){
     // TODO: make scroll position maintain
@@ -102,11 +107,16 @@ var CodeInputBox = React.createClass({
   }
 });
 
+var globalVar;
 
 var MarkdownInputBox = React.createClass({
 
   getInitialState: function(){
     return {text: this.props.initialText, hasFocus: false};
+  },
+
+  setFocus: function(){
+    $(this.getDOMNode()).find("textarea").focus();
   },
 
   onFocus: function(){
@@ -131,10 +141,11 @@ var MarkdownInputBox = React.createClass({
       markdownBlock: true
     });
     return (<div className={blockClasses}>
-            <textarea onChange={this.handleChange} onFocus={this.onFocus} onBlur={this.onBlur}>{this.state.text}</textarea>
             <button className="removeBlock" onClick={this.props.removeMe}>x</button>
             <button className="moveUp" onClick={this.props.moveUp}>▲</button>
             <button className="moveDown" onClick={this.props.moveDown}>▼</button>
+            <textarea onChange={this.handleChange} onFocus={this.onFocus} onBlur={this.onBlur}>{this.state.text}</textarea>
+            <div className="preview" onClick={this.setFocus} dangerouslySetInnerHTML={{ __html: converter.makeHtml(this.state.text) }} />
             </div>);
   },
 
@@ -181,7 +192,16 @@ var MarkdownOutputBox = React.createClass({
     return {lastUpdate: (new Date()).getTime()};
   },
 
+  shouldComponentUpdate: function(nextProps, nextState){
+    return (((new Date()).getTime() - this.state.lastUpdate) > 500) && (nextProps != this.props);
+  },
+
   render: function(){
+
+    if (!this.props.open){
+      return <div></div>;
+    }
+
     // get ordered list of blocks
     var orderedBlocks = getOrderedBlockList(this.props.blocks);
 
@@ -206,24 +226,33 @@ var MarkdownOutputBox = React.createClass({
 
   componentDidUpdate: function(){
     $("#editorMarkdown").trigger('autosize.resize');
-  },
-
-  shouldComponentUpdate: function(nextProps, nextState){
-    return (((new Date()).getTime() - this.state.lastUpdate) > 500) && (nextProps != this.props);
   }
+
 });
 
 
 var WebpplEditor = React.createClass({
 
   getInitialState: function(){
-    // block ids are separate from ordering indices (and only happen to coincide here)
-    return {
-      blocks: {
-        1: {type: "text", content: "Edit me!", orderingKey: 1},
-        2: {type: "code", content: 'print("hello world!")', orderingKey: 2}
-      }
-    };
+    var localState = localStorage.getItem("WebPPLEditorState");
+    if (localState === null){
+      // block ids are separate from ordering indices (and only happen to coincide here)
+      return {
+        blocks: {
+          1: {type: "text", content: "*Click here* to edit me!", orderingKey: 1},
+          2: {type: "code", content: 'print("hello world!")', orderingKey: 2}
+        },
+        markdownOutputOpen: false
+      };
+    } else {
+      var parsedState = JSON.parse(localState);
+      parsedState.markdownOutputOpen = false;
+      return parsedState;
+    }
+  },
+
+  componentDidUpdate: function(prevProps, prevState) {
+    localStorage.WebPPLEditorState = JSON.stringify(this.state);
   },
 
   nextBlockId: function(){
@@ -244,11 +273,11 @@ var WebpplEditor = React.createClass({
     }
   },
 
-  addBlock: function(type){
+  addBlock: function(type, content){
     var newBlocks = _.clone(this.state.blocks);
     var newBlock = {
       type: type,
-      content: "",
+      content: content,
       orderingKey: this.nextOrderingKey()
     };
     newBlocks[this.nextBlockId()] = newBlock;
@@ -256,11 +285,11 @@ var WebpplEditor = React.createClass({
   },
 
   addCodeBlock: function(){
-    this.addBlock("code");
+    this.addBlock("code", "");
   },
 
   addTextBlock: function(){
-    this.addBlock("text");
+    this.addBlock("text", "*Click here* to edit me!");
   },
 
   updateBlockContent: function(blockId, content){
@@ -312,6 +341,14 @@ var WebpplEditor = React.createClass({
     this.setState({blocks: newBlocks});
   },
 
+  toggleMarkdownOutput: function(){
+    var newMarkdownOutputOpen = !this.state.markdownOutputOpen;
+    this.setState({markdownOutputOpen: newMarkdownOutputOpen});
+    if (newMarkdownOutputOpen){
+      setTimeout(function(){$('#editorMarkdown').autosize();}, 500);
+    }
+  },
+
   render: function() {
     var that = this;
     var orderedBlocks = getOrderedBlockList(this.state.blocks);
@@ -343,8 +380,9 @@ var WebpplEditor = React.createClass({
         <div id="editorControls">
           <button onClick={this.addCodeBlock}>add code</button>
           <button onClick={this.addTextBlock}>add text</button>
+          <button onClick={this.toggleMarkdownOutput}>toggle output</button>
         </div>
-        <MarkdownOutputBox blocks={this.state.blocks}/>
+        <MarkdownOutputBox blocks={this.state.blocks} open={this.state.markdownOutputOpen}/>
       </div>);
   }
 });

@@ -169,7 +169,7 @@ div.editorBlock {
 
 button.removeBlock, button.moveUp, button.moveDown {
   position: absolute;
-  opacity: 0;
+  opacity: 0.3;
   left: -30px;
   font-size: 10px;
   width: 30px;
@@ -221,6 +221,32 @@ textarea#editorMarkdown {
    padding: .5em;
    border: 1px solid #ccc;  
    margin: 4em;
+}
+
+.markdownBlock textarea {
+   opacity: 0;
+   position: absolute;
+   z-index: -10;
+}
+
+.markdownBlock .preview {
+   opacity: 1;
+   margin: 9.5px;
+   position: relative;
+   z-index: 10;
+   min-height: 40px;
+}
+
+.markdownBlock.currentBlock .preview {
+  opacity: 0;
+  position: absolute;
+  z-index: -10;
+}
+
+.markdownBlock.currentBlock textarea {
+  opacity: 1;
+  position: relative;
+  z-index: 10;
 }
 
 
