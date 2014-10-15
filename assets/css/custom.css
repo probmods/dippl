@@ -152,13 +152,57 @@ div#editorBlocks {
   margin-top: 5em;
 }
 
+div#editorControls {
+   margin-top: .5em;
+   float: right;
+}
+
 div#editorButtons {
    margin-top: 1em;
    display: block;
    text-align: right;
 }
 
-textarea.editorBlock {
+div.editorBlock {
+  position: relative;
+}
+
+button.removeBlock, button.moveUp, button.moveDown {
+  position: absolute;
+  opacity: 0;
+  left: -30px;
+  font-size: 10px;
+  width: 30px;
+  height: 17px;
+}
+
+.codeBlock button.removeBlock {
+  top: 10px;
+}
+.codeBlock button.moveUp {
+  top: 25px;
+}
+.codeBlock button.moveDown {
+  top: 40px;
+}
+
+.markdownBlock button.removeBlock {
+  top: 0px;
+}
+.markdownBlock button.moveUp {
+  top: 15px;
+}
+.markdownBlock button.moveDown {
+  top: 30px;
+}
+
+div.currentBlock button.removeBlock,
+div.currentBlock button.moveUp,
+div.currentBlock button.moveDown {
+  opacity: 1;
+}
+
+.editorBlock textarea {
    display: block;
    border: none;
    border-left: 2px dotted #ccc;
@@ -177,7 +221,6 @@ textarea#editorMarkdown {
    padding: .5em;
    border: 1px solid #ccc;  
    margin: 4em;
-   display: none;
 }
 
 

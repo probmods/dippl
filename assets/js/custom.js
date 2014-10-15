@@ -279,6 +279,8 @@ function setupCodeBox(element){
   }
 
   codeBoxCount += 1;
+
+  return cm;
 }
 
 function setupCodeBoxes(){
