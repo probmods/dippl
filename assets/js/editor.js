@@ -107,7 +107,6 @@ var CodeInputBox = React.createClass({
   }
 });
 
-var globalVar;
 
 var MarkdownInputBox = React.createClass({
 
