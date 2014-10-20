@@ -1909,7 +1909,7 @@ Taken together, these applications suggest the following steps, not necessarily 
 
 - Automate the transform from a fine-grained model to a coarse-to-fine model. We can automate this first for single-stage coarsening for "flat" models (as in the restricted HMM example shown above), then for recursive models, and finally for multi-stage coarsening applied to recursive models. As part of this process, we may want to automatically merge sampling statements and factors.
 
-- Understand coarsening in the setting where variables are not directly depenedent, but influence the existence of other variables.
+- Understand coarsening in the setting where variables are not directly dependent, but influence the existence of other variables.
 
 - Work out coarsening for nested-query models.
 
