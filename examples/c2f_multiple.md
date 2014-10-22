@@ -205,3 +205,4 @@ var coarsenValue = function(value1, value2){
 var tmp = coarsenERP(testERP, coarsenValue);
 var coarseTestERP = tmp[0];
 var getFineTestERP = tmp[1];
+~~~~
