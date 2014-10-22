@@ -40,7 +40,7 @@ var transitionERPs = {
 var transition = function(state){
   return transitionERPs[state];
   }
-  ~~~~
+~~~~
 
 We will make some simplifying assumptions to get off the ground. First, assume there are only four observations. Also, suppose that you want to coarsen the first pair of states and the final pair of states. These decisions should eventually be made flexible.
 
@@ -56,7 +56,9 @@ var abstractionMap = {
       "yx": "x1",
         "yy": "y1"
 	}
-	~~~~
+~~~~
+
+asdf asdf
 
 ~~~~
 ///fold:
@@ -206,3 +208,5 @@ var tmp = coarsenERP(testERP, coarsenValue);
 var coarseTestERP = tmp[0];
 var getFineTestERP = tmp[1];
 ~~~~
+
+asdf asdf 
