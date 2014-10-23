@@ -1956,13 +1956,45 @@ var model = function(){
 }
 ~~~~
 
-Note that this didn't change the model's distribution.
+Note that this didn't change the model's distribution. We can now merge the two erps into a single one:
 
-Then, in the next step, we coarsen the variable `xy` as usual, and lift `first` and `second` to the abstract domain, also as usual.
+~~~~
+///fold:
+var first = function(xs){
+  return xs[0]
+}
+
+var second = function(xs){
+  return xs[1]
+}
+///
+
+var erpProduct = function(thunk1, thunk2){
+  return Enumerate(
+    function(){
+      var x = thunk1();
+      var y = thunk2();
+      return [x, y];
+    });
+};
+
+var xyErp = erpProduct(
+  function(){return sample(erp1)}, 
+  function(){return sample(erp2)}}
+
+var model = function(){
+  var xy = sample(xyErp);
+  var z = f(first(xy), second(xy));
+  var d = g(first(xy));
+  var e = h(second(xy));
+}
+~~~~
+
+Then, in the next step, we coarsen `xyErp` as usual, and lift `first` and `second` to the abstract domain, also as usual.
 
 ~~~~
 var coarseModel = function(){
-  var xy = sample(coarseErpXY);
+  var xy = sample(coarseXyErp);
   var z = coarseF(coarseFirst(xy), coarseSecond(xy));
   var d = coarseG(coarseFirst(xy));
   var e = coarseH(coarseSecond(xy));
