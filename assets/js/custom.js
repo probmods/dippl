@@ -98,10 +98,20 @@ DrawObject.prototype.newPoint = function(x, y){
   return new this.paper.Point(x, y);
 };
 
-DrawObject.prototype.circle = function(x, y, fillColor, radius){
+DrawObject.prototype.circle = function(x, y, radius, stroke, fill){
   var point = this.newPoint(x, y);
   var circle = new this.paper.Path.Circle(point, radius || 50);
-  circle.fillColor = fillColor || 'black';
+  circle.fillColor = fill || 'black';
+  circle.strokeColor = stroke || 'black';
+  this.redraw();
+};
+
+DrawObject.prototype.polygon = function(x, y, n, radius, stroke, fill){
+  var point = this.newPoint(x, y);
+  var polygon = new this.paper.Path.RegularPolygon(point, n, radius || 20);
+  polygon.fillColor = fill || 'white';
+  polygon.strokeColor = stroke || 'black';
+  polygon.strokeWidth = 4;
   this.redraw();
 };
 
@@ -122,7 +132,7 @@ DrawObject.prototype.toArray = function(){
   return imgData.data;
 };
 
-DrawObject.prototype.distance = function(cmpDrawObject){
+DrawObject.prototype.distanceF = function(f, cmpDrawObject){
   if (!((this.canvas.width == cmpDrawObject.canvas.width) &&
         (this.canvas.height == cmpDrawObject.canvas.height))){
     console.log(this.canvas.width, cmpDrawObject.canvas.width,
@@ -131,13 +141,20 @@ DrawObject.prototype.distance = function(cmpDrawObject){
   }
   var thisImgData = this.toArray();
   var cmpImgData = cmpDrawObject.toArray();
-  var distance = 0;
-  for (var i=0; i<thisImgData.length; i+=4) {
-    var col1 = [thisImgData[i], thisImgData[i+1], thisImgData[i+2], thisImgData[i+3]];
-    var col2 = [cmpImgData[i], cmpImgData[i+1], cmpImgData[i+2], cmpImgData[i+3]];
-    distance += euclideanDistance(col1, col2);
+  return f(thisImgData, cmpImgData);
+};
+
+DrawObject.prototype.distance = function(cmpDrawObject){
+  var df = function(thisImgData, cmpImgData) {
+    var distance = 0;
+    for (var i=0; i<thisImgData.length; i+=4) {
+      var col1 = [thisImgData[i], thisImgData[i+1], thisImgData[i+2], thisImgData[i+3]];
+      var col2 = [cmpImgData[i], cmpImgData[i+1], cmpImgData[i+2], cmpImgData[i+3]];
+      distance += euclideanDistance(col1, col2);
+    };
+    return distance;
   };
-  return distance;
+  return this.distanceF(df, cmpDrawObject)
 };
 
 DrawObject.prototype.destroy = function(){
