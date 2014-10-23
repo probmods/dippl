@@ -38,9 +38,9 @@ function jsPrint(x){
   }
 }
 
-function print(k, a, x){
+function print(store, k, a, x){
   jsPrint(x);
-  k();
+  k(store);
 }
 
 
@@ -223,7 +223,7 @@ function setupCodeBox(element){
     { "id": "result_" + codeBoxCount,
       "class": "resultDiv" });
 
-  var showResult = function(x){
+  var showResult = function(store, x){
     resultDiv.show();
     if (x !== undefined) {
       resultDiv.append(document.createTextNode(webpplObjectToText(x)));
@@ -364,7 +364,7 @@ $(setDate);
 
 // Special functions for webppl code boxes
 
-var invertMap = function (k, a, obj) {
+var invertMap = function (store, k, a, obj) {
 
   var newObj = {};
 
@@ -379,5 +379,5 @@ var invertMap = function (k, a, obj) {
     }
   }
 
-  return k(newObj);
+  return k(store, newObj);
 };
