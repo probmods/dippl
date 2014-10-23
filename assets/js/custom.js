@@ -47,6 +47,7 @@ function print(k, a, x){
 // Bar plots
 
 function barChart(containerSelector, labels, counts){
+  $(containerSelector).show();
   var svg = d3.select(containerSelector)
     .append("svg")
     .attr("class", "barChart");
@@ -61,6 +62,7 @@ function barChart(containerSelector, labels, counts){
   chart.setBounds(80, 30, 480, 250);
   var xAxis = chart.addMeasureAxis("x", "Count");
   xAxis.title = null;
+  xAxis.tickFormat = ",.2f";
   var yAxis = chart.addCategoryAxis("y", "Label");
   yAxis.title = null;
   chart.addSeries("Count", dimple.plot.bar);
@@ -195,6 +197,16 @@ var codeBoxCount = 0;
 CodeMirror.keyMap.default["Cmd-/"] = "toggleComment";
 CodeMirror.keyMap.default["Cmd-."] = function(cm){cm.foldCode(cm.getCursor(), myRangeFinder); };
 
+//fold "///fold: ... ///" parts:
+function foldCode(cm){
+  var lastLine = cm.lastLine();
+  for(var i=0;i<=lastLine;i++) {
+    var txt = cm.getLine(i),
+    pos = txt.indexOf("///fold:");
+    if (pos==0) {cm.foldCode(CodeMirror.Pos(i,pos), tripleCommentRangeFinder);}
+  }
+}
+
 function setupCodeBox(element){
   var $element = $(element);
   var $code = $element.html();
@@ -211,13 +223,7 @@ function setupCodeBox(element){
       extraKeys: {"Tab": "indentAuto"}
     });
 
-  //fold "///fold: ... ///" parts:
-  var lastLine = cm.lastLine();
-  for(var i=0;i<=lastLine;i++) {
-    var txt = cm.getLine(i),
-    pos = txt.indexOf("///fold:");
-    if (pos==0) {cm.foldCode(CodeMirror.Pos(i,pos), tripleCommentRangeFinder);}
-  }
+  foldCode(cm);
 
   var getLanguage = function(){
     var firstLine = cm.getValue().split("\n")[0];
@@ -294,6 +300,8 @@ function setupCodeBox(element){
   }
 
   codeBoxCount += 1;
+
+  return cm;
 }
 
 function setupCodeBoxes(){
@@ -303,57 +311,6 @@ function setupCodeBoxes(){
 }
 
 $(setupCodeBoxes);
-
-
-// iPython-style editor
-
-function addToTextarea(element, text){
-  element.val(element.val() + text);
-}
-
-function addCodeBlock(){
-  var newCodeBlock = $('<pre>', {'html': $('<code>', {'html': ""}),
-                                 'class': "editorBlock"});
-  $("#editorBlocks").append(newCodeBlock);
-  newCodeBlock.find("code").each(function(){setupCodeBox(this);});
-  return newCodeBlock;
-}
-
-function addTextBlock(){
-  var newTextBlock = $('<textarea>', {"class": "editorBlock"});
-  $("#editorBlocks").append(newTextBlock);
-  newTextBlock.autosize();
-  return newTextBlock;
-}
-
-function generateMarkdown(){
-  $('#editorMarkdown').val("");
-  $(".editorBlock").each(
-    function(){
-      var codeElements = $(this).find(".CodeMirror");
-      if (codeElements.length == 1){
-        var code = codeElements[0].CodeMirror.getValue();
-        addToTextarea($('#editorMarkdown'), "\n\n~~~~\n" + code + "\n~~~~");
-      } else {
-        addToTextarea($('#editorMarkdown'), "\n\n" + $(this).val());
-      };
-    });
-  $('#editorMarkdown').val($.trim($('#editorMarkdown').val()));
-  $('#editorMarkdown').show().trigger('autosize.resize');
-}
-
-function loadEditor(){
-  $('#editorMarkdown').autosize();
-  $("#addCodeBlock").click(addCodeBlock);
-  $("#addTextBlock").click(addTextBlock);
-  $("#generateMarkdown").click(generateMarkdown);
-  var textBlock = addTextBlock();
-  textBlock.val("Edit me!");
-  var codeBlock = addCodeBlock();
-  $(codeBlock).find(".CodeMirror")[0].CodeMirror.setValue('print("hello world!")');
-}
-
-$(loadEditor);
 
 
 // CPS and addressing forms
@@ -420,3 +377,22 @@ function setDate(){
 }
 
 $(setDate);
+// Special functions for webppl code boxes
+
+var invertMap = function (k, a, obj) {
+
+  var newObj = {};
+
+  for (var prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      var value = obj[prop];
+      if (newObj.hasOwnProperty(value)) {
+        newObj[value].push(prop);
+      } else {
+        newObj[value] = [prop];
+      }
+    }
+  }
+
+  return k(newObj);
+};

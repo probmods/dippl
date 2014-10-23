@@ -442,7 +442,7 @@ This is only a sketch. For a more detailed exposition, see [How to compile with 
 
 ## CPS transform in action
 
-The auto-updating form below shows the transform that we actually use for WebPPL programs. Try it out:
+The form below shows the transform that we actually use for WebPPL programs. Try it out - expressions entered below will automatically be transformed:
 
 <div id="cpsTransform">
     <textarea id="cpsInput">1 + 2</textarea>
@@ -479,6 +479,7 @@ print(EnumerateLikelyFirst(binomial, numexec))
 
 Because the return value from `Enumerate(foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution. 
 
+Next chapter: [Early, incremental evidence](/chapters/04-factorseq.html)
 
 
 <!--
