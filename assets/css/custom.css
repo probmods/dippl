@@ -5,7 +5,7 @@ body {
 }
 
 body div.container {
-   max-width: 800px;
+   max-width: 950px;
    background-color: #fefefe;
    box-shadow: 0 0 15px rgba(0, 0, 0, .3);
    padding-left: 5em;
@@ -103,7 +103,7 @@ a.navbar-brand strong {
 /* Code boxes */
 
 .CodeMirror {
-   height: auto!important;   
+   height: auto!important;
 }
 
 pre {
@@ -217,9 +217,9 @@ textarea#editorMarkdown {
    background-color: #fff;
    width: 90%;
    font-family: monospace;
-   font-size: 13px;  
+   font-size: 13px;
    padding: .5em;
-   border: 1px solid #ccc;  
+   border: 1px solid #ccc;
    margin: 4em;
 }
 
