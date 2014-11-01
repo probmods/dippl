@@ -123,7 +123,7 @@ pre {
 
 .resultDiv {
    display: none;
-   max-height: 500px;
+   max-height: 600px;
    overflow: scroll;
 }
 
@@ -272,8 +272,8 @@ svg.barChart {
   background-color: #fff;
   border: 1px solid #ccc;
   margin: 1em auto;
-  width: 590px;
-  height: 340px;
+  width: 740px;
+  height: 420px;
 }
 
 rect.dimple-bar {

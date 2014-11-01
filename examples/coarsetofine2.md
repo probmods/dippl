@@ -64,8 +64,8 @@ var epsilon = .000001;
 
 var observationERPs = {
   "x1" : makeERP([1 - epsilon, epsilon], observations),
-  "x2" : makeERP([1 - epsilon, epsilon], observations), 
-  "x3" : makeERP([1 - epsilon, epsilon], observations),   
+  "x2" : makeERP([1 - epsilon, epsilon], observations),
+  "x3" : makeERP([1 - epsilon, epsilon], observations),
   "y1" : makeERP([.5, .5], observations)
 }
 
@@ -80,12 +80,12 @@ var observationScore = function(state, trueObservation){
 
 var transitionERPs = {
   "x1" : makeERP([.33, .33, .33, epsilon], states),
-  "x2" : makeERP([.33, .33, .33, epsilon], states), 
-  "x3" : makeERP([.33, .33, .33, epsilon], states),   
+  "x2" : makeERP([.33, .33, .33, epsilon], states),
+  "x3" : makeERP([.33, .33, .33, epsilon], states),
   "y1" : makeERP([.3, .3, .3, .1], states)
 }
 
-var transition = function(state){  
+var transition = function(state){
   return transitionERPs[state];
 }
 
@@ -103,11 +103,11 @@ var model = function(){
   factor(observationScore(s0, "a"));
 
   var s1 = sample(transition(s0));
-  printStates([s0, s1]);  
+  printStates([s0, s1]);
   factor(observationScore(s1, "a"));
 
   var s2 = sample(transition(s1));
-  printStates([s0, s1, s2]);    
+  printStates([s0, s1, s2]);
   factor(observationScore(s2, "a"));
 
   var s3 = sample(transition(s2));
@@ -136,7 +136,7 @@ var abstractionMap = {
 
 A *coarse-to-fine model* is a transformed version of a model (henceforth the "original model") that contains both "fine" and "coarse" random variables. The "fine" random variables correspond to the variables in the original model in the sense that (marginalizing out all other variables) their joint distribution is the same as in the original model. In addition, the coarse-to-fine model contains "coarse" random variables that structure the sampling process for each "fine" variable: we first sample an abstract value from the coarse-grained variable, and later on sample a fine variable from the partition on fine values defined by the coarse-grained value. In the following, we assume (without loss of generality) a coarse-to-fine model with only one level of coarsening.
 
-### When does coarse-to-fine inference help? 
+### When does coarse-to-fine inference help?
 
 A typical inefficiency of fine-grained exploration looks as follows: There are a lot of choices that look similarly good in the beginning, but then turn out to be bad after a little bit of reasoning. Stochastic-search-style inference algorithms may spend a lot of time considering these choices individually instead of ruling them out in one go.
 
@@ -196,15 +196,15 @@ var epsilon = .000001;
 
 var observationERPs = {
   "x1" : makeERP([1 - epsilon, epsilon], observations),
-  "x2" : makeERP([1 - epsilon, epsilon], observations), 
-  "x3" : makeERP([1 - epsilon, epsilon], observations),   
+  "x2" : makeERP([1 - epsilon, epsilon], observations),
+  "x3" : makeERP([1 - epsilon, epsilon], observations),
   "y1" : makeERP([.5, .5], observations)
 }
 
 var transitionERPs = {
   "x1" : makeERP([.33, .33, .33, epsilon], states),
-  "x2" : makeERP([.33, .33, .33, epsilon], states), 
-  "x3" : makeERP([.33, .33, .33, epsilon], states),   
+  "x2" : makeERP([.33, .33, .33, epsilon], states),
+  "x3" : makeERP([.33, .33, .33, epsilon], states),
   "y1" : makeERP([.3, .3, .3, .1], states)
 }
 
@@ -213,7 +213,7 @@ var observationScore = function(state, trueObservation){
   return observationERP.score([], trueObservation);
 }
 
-var transition = function(state){  
+var transition = function(state){
   return transitionERPs[state];
 }
 
@@ -283,15 +283,15 @@ var epsilon = .000001;
 
 var observationERPs = {
   "x1" : makeERP([1 - epsilon, epsilon], observations),
-  "x2" : makeERP([1 - epsilon, epsilon], observations), 
-  "x3" : makeERP([1 - epsilon, epsilon], observations),   
+  "x2" : makeERP([1 - epsilon, epsilon], observations),
+  "x3" : makeERP([1 - epsilon, epsilon], observations),
   "y1" : makeERP([.5, .5], observations)
 }
 
 var transitionERPs = {
   "x1" : makeERP([.33, .33, .33, epsilon], states),
-  "x2" : makeERP([.33, .33, .33, epsilon], states), 
-  "x3" : makeERP([.33, .33, .33, epsilon], states),   
+  "x2" : makeERP([.33, .33, .33, epsilon], states),
+  "x3" : makeERP([.33, .33, .33, epsilon], states),
   "y1" : makeERP([.3, .3, .3, .1], states)
 }
 
@@ -348,7 +348,7 @@ var makeERP = function(ps, vs){
 
 ///
 
-var testERP = makeERP([.1, .2, .3, .4], 
+var testERP = makeERP([.1, .2, .3, .4],
                       ["x1", "x2", "x3", "y1"]);
 
 print(testERP)
@@ -358,90 +358,18 @@ Here is the corresponding two-stage sampling process, resulting in the same marg
 
 ~~~~
 ///fold:
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
 
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
 var coarsenERP = function(erp, coarsenValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by coarsenValue function
@@ -451,37 +379,37 @@ var coarsenERP = function(erp, coarsenValue){
       return coarsenValue(vp1[0]) == coarsenValue(vp2[0]);
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return coarsenValue(group[0][0])})
+      return coarsenValue(group[0][0])},
+	groups)
 
   var groupedVs = map(
-    groups,
     function(group){
       return map(group, first);
-    });
+      },
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
       return map(group, second);
-    });
+      },
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -490,7 +418,7 @@ var coarsenERP = function(erp, coarsenValue){
 
 // Original random variable
 
-var testERP = makeERP([.1, .2, .3, .4], 
+var testERP = makeERP([.1, .2, .3, .4],
                       ["x1", "x2", "x3", "y1"]);
 
 // Abstraction map for partitioning values
@@ -536,92 +464,20 @@ The implementation of `coarsenERP` that we used above simply groups values and p
 
 ~~~~
 ///fold:
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
 
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
 ///
 
 var coarsenERP = function(erp, coarsenValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by coarsenValue function
@@ -631,37 +487,37 @@ var coarsenERP = function(erp, coarsenValue){
       return coarsenValue(vp1[0]) == coarsenValue(vp2[0]);
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return coarsenValue(group[0][0])})
+      return coarsenValue(group[0][0])},
+	groups)
 
   var groupedVs = map(
-    groups,
     function(group){
       return map(group, first);
-    });
+      },
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
       return map(group, second);
-    });
+      },
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -672,90 +528,18 @@ Now let's apply this process to all random variables in our HMM example:
 
 ~~~~
 ///fold:
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
 
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
 var coarsenERP = function(erp, coarsenValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by coarsenValue function
@@ -765,37 +549,37 @@ var coarsenERP = function(erp, coarsenValue){
       return coarsenValue(vp1[0]) == coarsenValue(vp2[0]);
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return coarsenValue(group[0][0])})
+      return coarsenValue(group[0][0])},
+	groups)
 
   var groupedVs = map(
-    groups,
     function(group){
       return map(group, first);
-    });
+      },
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
       return map(group, second);
-    });
+      },
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -834,15 +618,15 @@ var epsilon = .000001;
 
 var observationERPs = {
   "x1" : makeERP([1 - epsilon, epsilon], observations),
-  "x2" : makeERP([1 - epsilon, epsilon], observations), 
-  "x3" : makeERP([1 - epsilon, epsilon], observations),   
+  "x2" : makeERP([1 - epsilon, epsilon], observations),
+  "x3" : makeERP([1 - epsilon, epsilon], observations),
   "y1" : makeERP([.5, .5], observations)
 }
 
 var transitionERPs = {
   "x1" : makeERP([.33, .33, .33, epsilon], states),
-  "x2" : makeERP([.33, .33, .33, epsilon], states), 
-  "x3" : makeERP([.33, .33, .33, epsilon], states),   
+  "x2" : makeERP([.33, .33, .33, epsilon], states),
+  "x3" : makeERP([.33, .33, .33, epsilon], states),
   "y1" : makeERP([.3, .3, .3, .1], states)
 }
 
@@ -891,7 +675,7 @@ var getFineUniformStateERP = tmp1[1];
 
 
 var model = function(){
-  
+
   var coarseS0 = sample(coarseStartStateERP);
   var s0 = sample(getFineStartStateERP(coarseS0));
   factor(observationScore(s0, "a"));
@@ -920,90 +704,18 @@ In preparation for the next step, let's rearrange the model by hoisting the (ind
 
 ~~~~
 ///fold:
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
 
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
 var coarsenERP = function(erp, coarsenValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by coarsenValue function
@@ -1013,37 +725,37 @@ var coarsenERP = function(erp, coarsenValue){
       return coarsenValue(vp1[0]) == coarsenValue(vp2[0]);
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return coarsenValue(group[0][0])})
+      return coarsenValue(group[0][0])},
+	groups)
 
   var groupedVs = map(
-    groups,
     function(group){
       return map(group, first);
-    });
+      },
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
       return map(group, second);
-    });
+      },
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -1082,15 +794,15 @@ var epsilon = .000001;
 
 var observationERPs = {
   "x1" : makeERP([1 - epsilon, epsilon], observations),
-  "x2" : makeERP([1 - epsilon, epsilon], observations), 
-  "x3" : makeERP([1 - epsilon, epsilon], observations),   
+  "x2" : makeERP([1 - epsilon, epsilon], observations),
+  "x3" : makeERP([1 - epsilon, epsilon], observations),
   "y1" : makeERP([.5, .5], observations)
 }
 
 var transitionERPs = {
   "x1" : makeERP([.33, .33, .33, epsilon], states),
-  "x2" : makeERP([.33, .33, .33, epsilon], states), 
-  "x3" : makeERP([.33, .33, .33, epsilon], states),   
+  "x2" : makeERP([.33, .33, .33, epsilon], states),
+  "x3" : makeERP([.33, .33, .33, epsilon], states),
   "y1" : makeERP([.3, .3, .3, .1], states)
 }
 
@@ -1135,12 +847,12 @@ var getFineUniformStateERP = tmp1[1];
 
 
 var model = function(){
-  
+
   var coarseS0 = sample(coarseStartStateERP);
   var coarseS1 = sample(coarseUniformStateERP);
   var coarseS2 = sample(coarseUniformStateERP);
-  var coarseS3 = sample(coarseUniformStateERP);  
-  
+  var coarseS3 = sample(coarseUniformStateERP);
+
   var s0 = sample(getFineStartStateERP(coarseS0));
   factor(observationScore(s0, "a"));
 
@@ -1187,7 +899,7 @@ var myFunc = function(a){
     return "x1"
   } else {
     return "y1"
-  }    
+  }
 }
 
 myFunc("x1")
@@ -1265,16 +977,16 @@ var myFunc = function(a){
     return "y1"
   } else {
     return "y1"
-  }    
+  }
 }
 
 ///
 
-var lift1 = function(f, coarsenValue, refineValue){    
+var lift1 = function(f, coarsenValue, refineValue){
 
   var getOutputSampler = cache(function(coarseArg){
     // Compute set of fine values corresponding to coarse argument value
-    var fineArgs = refineValue(coarseArg);    
+    var fineArgs = refineValue(coarseArg);
     return Enumerate(
       function(){
         // Uniformly sample argument instantiation
@@ -1284,7 +996,7 @@ var lift1 = function(f, coarsenValue, refineValue){
         // Coarsen return value
         var coarseOut = coarsenValue(fineOut);
         return coarseOut;
-      });    
+      });
   });
 
   return function(coarseArg){
@@ -1317,7 +1029,7 @@ var myScoreFunc = function(state){
     return -2;
   } else {
     return -1;
-  }    
+  }
 }
 
 // Uniformly sample state, then create factor with score
@@ -1375,20 +1087,20 @@ var myScoreFunc = function(state){
     return -2;
   } else {
     return -1;
-  }    
+  }
 }
 
-var lift1 = function(f, coarsenValue, refineValue){    
+var lift1 = function(f, coarsenValue, refineValue){
 
   var getOutputSampler = cache(function(coarseArg){
-    var fineArgs = refineValue(coarseArg);    
+    var fineArgs = refineValue(coarseArg);
     return Enumerate(
       function(){
         var fineArg = fineArgs[randomInteger(fineArgs.length)];
         var fineOut = f(fineArg);
         var coarseOut = coarsenValue(fineOut);
         return coarseOut;
-      });    
+      });
   });
 
   return function(coarseArg){
@@ -1453,7 +1165,7 @@ var myScoreFunc = function(a){
     return -2;
   } else {
     return -1;
-  }    
+  }
 }
 
 var sum = function(xs){
@@ -1467,10 +1179,11 @@ var sum = function(xs){
 var expectation = function(erp, f){
   return sum(
     map(
-      erp.support([]),
       function(v){
         return Math.exp(erp.score([], v)) * f(v);
-      }));
+		},
+	  erp.support([])
+      ));
 };
 
 var logMeanExp = function(erp){
@@ -1479,25 +1192,25 @@ var logMeanExp = function(erp){
 
 ///
 
-var lift1 = function(f, coarsenValue, refineValue, useMean){    
+var lift1 = function(f, coarsenValue, refineValue, useMean){
 
   var getOutputSampler = cache(function(coarseArg){
-    var fineArgs = refineValue(coarseArg);    
+    var fineArgs = refineValue(coarseArg);
     return Enumerate(
       function(){
         var fineArg = fineArgs[randomInteger(fineArgs.length)];
         var fineOut = f(fineArg);
         var coarseOut = coarsenValue(fineOut);
         return coarseOut;
-      });    
+      });
   });
 
   var samplerToValue = useMean ? logMeanExp : sample;
-  
+
   return function(coarseArg){
     var outputSampler = getOutputSampler(coarseArg);
     return samplerToValue(outputSampler);
-  };  
+  };
 
 };
 
@@ -1513,90 +1226,18 @@ We are ready to apply lifting to our original HMM program:
 
 ~~~~
 ///fold:
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
 
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
 var coarsenERP = function(erp, coarsenValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by coarsenValue function
@@ -1606,37 +1247,37 @@ var coarsenERP = function(erp, coarsenValue){
       return coarsenValue(vp1[0]) == coarsenValue(vp2[0]);
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return coarsenValue(group[0][0])})
+      return coarsenValue(group[0][0])},
+	groups)
 
   var groupedVs = map(
-    groups,
     function(group){
       return map(group, first);
-    });
+      },
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
       return map(group, second);
-    });
+      },
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -1652,59 +1293,60 @@ var sum = function(xs){
 var expectation = function(erp, f){
   return sum(
     map(
-      erp.support([]),
       function(v){
         return Math.exp(erp.score([], v)) * f(v);
-      }));
+		},
+	  erp.support([])
+      ));
 };
 
 var logMeanExp = function(erp){
   return Math.log(expectation(erp, function(x){return Math.exp(x);}));
 }
 
-var lift1 = function(f, coarsenValue, refineValue, useMean){    
+var lift1 = function(f, coarsenValue, refineValue, useMean){
 
   var getOutputSampler = cache(function(coarseArg){
-    var fineArgs = refineValue(coarseArg);    
+    var fineArgs = refineValue(coarseArg);
     return Enumerate(
       function(){
         var fineArg = fineArgs[randomInteger(fineArgs.length)];
         var fineOut = f(fineArg);
         var coarseOut = coarsenValue(fineOut);
         return coarseOut;
-      });    
+      });
   });
 
   var samplerToValue = useMean ? logMeanExp : sample;
-  
+
   return function(coarseArg){
     var outputSampler = getOutputSampler(coarseArg);
     return samplerToValue(outputSampler);
-  };  
+  };
 
 };
 
-var lift2 = function(f, coarsenValue, refineValue, useMean){    
+var lift2 = function(f, coarsenValue, refineValue, useMean){
 
   var getOutputSampler = cache(function(coarseArg1, coarseArg2){
-    var fineArgs1 = refineValue(coarseArg1);    
-    var fineArgs2 = refineValue(coarseArg2);        
+    var fineArgs1 = refineValue(coarseArg1);
+    var fineArgs2 = refineValue(coarseArg2);
     return Enumerate(
       function(){
         var fineArg1 = fineArgs1[randomInteger(fineArgs1.length)];
-        var fineArg2 = fineArgs2[randomInteger(fineArgs2.length)];        
+        var fineArg2 = fineArgs2[randomInteger(fineArgs2.length)];
         var fineOut = f(fineArg1, fineArg2);
         var coarseOut = coarsenValue(fineOut);
         return coarseOut;
-      });    
+      });
   });
 
   var samplerToValue = useMean ? logMeanExp : sample;
-  
+
   return function(coarseArg1, coarseArg2){
     var outputSampler = getOutputSampler(coarseArg1, coarseArg2);
     return samplerToValue(outputSampler);
-  };  
+  };
 
 };
 
@@ -1742,15 +1384,15 @@ var epsilon = .000001;
 
 var observationERPs = {
   "x1" : makeERP([1 - epsilon, epsilon], observations),
-  "x2" : makeERP([1 - epsilon, epsilon], observations), 
-  "x3" : makeERP([1 - epsilon, epsilon], observations),   
+  "x2" : makeERP([1 - epsilon, epsilon], observations),
+  "x3" : makeERP([1 - epsilon, epsilon], observations),
   "y1" : makeERP([.5, .5], observations)
 }
 
 var transitionERPs = {
   "x1" : makeERP([.33, .33, .33, epsilon], states),
-  "x2" : makeERP([.33, .33, .33, epsilon], states), 
-  "x3" : makeERP([.33, .33, .33, epsilon], states),   
+  "x2" : makeERP([.33, .33, .33, epsilon], states),
+  "x3" : makeERP([.33, .33, .33, epsilon], states),
   "y1" : makeERP([.3, .3, .3, .1], states)
 }
 
@@ -1817,50 +1459,50 @@ var coarseUniformScore = lift1(uniformScore, coarsenValue, refineValue, true);
 // invariant.
 
 var model = function(){
-  
+
   // Coarse level
-  
+
   var coarseS0 = sample(coarseStartStateERP);
   printStates([coarseS0]);
   var score0 = coarseObservationScore(coarseS0, "a")
   factor(score0);
-  
+
   var coarseS1 = sample(coarseUniformStateERP);
-  printStates([coarseS0, coarseS1]);  
-  var score1 = (coarseTransitionScore(coarseS0, coarseS1) 
+  printStates([coarseS0, coarseS1]);
+  var score1 = (coarseTransitionScore(coarseS0, coarseS1)
                 - coarseUniformScore(coarseS1)
                 + coarseObservationScore(coarseS1, "a"));
   factor(score1);
-  
+
   var coarseS2 = sample(coarseUniformStateERP);
-  printStates([coarseS0, coarseS1, coarseS2]);    
-  var score2 = (coarseTransitionScore(coarseS1, coarseS2) 
+  printStates([coarseS0, coarseS1, coarseS2]);
+  var score2 = (coarseTransitionScore(coarseS1, coarseS2)
                 - coarseUniformScore(coarseS2)
                 + coarseObservationScore(coarseS2, "a"));
   factor(score2);
-  
+
   var coarseS3 = sample(coarseUniformStateERP);
-  printStates([coarseS0, coarseS1, coarseS2, coarseS3]);      
-  var score3 = (coarseTransitionScore(coarseS2, coarseS3) 
+  printStates([coarseS0, coarseS1, coarseS2, coarseS3]);
+  var score3 = (coarseTransitionScore(coarseS2, coarseS3)
                 - coarseUniformScore(coarseS3)
                 + coarseObservationScore(coarseS3, "b"));
   factor(score3);
-  
-  
+
+
   // Fine level
-  
+
   var s0 = sample(getFineStartStateERP(coarseS0));
   printStates([s0]);
   factor(observationScore(s0, "a") - score0);
 
   var s1 = sample(getFineUniformStateERP(coarseS1));
   factor(transitionScore(s0, s1) - uniformScore(s1));
-  printStates([s0, s1]);  
+  printStates([s0, s1]);
   factor(observationScore(s1, "a") - score1);
 
   var s2 = sample(getFineUniformStateERP(coarseS2));
   factor(transitionScore(s1, s2) - uniformScore(s2));
-  printStates([s0, s1, s2]);    
+  printStates([s0, s1, s2]);
   factor(observationScore(s2, "a") - score2);
 
   var s3 = sample(getFineUniformStateERP(coarseS3));
@@ -1928,7 +1570,7 @@ var model = function(){
   var y = sample(erp2);
   var z = f(x, y);
   var d = g(x);
-  var e = h(y);  
+  var e = h(y);
 }
 ~~~~
 
@@ -1979,7 +1621,7 @@ var erpProduct = function(thunk1, thunk2){
 };
 
 var xyErp = erpProduct(
-  function(){return sample(erp1)}, 
+  function(){return sample(erp1)},
   function(){return sample(erp2)}}
 
 var model = function(){

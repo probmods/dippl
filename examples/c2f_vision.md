@@ -23,16 +23,6 @@ good match. (This is different from the classification example we had before)
 ~~~~
 ///fold:
 
-var map2 = function(f,l1,l2) {
-  return l1.length == 0
-         ? []
-		 : append([f(l1[0],l2[0])], map2(f, l1.slice(1), l2.slice(1)))
-}
-
-var sum = function(l) {
-  return reduce(l, function(a,b){return a+b}, 0)
-}
-
 var uniformDist = function(xs) {
   Enumerate(function(){ return xs[randomInteger(xs.length)] })
 }

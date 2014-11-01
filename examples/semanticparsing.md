@@ -59,7 +59,7 @@ For our system, the `meaning` function is a *stochastic* map from utterances to 
 First we get a lexical meaning for each word and filter out the undefined meanings, then we recursively apply meaning fragments to each other until only one meaning fragment is left.
 
 ~~~
-// Split the string into words, lookup lexical meanings, 
+// Split the string into words, lookup lexical meanings,
 // delete words with vacuous meaning, then call combine_meanings..
 
 var meaning = function(utterance, world) {
@@ -70,37 +70,37 @@ var meaning = function(utterance, world) {
 }
 ~~~
 
-The lexicon is captured in a function `lexical_meaning` which looks up the meaning of a word. A meaning is an object with semantics and syntax. 
+The lexicon is captured in a function `lexical_meaning` which looks up the meaning of a word. A meaning is an object with semantics and syntax.
 
 ~~~
 var lexical_meaning = function(word, world) {
 
   var wordMeanings = {
-    
+
     "blond" : {
       sem: function(obj){return obj.blond},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "nice" : {
       sem: function(obj){return obj.nice},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "Bob" : {
-      sem: find(world, function(obj){return obj.name=="Bob"}),
+      sem: find(function(obj){return obj.name=="Bob"}, world),
       syn: 'NP' },
-    
+
     "some" : {
       sem: function(P){
-        return function(Q){return filter(filter(world, P), Q).length>0}},
+        return function(Q){return filter(Q, filter(P, world)).length>0}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
                  int:{dir:'L', int:'NP', out:'S'},
-                 out:'S'}} },  
-    
+                 out:'S'}} },
+
     "all" : {
       sem: function(P){
-        return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
+        return function(Q){return filter(neg(Q), filter(P, world)).length==0}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
@@ -157,7 +157,7 @@ var canApply = function(meanings,i) {
 }
 
 
-// The syntaxMatch function is a simple recursion to 
+// The syntaxMatch function is a simple recursion to
 // check if two syntactic types are equal.
 var syntaxMatch = function(s,t) {
   return !s.hasOwnProperty('dir') ? s==t :
@@ -165,7 +165,7 @@ var syntaxMatch = function(s,t) {
 }
 
 
-// Recursively do the above until only one meaning is 
+// Recursively do the above until only one meaning is
 // left, return it's semantics.
 var combine_meanings = function(meanings){
   return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
@@ -195,44 +195,44 @@ var worldPrior = function(objs) {
   return [makeObj("Bob"), makeObj("Bill"), makeObj("Alice")]
 }
 
-// Split the string into words, lookup lexical meanings, 
+// Split the string into words, lookup lexical meanings,
 // delete words with vacuous meaning, then call combine_meanings..
 
 var meaning = function(utterance, world) {
   return combine_meanings(
-    filter(map(utterance.split(" "),
-               function(w){return lexical_meaning(w, world)}),
-           function(m){return !(m.sem==undefined)}))
+    filter(function(m){return !(m.sem==undefined)},
+	       map(function(w){return lexical_meaning(w, world)},
+		       utterance.split(" "))))
 }
 
 var lexical_meaning = function(word, world) {
 
   var wordMeanings = {
-    
+
     "blond" : {
       sem: function(obj){return obj.blond},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "nice" : {
       sem: function(obj){return obj.nice},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "Bob" : {
-      sem: find(world, function(obj){return obj.name=="Bob"}),
+      sem: find(function(obj){return obj.name=="Bob"}, world),
       syn: 'NP' },
-    
+
     "some" : {
       sem: function(P){
-        return function(Q){return filter(filter(world, P), Q).length>0}},
+        return function(Q){return filter(Q, filter(P, world)).length>0}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
                  int:{dir:'L', int:'NP', out:'S'},
-                 out:'S'}} },  
-    
+                 out:'S'}} },
+
     "all" : {
       sem: function(P){
-        return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
+        return function(Q){return filter(neg(Q), filter(P, world)).length==0}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
@@ -283,7 +283,7 @@ var canApply = function(meanings,i) {
 }
 
 
-// The syntaxMatch function is a simple recursion to 
+// The syntaxMatch function is a simple recursion to
 // check if two syntactic types are equal.
 var syntaxMatch = function(s,t) {
   return !s.hasOwnProperty('dir') ? s==t :
@@ -291,7 +291,7 @@ var syntaxMatch = function(s,t) {
 }
 
 
-// Recursively do the above until only one meaning is 
+// Recursively do the above until only one meaning is
 // left, return it's semantics.
 var combine_meanings = function(meanings){
   return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
@@ -309,7 +309,7 @@ print(literalListener("all blond people are nice"))
 
 
 
-## Incremental world building 
+## Incremental world building
 
 The above version of semantic parsing constructs an entire world *and* an entire meaning before trying to enforce that the meaning is true of the world. We would like to make either the world construction or the parsing more incremental... Below we give a version that uses the [canceling heuristic factors](04-factorseq.html#inserting-canceling-heuristic-factors) trick to encourage the world to be one in which the constructed meaning is true, incrementally as we add objects to the world.
 
@@ -388,38 +388,38 @@ The remainder of the model is similar to the above, but with delayed denotations
 ~~~
 var meaning = function(utterance) {
   return combine_meanings(
-    filter(map(utterance.split(" "),
-               function(w){return lexical_meaning(w)}),
-           function(m){return !(m.sem==undefined)}))
+    filter(function(m){return !(m.sem==undefined)},
+	       map(function(w){return lexical_meaning(w, world)},
+		       utterance.split(" "))))
 }
 
 
 var lexical_meaning = function(word) {
 
   var wordMeanings = {
-    
+
     "blond" : {
       sem: function(world){return function(obj){return obj.blond}},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "nice" : {
       sem: function(world){return function(obj){return obj.nice}},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "Bob" : {
-    sem: function(world){return find(world, function(obj){return obj.name=="Bob"})},
+    sem: function(world){return find(function(obj){return obj.name=="Bob"}, world)},
       syn: 'NP' },
-    
+
     "some" : {
-      sem: function(world){return function(P){return function(Q){return filter(filter(world, P), Q).length>0}}},
+      sem: function(world){return function(P){return function(Q){return filter(Q, filter(P, world)).length>0}}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
                  int:{dir:'L', int:'NP', out:'S'},
-                 out:'S'}} },  
-    
+                 out:'S'}} },
+
     "all" : {
-      sem: function(world){return function(P){return function(Q){return filter(filter(world, P), neg(Q)).length==0}}},
+      sem: function(world){return function(P){return function(Q){return filter(neg(Q), filter(P, world)).length==0}}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
@@ -475,7 +475,7 @@ var canApply = function(meanings,i) {
 }
 
 
-// The syntaxMatch function is a simple recursion to 
+// The syntaxMatch function is a simple recursion to
 // check if two syntactic types are equal.
 var syntaxMatch = function(s,t) {
   return !s.hasOwnProperty('dir') ? s==t :
@@ -483,7 +483,7 @@ var syntaxMatch = function(s,t) {
 }
 
 
-// Recursively do the above until only one meaning is 
+// Recursively do the above until only one meaning is
 // left, return it's semantics.
 var combine_meanings = function(meanings){
   return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
@@ -524,38 +524,38 @@ var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
 
 var meaning = function(utterance) {
   return combine_meanings(
-    filter(map(utterance.split(" "),
-               function(w){return lexical_meaning(w)}),
-           function(m){return !(m.sem==undefined)}))
+    filter(function(m){return !(m.sem==undefined)},
+	       map(function(w){return lexical_meaning(w, world)},
+		       utterance.split(" "))))
 }
 
 
 var lexical_meaning = function(word) {
 
   var wordMeanings = {
-    
+
     "blond" : {
       sem: function(world){return function(obj){return obj.blond}},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "nice" : {
       sem: function(world){return function(obj){return obj.nice}},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "Bob" : {
-    sem: function(world){return find(world, function(obj){return obj.name=="Bob"})},
+    sem: function(world){return find(function(obj){return obj.name=="Bob"}, world)},
       syn: 'NP' },
-    
+
     "some" : {
-      sem: function(world){return function(P){return function(Q){return filter(filter(world, P), Q).length>0}}},
+      sem: function(world){return function(P){return function(Q){return filter(Q, filter(P, world)).length>0}}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
                  int:{dir:'L', int:'NP', out:'S'},
-                 out:'S'}} },  
-    
+                 out:'S'}} },
+
     "all" : {
-      sem: function(world){return function(P){return function(Q){return filter(filter(world, P), neg(Q)).length==0}}},
+      sem: function(world){return function(P){return function(Q){return filter(neg(Q), filter(P, world)).length==0}}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
@@ -611,7 +611,7 @@ var canApply = function(meanings,i) {
 }
 
 
-// The syntaxMatch function is a simple recursion to 
+// The syntaxMatch function is a simple recursion to
 // check if two syntactic types are equal.
 var syntaxMatch = function(s,t) {
   return !s.hasOwnProperty('dir') ? s==t :
@@ -619,7 +619,7 @@ var syntaxMatch = function(s,t) {
 }
 
 
-// Recursively do the above until only one meaning is 
+// Recursively do the above until only one meaning is
 // left, return it's semantics.
 var combine_meanings = function(meanings){
   return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))

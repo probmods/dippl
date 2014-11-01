@@ -59,7 +59,8 @@ function barChart(containerSelector, labels, counts){
               });
   };
   var chart = new dimple.chart(svg, data);
-  chart.setBounds(80, 30, 480, 250);
+  // chart.setBounds(120, 30, 540, 300);
+  chart.setMargins("30%","3%","3%","3%");
   var xAxis = chart.addMeasureAxis("x", "Count");
   xAxis.title = null;
   xAxis.tickFormat = ",.2f";

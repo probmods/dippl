@@ -1,5 +1,5 @@
 ---
-layout: hidden
+layout: default
 title: Computer vision and language
 description: Combining vision with semantics and pragmatics
 ---
@@ -7,39 +7,34 @@ description: Combining vision with semantics and pragmatics
 Combining vision with semantics and pragmatics
 
 ~~~~
+///fold:
+// helpers
 var multinomial = function(s, p) { return s[discrete(p)] }
+var uniformDraw = function(l) {return l[randomInteger(l.length)]}
 
-var makeObj = function() {
-  return {pos: [randomInteger(200), randomInteger(200)],
-          // pos: multinomial([[50, 50], [50, 150], [150, 50], [150, 150]], [0.25, 0.25, 0.25, 0.25]),
-          blue: flip(0.5),
-          square: flip(0.5)} // !blue = green; !square = triangle
-}
+var neg = function(Q){ return function(x){return !Q(x)} }
+var applyWorldPassing = function(f,a) { return function(w){return f(w)(a(w))} }
 
-var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
-  var worldSoFar = worldSoFar==undefined ? [] : worldSoFar
-  var prevFactor = prevFactor==undefined ? 0 : prevFactor
-  if(nObjLeft==0) {
-    factor(-prevFactor)
-    return worldSoFar
-  } else {
-    var newObj = makeObj()
-    var newWorld = worldSoFar.concat([newObj])
-    var newFactor = meaningFn(newWorld)?0:-100
-    factor(newFactor - prevFactor)
-    return worldPrior(nObjLeft-1, meaningFn, newWorld, newFactor)
+var maxF = function(f,ar) {
+  var fn = function(_ar, _best) {
+    if (_ar.length == 0) {
+      return _best
+    } else if (_ar[0][1] > _best[1]) {
+      return fn(_ar.slice(1), _ar[0])
+    } else {
+      return fn(_ar.slice(1), _best)
+    }
   }
+  return fn(zip(ar,map(f,ar)), [-Infinity,-Infinity])
 }
 
-var meaning = function(utterance) {
-  return combine_meanings(
-    filter(map(utterance.split(" "), lexical_meaning),
-           function(m){return !(m.sem==undefined)}))
-}
+///
+
+// language: ccg
 
 var lexical_meaning = function(word) {
 
-  var wordMeanings = {
+  var lexicon = {
     "blue" : {
       sem: function(world) {return function(obj){return obj.blue}},
       syn: {dir:'L', int:'NP', out:'S'} },
@@ -60,7 +55,7 @@ var lexical_meaning = function(word) {
       sem: function(world){
         return function(P){
           return function(Q){
-            return filter(filter(world, P), Q).length>0}}},
+            return filter(Q, filter(P, world)).length>0}}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
@@ -71,8 +66,10 @@ var lexical_meaning = function(word) {
       sem: function(world){
         return function(P){
           return function(Q){
-            var first = filter(world, P)
-            return first.length != 0 & filter(first, neg(Q)).length==0}}},
+            var first = filter(P, world)
+            // return first.length != 0 & filter(neg(Q), first).length==0
+            return first.length == world.length & filter(neg(Q), first).length==0
+          }}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
@@ -83,78 +80,92 @@ var lexical_meaning = function(word) {
       sem: function(world){
         return function(P){
           return function(Q){
-            var first = filter(world, P)
-            return first.length != 0 & filter(first, Q).length==0}}},
+            var first = filter(P, world)
+            // return first.length != 0 & filter(Q, first).length==0
+            return first.length == world.length & filter(Q, first).length==0
+          }}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
                  int:{dir:'L', int:'NP', out:'S'},
-                 out:'S'}} },
+                 out:'S'}} }
 
-    "not" : {
-      sem: function(world){ return neg },
-      syn: {dir:'R',
-            int:{dir:'L', int:'NP', out:'S'},
-            out:{dir:'L', int:'NP', out:'S'} }
-      }
   }
 
-  var meaning = wordMeanings[word];
-  return meaning == undefined?{sem: undefined, syn: ''}:meaning;
+  var meaning = lexicon[word]
+  return meaning == undefined ? {sem: undefined, syn: ''} : meaning
 }
 
-var neg = function(Q){ return function(x){return !Q(x)} }
+var syntaxMatch = function(s,t) {
+  return s.hasOwnProperty('dir')
+    ? s.dir == t.dir & syntaxMatch(s.int,t.int) & syntaxMatch(s.out,t.out)
+    : s == t
+}
 
-var applyWorldPassing = function(f,a) {
-  return function(w){return f(w)(a(w))}
+var canApply = function(meanings,i) {
+  if(i == meanings.length) { return [] }
+  var s = meanings[i].syn
+  if (s.hasOwnProperty('dir')){ // a functor
+    var a = ((s.dir == 'L') ? syntaxMatch(s.int, meanings[i-1].syn) : false) |
+        ((s.dir == 'R') ? syntaxMatch(s.int, meanings[i+1].syn) : false)
+    if (a) { return [i].concat(canApply(meanings,i+1)) }
+  }
+  return canApply(meanings,i+1)
 }
 
 var combine_meaning = function(meanings) {
   var possibleComb = canApply(meanings,0)
-  var i = possibleComb[randomInteger(possibleComb.length)]
+  var i = uniformDraw(possibleComb)
   var s = meanings[i].syn
+  var f = meanings[i].sem
   if (s.dir == 'L') {
-    var f = meanings[i].sem
     var a = meanings[i-1].sem
     var newmeaning = {sem: applyWorldPassing(f,a), syn: s.out}
     return meanings.slice(0,i-1).concat([newmeaning]).concat(meanings.slice(i+1))
   }
   if (s.dir == 'R') {
-    var f = meanings[i].sem
     var a = meanings[i+1].sem
     var newmeaning = {sem: applyWorldPassing(f,a), syn: s.out}
     return meanings.slice(0,i).concat([newmeaning]).concat(meanings.slice(i+2))
   }
 }
 
-//make a list of the indexes that can (syntactically) apply.
-var canApply = function(meanings,i) {
-  if(i==meanings.length){
-    return []
-  }
-  var s = meanings[i].syn
-  if (s.hasOwnProperty('dir')){ //a functor
-    var a = ((s.dir == 'L')?syntaxMatch(s.int, meanings[i-1].syn):false) |
-            ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
-    if(a){return [i].concat(canApply(meanings,i+1))}
-  }
-  return canApply(meanings,i+1)
-}
-
-// The syntaxMatch function is a simple recursion to
-// check if two syntactic types are equal.
-var syntaxMatch = function(s,t) {
-  return !s.hasOwnProperty('dir') ? s==t :
-    s.dir==t.dir & syntaxMatch(s.int,t.int) & syntaxMatch(s.out,t.out)
-}
-
-// Recursively do the above until only one meaning is
-// left, return it's semantics.
 var combine_meanings = function(meanings){
-  return meanings.length==1
+  return meanings.length == 1
     ? meanings[0].sem
     : combine_meanings(combine_meaning(meanings))
 }
+
+var meaning = function(utterance) {
+  return combine_meanings(
+    filter(function(m){return !(m.sem == undefined)},
+           map(lexical_meaning, utterance.split(" "))))
+}
+
+// world: construction
+
+var makeObj = function() {
+  return {pos: [randomInteger(200), randomInteger(200)],
+          blue: flip(0.5), // !blue = green;
+          square: flip(0.5)} // !square = triangle
+}
+
+var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
+  var worldSoFar = worldSoFar == undefined ? [] : worldSoFar
+  var prevFactor = prevFactor == undefined ?  0 : prevFactor
+  if(nObjLeft==0) {
+    factor(-prevFactor)
+    return worldSoFar
+  } else {
+    var newObj = makeObj()
+    var newWorld = worldSoFar.concat([newObj])
+    var newFactor = meaningFn(newWorld) ? 0 : -100
+    factor(newFactor - prevFactor)
+    return worldPrior(nObjLeft-1, meaningFn, newWorld, newFactor)
+  }
+}
+
+// global priors
 
 var utterancePrior = function() {
   var utterances = ["some of the squares are blue",
@@ -169,69 +180,117 @@ var utterancePrior = function() {
                     "some of the triangles are green",
                     "all of the triangles are green",
                     "none of the triangles are green"]
-  var i = randomInteger(utterances.length)
-  return utterances[i]
+  return uniformDraw(utterances)
 }
 
-var toInt = function(v) {return Math.floor(v)}
-
-var shapeCircumRadius = 20
-var polygonVerts = function(n, nverts, at, ps) {
-  var newps = ps.concat(
-    [[toInt(at[0] + shapeCircumRadius * Math.cos(2 * Math.PI * n / nverts)),
-      toInt(at[1] + shapeCircumRadius * Math.sin(2 * Math.PI * n / nverts))]]
-  )
-  return (n == 1) ? newps.concat([ps[0]]) : polygonVerts(n-1, nverts, at, newps)
-}
-
-var drawPolygon = function(d, n, at, colour) {
-  var fn = function(ps) {
-    if (ps.length != 1) {
-      d.line(ps[0][0], ps[0][1], ps[1][0], ps[1][1], 4, undefined, colour);
-      fn(ps.slice(1));
-    }
-  }
-  fn(polygonVerts(n, n, at, []))
-}
+// Image utilities
+// 1. comparing worlds is greedy, best first
+// 2. parseimage is currently based on lookup -- should actually do some cv
 
 var renderImg = function(imgObj, world) {
   var fn = function (w) {
     if (w.length != 0) {
       var colour = w[0].blue ? 'blue' : 'green'
       var nsides = w[0].square ? 4 : 3
-      drawPolygon(imgObj, nsides, w[0].pos, colour)
+      imgObj.polygon(w[0].pos[0], w[0].pos[1], nsides, undefined, colour)
       fn(w.slice(1))
     }
   }
   fn(world)
 }
 
+var worldMatch = function(world1, world2) {
+  var objMatch = function(obj1, obj2) {
+    // doesn't consider position distance yet
+    // return (obj1.blue == obj2.blue ? 0 : -5) + (obj1.square == obj2.square ? 0 : -10)
+    // return obj1.square != obj2.square ? -30 : (obj1.blue == obj2.blue ? -15 : 0)
+    return obj1.square != obj2.square | obj1.blue != obj2.blue ? -5 : 0
+  }
+  var fn = function(w1, w2, _accf) {
+    if (w1.length == 0 | w2.length == 0) {
+      return _accf - (Math.abs(w1.length - w2.length) * 5)
+    } else {
+      var _elem = maxF(function(o2) { return objMatch(w1[0],o2) }, w2)
+      return fn(w1.slice(1), remove(_elem[0], w2), _accf + _elem[1])
+    }
+  }
+  return fn(world1, world2, 0)
+}
+
+// data
+// initially this was made externally, but now just make with internal libs
+
+var imageDataset = [
+  ["all_sq_blue", [{pos: [ 50,  50], blue: true, square: true},
+                   {pos: [150,  50], blue: true, square: true},
+                   {pos: [150, 150], blue: true, square: true}]],
+  ["all_sq_green", [{pos: [ 50,  50], blue: false, square: true},
+                    {pos: [150,  50], blue: false, square: true},
+                    {pos: [ 50, 150], blue: false, square: true}]],
+  ["some_sq_blue", [{pos: [ 50,  50], blue: true, square: true},
+                    {pos: [150, 150], blue: false, square: true},
+                    {pos: [150,  50], blue: true, square: true}]],
+  ["some_sq_green", [{pos: [ 50, 150], blue: false, square: true},
+                     {pos: [150, 150], blue: false, square: true},
+                     {pos: [150,  50], blue: true, square: true}]],
+  ["all_tri_blue", [{pos: [ 50,  50], blue: true, square: false},
+                    {pos: [150,  50], blue: true, square: false},
+                    {pos: [150, 150], blue: true, square: false}]],
+  ["all_tri_green", [{pos: [ 50,  50], blue: false, square: false},
+                     {pos: [150,  50], blue: false, square: false},
+                     {pos: [ 50, 150], blue: false, square: false}]],
+  ["some_tri_blue", [{pos: [ 50,  50], blue: true, square: false},
+                     {pos: [150, 150], blue: false, square: false},
+                     {pos: [150,  50], blue: true, square: false}]],
+  ["some_tri_green", [{pos: [ 50, 150], blue: false, square: false},
+                      {pos: [150, 150], blue: false, square: false},
+                      {pos: [150,  50], blue: true, square: false}]]
+]
+
+// model
+
+var printW = function(w) {
+  var printE = function(e) {
+    return (e.blue ? "blue" : "green") + " " + (e.square ? "square" : "triangle")
+  }
+  return map(printE,w).join(", ")
+}
+
+var parseImage = function(img) {
+  // somewhat ugly hack: does a lookup on the dataset to find correct world.
+  var r = find(function(i) {return img == i[0]}, imageDataset)
+  return r[1]
+}
+
 var literalListener = function(utterance) {
   ParticleFilter(function(){
     var m = meaning(utterance)
-    var world = worldPrior(3,m)
-    factor(m(world)?0:-Infinity)
+    // var nelems = binomial(0.6,5)+1
+    var nelems = 3
+    var world = worldPrior(nelems,m)
+    factor(m(world) ? 0 : -Infinity)
     return world
-  }, 100)
+  }, 30)
 }
 
 var speaker = function(img) {
- ParticleFilter(function(){
-   var utterance = utterancePrior()
-   var L = literalListener(utterance)
-   var newimg = Draw(200, 200, false)
-   renderImg(img, sample(L))
-   var newscore = -img.distance(newimg)/1000
-   //newimg.destroy()
-   factor(newscore)
-   return utterance
- }, 100)
+  ParticleFilter(function(){
+    var utterance = utterancePrior()
+    var w = literalListener(utterance)
+    var sw = sample(w)
+    var pw = parseImage(img)
+    var score = worldMatch(sw,pw)
+    print([utterance, score, printW(sw)])
+    factor(score)
+    return utterance
+  }, 80)
 }
 
-// literalListener("all of the squares are blue")
-
+// var targetImage = Draw(200, 200, true);
+// loadImage(targetImage, "/assets/img/some_sq_blue.png")
+var _f = uniformDraw(imageDataset)
+print(_f[0])
 var targetImage = Draw(200, 200, true);
-loadImage(targetImage, "/assets/img/some_sq_blue.png")
-print(speaker(targetImage))
-
+renderImg(targetImage, _f[1])
+print(speaker(_f[0]))
 ~~~~

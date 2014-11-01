@@ -30,57 +30,55 @@ var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
 ////////////////
 
 var meaning = function(utterance) {
-  return combine_meanings(
-                          filter(map(utterance.split(" "),
-                                     function(w){return lexical_meaning(w)}),
-                                 function(m){return !(m.sem==undefined)}))
+  return combine_meanings(filter(function(m){return !(m.sem==undefined)},
+                          map(lexical_meaning, utterance.split(" "))))
 }
 
 var lexical_meaning = function(word) {
-  
+
   var wordMeanings = {
-    
+
     "blond" : {
     sem: function(world){return function(obj){return obj.blond}},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "nice" : {
     sem: function(world){return function(obj){return obj.nice}},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "tall" : {
     sem: function(world){return function(obj){return obj.tall}},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "Bob" : {
-    sem: function(world){return find(world, function(obj){return obj.name=="Bob"})},
+    sem: function(world){return find(function(obj){return obj.name=="Bob"}, world)},
       syn: 'NP' },
-    
+
     "some" : {
-    sem: function(world){return function(P){return function(Q){return filter(filter(world, P), Q).length>0}}},
+    sem: function(world){return function(P){return function(Q){return filter(Q, filter(P, world)).length>0}}},
     syn: {dir:'R',
     int:{dir:'L', int:'NP', out:'S'},
     out:{dir:'R',
     int:{dir:'L', int:'NP', out:'S'},
       out:'S'}} },
-    
+
     "all" : {
-    sem: function(world){return function(P){return function(Q){return filter(filter(world, P), neg(Q)).length==0}}},
+    sem: function(world){return function(P){return function(Q){return filter(neg(Q), filter(P, world)).length==0}}},
     syn: {dir:'R',
     int:{dir:'L', int:'NP', out:'S'},
     out:{dir:'R',
     int:{dir:'L', int:'NP', out:'S'},
       out:'S'}} },
-    
+
     "none" : {
-    sem: function(world){return function(P){return function(Q){return filter(filter(world, P), Q).length==0}}},
+    sem: function(world){return function(P){return function(Q){return filter(Q, filter(P, world)).length==0}}},
     syn: {dir:'R',
     int:{dir:'L', int:'NP', out:'S'},
     out:{dir:'R',
     int:{dir:'L', int:'NP', out:'S'},
       out:'S'}} }
   }
-  
+
   var meaning = wordMeanings[word];
   return meaning == undefined?{sem: undefined, syn: ''}:meaning;
 }
@@ -192,4 +190,3 @@ var listener = function(utterance) {
 
 print(listener("some of the blond people are nice"))
 ~~~
-

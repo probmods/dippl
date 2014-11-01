@@ -1,3 +1,8 @@
+---
+layout: hidden
+title: c2f multiple
+---
+
 In this document, we generalize the coarse-to-fine procedure presented [here](http://dippl.org/examples/coarsetofine2) to handle the coarsening of multiple random variables into single representations. For example, in the HMM setting, we might want to coarsen a sequence of successive latent state variables into a single (joint) variable predicting the corresponding sequence of observations. Note that the current procedure coarsens *within* variables, mapping occurrences of a single variable (e.g. "x1", "x2", or "x3") onto another single variable ("x"), but cannot clump multiple variables together.
 
 First, we form a joint distribution of two variables by enumerating over them separately and then placing them together into a single container. Note that this can be generalized to an arbitrary number of variables by pulling erps from a list, sampling from them, and then appending them to a master list.
@@ -8,84 +13,11 @@ var makeERP = function(ps, vs){
   return Enumerate(function(){return vs[discrete(ps)]});
 }
 
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
-
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
 
 var erpProduct = function(thunk1, thunk2){
   return Enumerate(
@@ -101,7 +33,7 @@ var coarsenERP = function(erp, coarsenValue){
   // Get concrete values and probabilities
 
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by coarsenValue function
@@ -113,30 +45,30 @@ var coarsenERP = function(erp, coarsenValue){
     zip(allVs, allPs));
 
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return coarsenValue(group[0][0], erp)})
+      return coarsenValue(group[0][0], erp)},
+	groups)
 
   var groupedVs = map(
-    groups,
     function(group){
       return map(group, first);
-    });
+      },
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
       return map(group, second);
-    });
+      },
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
 
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
@@ -177,10 +109,11 @@ var sum = function(xs){
 var expectation = function(erp, f){
   return sum(
     map(
-      erp.support([]),
       function(v){
-	return Math.exp(erp.score([], v)) * f(v);
-      }));
+	    return Math.exp(erp.score([], v)) * f(v);
+      },
+	erp.support([])
+      ));
 };
 
 var logMeanExp = function(erp){
@@ -347,7 +280,7 @@ var observationScore = function(state, trueObservation){
 var uniformScore = function(state){
   return uniformStateERP.score([], state);
 }
-									      
+
 var transition = function(state){
   return transitionERPs[state];
 }
@@ -444,7 +377,7 @@ var transition = function(state){
 
 var abstractionMap = function(vars) {
   // if there's anything in there that's not in the state space, just return it
-  var aliens = ((vars instanceof Array) ? filter(vars, function(v){return !_.contains(states,v)}) :
+  var aliens = ((vars instanceof Array) ? filter(function(v){return !_.contains(states,v)}, vars) :
                 (!_.contains(states,vars) ? [vars] : []))
   if (aliens.length > 0) {
     return vars;
@@ -471,7 +404,7 @@ var refinementMap = function(val, origFunction) {
     var map_obj = _.object(concrete_domain, map(concrete_domain, origFunction))
     var inv_map = invertMap(map_obj)
     var inv_set = inv_map[val]
-    var parsed = map(inv_set, function(v){return v.split(',')})
+    var parsed = map(function(v){return v.split(',')}, inv_set)
     return (parsed[0].length > 1 ? parsed : parsed[0])
   }
 }

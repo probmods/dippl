@@ -56,7 +56,7 @@ print(literalListener("some of the people are nice"))
 
 If you evaluate the above code box, you will see that the inferred meaning of "some of the people are nice" is uniform on all world states where at least one person is nice -- including the state in which all people are nice. This fails to capture the usual 'some but not all' scalar implicature.
 
-We can move to a more Gricean listener who assumes that the speaker has chosen an utterance to convey the intended state of the world: 
+We can move to a more Gricean listener who assumes that the speaker has chosen an utterance to convey the intended state of the world:
 
 ~~~
 ///fold:
@@ -255,31 +255,31 @@ var worldPrior = function(objs) {
 var lexical_meaning = function(word, world) {
 
   var wordMeanings = {
-    
+
     "blond" : {
       sem: function(obj){return obj.blond},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "nice" : {
       sem: function(obj){return obj.nice},
       syn: {dir:'L', int:'NP', out:'S'} },
-    
+
     "Bob" : {
-      sem: find(world, function(obj){return obj.name=="Bob"}),
+      sem: find(function(obj){return obj.name=="Bob"}, world),
       syn: 'NP' },
-    
+
     "some" : {
       sem: function(P){
-        return function(Q){return filter(filter(world, P), Q).length>0}},
+        return function(Q){return filter(Q, filter(P, world)).length>0}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
                  int:{dir:'L', int:'NP', out:'S'},
-                 out:'S'}} },  
-    
+                 out:'S'}} },
+
     "all" : {
       sem: function(P){
-        return function(Q){return filter(filter(world, P), neg(Q)).length==0}},
+        return function(Q){return filter(neg(Q), filter(P, world)).length==0}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
             out:{dir:'R',
@@ -336,9 +336,9 @@ var combine_meanings = function(meanings){
 
 var meaning = function(utterance, world) {
   return combine_meanings(
-    filter(map(utterance.split(" "),
-               function(w){return lexical_meaning(w, world)}),
-           function(m){return !(m.sem==undefined)}))
+    filter(function(m){return !(m.sem==undefined)},
+	       map(function(w){return lexical_meaning(w, world)},
+	           utterance.split(" "))))
 }
 
 var utterancePrior = function() {

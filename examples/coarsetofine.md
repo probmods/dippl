@@ -52,73 +52,10 @@ print(Enumerate(foo));
 Let's first write some general-purpose functions that will come in handy later on. These are standard functional programming tools.
 
 ~~~~
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
-};
-
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
 };
 ~~~~
 
@@ -127,11 +64,8 @@ We'll also need expectations (for erps) and delta distributions:
 ~~~~
 var expectation = function(erp, f){
   return sum(
-    map(
-      erp.support([]),
-      function(v){
-        return Math.exp(erp.score([], v)) * f(v);
-      }));
+    map(function(v){ return Math.exp(erp.score([], v)) * f(v); },
+        erp.support([])));
 };
 
 var mean = function(erp){
@@ -143,7 +77,7 @@ var delta = function(x) {
 };
 ~~~~
 
-Now let's think about how to coarsen a sampler given a value abstraction function. 
+Now let's think about how to coarsen a sampler given a value abstraction function.
 
 A value abstraction function sorts values into equivalence classes and looks like this:
 
@@ -168,11 +102,11 @@ The hierarchical sampler first chooses a base-level sampler (according to the su
 var coarsen = function(sampler, abstractValue){
 
   // Get sampler's distribution in explicit form
-  
+
   var erp = Enumerate(sampler);
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
-  
+  var allPs = map(function(v){return Math.exp(erp.score([], v))}, allVs);
+
   // Group distribution based on equivalence classes
   // implied by abstractValue function
 
@@ -182,22 +116,14 @@ var coarsen = function(sampler, abstractValue){
     },
     zip(allVs, allPs));
 
-  var groupedVs = map(
-    groups,
-    function(group){
-      return map(group, first);
-    });
+  var groupedVs = map(function(group){return map(group, first)}, groups);
 
-  var groupedPs = map(
-    groups,
-    function(group){
-      return map(group, second);
-    });
+  var groupedPs = map(function(group){return map(group, second)}, groups);
 
   // Construct hierarchical sampler
-  
-  var samplers = map2(groupedVs, groupedPs, discreteSampler);
-  var samplerPs = map(groupedPs, sum);
+
+  var samplers = map2(discreteSampler, groupedVs, groupedPs);
+  var samplerPs = map(sum, groupedPs);
 
   return discreteSampler(samplers, samplerPs);
 };
@@ -375,92 +301,19 @@ Coarsening this ERP means splitting it into two parts: an unconditional sampler 
 
 ~~~~
 ///fold:
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
-
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
 ///
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
 
 var coarsen = function(erp, abstractValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by abstractValue function
@@ -470,37 +323,35 @@ var coarsen = function(erp, abstractValue){
       return abstractValue[vp1[0]] == abstractValue[vp2[0]];
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return abstractValue[group[0][0]]})
+      return abstractValue[group[0][0]]},
+    groups);
 
   var groupedVs = map(
-    groups,
     function(group){
-      return map(group, first);
-    });
+      return map(group, first);},
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
-      return map(group, second);
-    });
+      return map(group, second);},
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -546,7 +397,7 @@ print(
     }))
 ~~~~
 
-Besides coarsening erps, we also need to lift primitive functions. 
+Besides coarsening erps, we also need to lift primitive functions.
 
 We will face a choice here:
 
@@ -608,7 +459,7 @@ var conditionalERP2 = tmp2[1];
 var program = function(){
 
   var cX = abstractERP1();
-  var cY = abstractERP2();  
+  var cY = abstractERP2();
   var cOut = cAnd(cX, cY);
   var cScore = cExpectation(cOut c? -1 : -2);
   factor(cScore);
@@ -649,7 +500,7 @@ var conditionalERP2 = tmp2[1];
 var program = function(){
 
   var cX = abstractERP1();
-  var cY = abstractERP2();  
+  var cY = abstractERP2();
   var cOut = cAnd(cX, cY);
   var cScore = cExpectation(cOut c? -1 : -2);
   factor(cScore);
@@ -671,7 +522,7 @@ Claim: If all the erps in the abstract program are independent, if the erps are 
 
 (This may resolve the problem of what to do about images - if we can sample a coarse image, do whatever we want, including apply factors to it, and then later on refine and correct the factors.)
 
-It may seem surprising that the particular choice of refinement distribution for the purpose of lifting doesn't matter for correctness. 
+It may seem surprising that the particular choice of refinement distribution for the purpose of lifting doesn't matter for correctness.
 
 (Question for later: what about conditional erps in the concrete program?)
 
@@ -703,8 +554,8 @@ var conditionalERP3 = tmp3[1];
 var program = function(){
 
   var cX = abstractERP1();
-  var cY = abstractERP2();  
-  var cZ = abstractERP3();    
+  var cY = abstractERP2();
+  var cZ = abstractERP3();
 
   var cOut1 = cOr(cX, cY);
   var cOut2 = cOr(cY, cZ);
@@ -713,9 +564,9 @@ var program = function(){
 
   var x = conditionalERP1(cX);
   var y = conditionalERP2(cY);
-  var z = conditionalERP3(cZ);  
+  var z = conditionalERP3(cZ);
   var out1 = or(x, y);
-  var out2 = or(y, z);  
+  var out2 = or(y, z);
   var score = (out1 & out2)  ? -1 : -2;
   factor(score - cScore);
 
@@ -757,11 +608,11 @@ var program = function(){
   var y = sample(erp2);
   var z = sample(erp3);
   var out1 = or(x, y);
-  var out2 = or(y, z);  
+  var out2 = or(y, z);
   var score = ternary(and(out1, out2), -1, -2);
-  factor(score);  
+  factor(score);
   return [x, y, z];
-  
+
 }
 
 print(Enumerate(program));
@@ -796,7 +647,7 @@ var maxEntERP = function(cV, abstractValue){
 
 // Do we really not need to marginalize here?
 
-var lift1 = function(f, abstractValue){  
+var lift1 = function(f, abstractValue){
   return function(cX){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var x = sample(d1);
@@ -805,7 +656,7 @@ var lift1 = function(f, abstractValue){
   }
 }
 
-var lift2 = function(f, abstractValue){  
+var lift2 = function(f, abstractValue){
   return function(cX, cY){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
@@ -816,7 +667,7 @@ var lift2 = function(f, abstractValue){
   }
 }
 
-var lift3 = function(f, abstractValue){  
+var lift3 = function(f, abstractValue){
   return function(cX, cY, cZ){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
@@ -847,90 +698,18 @@ var makeERP = function(ps, vs){
   return Enumerate(function(){return vs[discrete(ps)]});
 }
 
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
 
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
 var coarsen = function(erp, abstractValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by abstractValue function
@@ -940,37 +719,29 @@ var coarsen = function(erp, abstractValue){
       return abstractValue[vp1[0]] == abstractValue[vp2[0]];
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return abstractValue[group[0][0]]})
+      return abstractValue[group[0][0]]},
+	groups)
 
-  var groupedVs = map(
-    groups,
-    function(group){
-      return map(group, first);
-    });
+  var groupedVs = map(function(group){return map(group, first);}, groups);
 
-  var groupedPs = map(
-    groups,
-    function(group){
-      return map(group, second);
-    });
+  var groupedPs = map(function(group){return map(group, second);}, groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -1001,7 +772,7 @@ var maxEntERP = function(cV, abstractValue){
 
 // Do we really not need to marginalize here?
 
-var lift1 = function(f, abstractValue){  
+var lift1 = function(f, abstractValue){
   return function(cX){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var x = sample(d1);
@@ -1010,7 +781,7 @@ var lift1 = function(f, abstractValue){
   }
 }
 
-var lift2 = function(f, abstractValue){  
+var lift2 = function(f, abstractValue){
   return function(cX, cY){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
@@ -1021,7 +792,7 @@ var lift2 = function(f, abstractValue){
   }
 }
 
-var lift3 = function(f, abstractValue){  
+var lift3 = function(f, abstractValue){
   return function(cX, cY, cZ){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
@@ -1041,7 +812,7 @@ var lift3 = function(f, abstractValue){
 
 var abstractValue = {
   "-2": -2,
-  "-1": -1,    
+  "-1": -1,
   0: "a",
   1: "b",
   2: "b"
@@ -1095,14 +866,14 @@ var conditionalERP3 = tmp3[1];
 // Main program
 
 var ctfProgram = function(){
-  
+
   var cX = sample(abstractERP1);
   var cY = sample(abstractERP2);
-  var cZ = sample(abstractERP3);  
+  var cZ = sample(abstractERP3);
   var cOut1 = cOr(cX, cY);
-  var cOut2 = cOr(cY, cZ);  
-  var cScore = cTernary(cAnd(cOut1, cOut2), 
-                        abstractValue[-1], 
+  var cOut2 = cOr(cY, cZ);
+  var cScore = cTernary(cAnd(cOut1, cOut2),
+                        abstractValue[-1],
                         abstractValue[-2]);
   factor(cScore);
 
@@ -1110,9 +881,9 @@ var ctfProgram = function(){
   var y = sample(conditionalERP2(cY));
   var z = sample(conditionalERP3(cZ));
   var out1 = or(x, y);
-  var out2 = or(y, z);  
+  var out2 = or(y, z);
   var score = ternary(and(out1, out2), -1, -2);
-  factor(score - cScore);  
+  factor(score - cScore);
   return [x, y, z];
 
 }
@@ -1155,12 +926,12 @@ var makeERP = function(ps, vs){
 ///
 
 var chooseP = makeERP([.25, .25, .25, .25], [.1, .2, .4, .7])
-                      
+
 var program = function(){
   var p0 = sample(chooseP);
   var y = flip(p0);
   var score = ternary(y, -1, -2);
-  factor(score);    
+  factor(score);
   return y;
 }
 
@@ -1178,7 +949,7 @@ var instantiate = function(cV, abstractValue){
 
 var coarsenDependentERP = function(depERP, abstractValue){
 
-  // The params are coarse-grained values. However, 
+  // The params are coarse-grained values. However,
   // we need fine-grained parameter values to construct
   // a real ERP. This can be achieved through sampling or
   // marginalizing. We'll marginalize.
@@ -1186,14 +957,14 @@ var coarsenDependentERP = function(depERP, abstractValue){
     return Enumerate(
       function(){
         var fineParams = map(
-          params, 
-          function(cV){return instantiate(cV, abstractValue);});
+          function(cV){return instantiate(cV, abstractValue);},
+		  params);
         return abstractValue[sample(depERP, fineParams)];
       });
   };
 
-  // Now params are fine-grained values, so we can build a 
-  // concrete independent erp; we just need to restrict the 
+  // Now params are fine-grained values, so we can build a
+  // concrete independent erp; we just need to restrict the
   // support to values in the support of coarseValue.
   var getFineERP = function(params, coarseValue){
     return Enumerate(
@@ -1203,7 +974,7 @@ var coarsenDependentERP = function(depERP, abstractValue){
         return value;
       });
   };
-  
+
   return [getCoarseERP, getFineERP];
 }
 ~~~~
@@ -1217,90 +988,18 @@ var makeERP = function(ps, vs){
   return Enumerate(function(){return vs[discrete(ps)]});
 }
 
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
 
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
 var coarsen = function(erp, abstractValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by abstractValue function
@@ -1310,37 +1009,35 @@ var coarsen = function(erp, abstractValue){
       return abstractValue[vp1[0]] == abstractValue[vp2[0]];
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return abstractValue[group[0][0]]})
+      return abstractValue[group[0][0]]},
+	groups)
 
   var groupedVs = map(
-    groups,
     function(group){
-      return map(group, first);
-    });
+      return map(group, first);},
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
-      return map(group, second);
-    });
+      return map(group, second);},
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -1380,7 +1077,7 @@ var instantiate = function(cV, abstractValue){
 
 var coarsenDependentERP = function(depERP, abstractValue){
 
-  // The params are coarse-grained values. However, 
+  // The params are coarse-grained values. However,
   // we need fine-grained parameter values to construct
   // a real ERP. This can be achieved through sampling or
   // marginalizing. We'll marginalize.
@@ -1388,14 +1085,14 @@ var coarsenDependentERP = function(depERP, abstractValue){
     return Enumerate(
       function(){
         var fineParams = map(
-          params, 
-          function(cV){return instantiate(cV, abstractValue);});
+          function(cV){return instantiate(cV, abstractValue);},
+		  params);
         return abstractValue[sample(depERP, fineParams)];
       });
   };
 
-  // Now params are fine-grained values, so we can build a 
-  // concrete independent erp; we just need to restrict the 
+  // Now params are fine-grained values, so we can build a
+  // concrete independent erp; we just need to restrict the
   // support to values in support of coarseValue.
   var getFineERP = function(params, coarseValue){
     return Enumerate(
@@ -1405,14 +1102,14 @@ var coarsenDependentERP = function(depERP, abstractValue){
         return value;
       });
   };
-  
+
   return [getCoarseERP, getFineERP];
 }
 
 
 // Do we really not need to marginalize here?
 
-var lift1 = function(f, abstractValue){  
+var lift1 = function(f, abstractValue){
   return function(cX){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var x = sample(d1);
@@ -1421,7 +1118,7 @@ var lift1 = function(f, abstractValue){
   }
 }
 
-var lift2 = function(f, abstractValue){  
+var lift2 = function(f, abstractValue){
   return function(cX, cY){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
@@ -1432,7 +1129,7 @@ var lift2 = function(f, abstractValue){
   }
 }
 
-var lift3 = function(f, abstractValue){  
+var lift3 = function(f, abstractValue){
   return function(cX, cY, cZ){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
@@ -1496,19 +1193,19 @@ var getFineCoin = tmp2[1];
 
 
 // Main program
-                      
+
 var ctfProgram = function(){
-  
+
   // Coarse program
-  
+
   var cP0 = sample(coarseChooseP);
   var coarseCoin = getCoarseCoin([cP0]);
   var cY = sample(coarseCoin);
   var cScore = cTernary(cY, abstractValue[-1], abstractValue[-2]);
   factor(cScore);
-  
+
   // Fine program
-  
+
   var p0 = sample(fineChooseP(cP0));
   var fineCoin = getFineCoin([p0], cY);
   var y = sample(fineCoin);
@@ -1581,8 +1278,8 @@ var scores = {
 var getScore = function(x){
   return scores[x];
 }
-                      
-var program = function(){  
+
+var program = function(){
   var x = sample(erp0);
   var y = erp1(x);
   var score = getScore(y);
@@ -1607,7 +1304,7 @@ var instantiate = function(cV, abstractValue){
 
 var coarsenDependentERP = function(depERP, abstractValue){
 
-  // The params are coarse-grained values. However, 
+  // The params are coarse-grained values. However,
   // we need fine-grained parameter values to construct
   // a real ERP. This can be achieved through sampling or
   // marginalizing. We'll marginalize.
@@ -1615,14 +1312,14 @@ var coarsenDependentERP = function(depERP, abstractValue){
     return Enumerate(
       function(){
         var fineParams = map(
-          params, 
-          function(cV){return instantiate(cV, abstractValue);});
+          function(cV){return instantiate(cV, abstractValue);},
+		  params);
         return abstractValue[sample(depERP, fineParams)];
       });
   };
 
-  // Now params are fine-grained values, so we can build a 
-  // concrete independent erp; we just need to restrict the 
+  // Now params are fine-grained values, so we can build a
+  // concrete independent erp; we just need to restrict the
   // support to values in the support of coarseValue.
   var getFineERP = function(params, coarseValue){
     return Enumerate(
@@ -1632,7 +1329,7 @@ var coarsenDependentERP = function(depERP, abstractValue){
         return value;
       });
   };
-  
+
   return [getCoarseERP, getFineERP];
 }
 ~~~~
@@ -1650,11 +1347,11 @@ In words:
 
 Where is the problem (if any)?
 
-My guess is that the problem comes in when we uniformly sample an instantiation for the abstract value V at the coarse ERP. 
+My guess is that the problem comes in when we uniformly sample an instantiation for the abstract value V at the coarse ERP.
 
 ~~~~
 // static
-// p(fine1, fine2) 
+// p(fine1, fine2)
 // = p(coarse1)p(fine1|coarse1) p(fine2|fine1) // so far so good
 // = p(coarse1)p(fine1|coarse1) p(coarse2|coarse1) p(fine2|coarse2, fine1)
 ~~~~
@@ -1680,93 +1377,20 @@ var makeERP = function(ps, vs){
 
 // Utils
 
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
 
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
-
 // Coarsening
 
 var coarsen = function(erp, abstractValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by abstractValue function
@@ -1776,37 +1400,37 @@ var coarsen = function(erp, abstractValue){
       return abstractValue[vp1[0]] == abstractValue[vp2[0]];
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return abstractValue[group[0][0]]})
+      return abstractValue[group[0][0]]},
+	groups)
 
   var groupedVs = map(
-    groups,
     function(group){
       return map(group, first);
-    });
+      },
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
       return map(group, second);
-    });
+      },
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -1847,7 +1471,7 @@ var instantiate = function(cV, abstractValue){
 
 var coarsenDependentERP = function(depERPfunc, abstractValue){
 
-  // The params are coarse-grained values. However, 
+  // The params are coarse-grained values. However,
   // we need fine-grained parameter values to construct
   // a real ERP. This can be achieved through sampling or
   // marginalizing. We'll marginalize.
@@ -1859,8 +1483,8 @@ var coarsenDependentERP = function(depERPfunc, abstractValue){
       });
   };
 
-  // Now params are fine-grained values, so we can build a 
-  // concrete independent erp; we just need to restrict the 
+  // Now params are fine-grained values, so we can build a
+  // concrete independent erp; we just need to restrict the
   // support to values in the support of coarseValue.
   var getFineERP = function(params, coarseValue){
     return Enumerate(
@@ -1870,7 +1494,7 @@ var coarsenDependentERP = function(depERPfunc, abstractValue){
         return value;
       });
   };
-  
+
   return [getCoarseERP, getFineERP];
 }
 
@@ -1878,7 +1502,7 @@ var coarsenDependentERP = function(depERPfunc, abstractValue){
 
 // Lifting
 
-var lift1 = function(f, abstractValue){  
+var lift1 = function(f, abstractValue){
   return function(cX){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var x = sample(d1);
@@ -1887,7 +1511,7 @@ var lift1 = function(f, abstractValue){
   }
 }
 
-var lift2 = function(f, abstractValue){  
+var lift2 = function(f, abstractValue){
   return function(cX, cY){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
@@ -1898,7 +1522,7 @@ var lift2 = function(f, abstractValue){
   }
 }
 
-var lift3 = function(f, abstractValue){  
+var lift3 = function(f, abstractValue){
   return function(cX, cY, cZ){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
@@ -1979,14 +1603,14 @@ var fErp1 = tmp2[1];
 
 var cGetScore = lift1(getScore, abstractValue);
 
-                      
-var program = function(){  
-  
+
+var program = function(){
+
   var cX = sample(cErp0);
-  var cY = sample(cErp1(cX));  
+  var cY = sample(cErp1(cX));
   var cScore = cGetScore(cY);
   factor(cScore);
-  
+
   var x = sample(fErp0(cX));
   var y = sample(fErp1(x, cY));
   var score = getScore(y);
@@ -2059,14 +1683,14 @@ var getFactorScore = function(y){
     "f" : -1.5,
     "g" : -2,
     "h" : -2.5
-  }  
+  }
   return scores[y];
 }
 
 
 // Model
-                      
-var program = function(){  
+
+var program = function(){
   var x = sample(erp0);
   var y = sample(erp1maxent);
   var score1 = getErp1Score(x, y) - getErp1MaxEntScore(y);
@@ -2089,90 +1713,18 @@ var makeERP = function(ps, vs){
   return Enumerate(function(){return vs[discrete(ps)]});
 }
 
-var first = function(xs){return xs[0];};
-
-var second = function(xs){return xs[1];};
-
 var compose = function(f, g){
   return function(x){
     return f(g(x));
   };
 };
 
-var zip = function(xs, ys){
-  if (xs.length == 0) {
-    return [];
-  } else {
-    return [[xs[0], ys[0]]].concat(zip(xs.slice(1), ys.slice(1)));
-  }
-};
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return [];
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-// span, applied to a predicate pred and a list xs, returns a tuple 
-// of elements that satisfy pred, and of the remainder of elements
-// that don't satisfy pred.
-
-var span = function(pred, xs, _xsY, _xsN){
-  var xsY = _xsY ? _xsY : [];
-  var xsN = _xsN ? _xsN : [];
-  if (xs.length == 0) {
-    return [xsY, xsN];
-  } else {
-    if (pred(xs[0])){
-      return span(pred, xs.slice(1), xsY.concat([xs[0]]), xsN);
-    } else {
-      return span(pred, xs.slice(1), xsY, xsN.concat([xs[0]]));
-    }
-  }
-};
-
-// groupBy takes an equivalenece function and a list, and returns
-// a list of lists that, when concatenated, contains all elements in
-// the original list and that is grouped by equivalence.
-
-var groupBy = function(eq, vs){
-  if (vs.length == 0) {
-    return [];
-  } else {
-    var x = vs[0];
-    var xs = vs.slice(1);
-    var tmp = span(function(b){return eq(x, b);}, xs);
-    var ys = tmp[0];
-    var zs = tmp[1];
-    return [[x].concat(ys)].concat(groupBy(eq, zs));
-  }
-};
-
-var indexOf = function(xs, x, j){
-  var i = (j == undefined) ? 0 : j;
-  if (xs[0] == x) {
-    return i;
-  } else {
-    return indexOf(xs.slice(1), x, i+1);
-  }
-}
-
 var coarsen = function(erp, abstractValue){
 
   // Get concrete values and probabilities
-  
+
   var allVs = erp.support([]);
-  var allPs = map(allVs, function(v){return Math.exp(erp.score([], v));});
+  var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by abstractValue function
@@ -2182,37 +1734,37 @@ var coarsen = function(erp, abstractValue){
       return abstractValue[vp1[0]] == abstractValue[vp2[0]];
     },
     zip(allVs, allPs));
-  
+
   var groupSymbols = map(
-    groups,
     function(group){
       // group[0][0]: first value in group
-      return abstractValue[group[0][0]]})
+      return abstractValue[group[0][0]]},
+	groups)
 
   var groupedVs = map(
-    groups,
     function(group){
       return map(group, first);
-    });
+      },
+	groups);
 
   var groupedPs = map(
-    groups,
     function(group){
       return map(group, second);
-    });
+      },
+	groups);
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
 
-  var abstractPs = map(groupedPs, sum);
+  var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
-  
-  var groupERPs = map2(groupedPs, groupedVs, makeERP);    
+
+  var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
     var i = indexOf(groupSymbols, abstractSymbol);
     return groupERPs[i];
   }
-  
+
   return [abstractSampler, getConcreteSampler];
 
 }
@@ -2255,12 +1807,12 @@ var contains = function(lst, val){
 
 // Do we really not need to marginalize here?
 
-var lift1 = function(f, abstractValue){  
+var lift1 = function(f, abstractValue){
   return function(cX){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var x = sample(d1);
     var out = f(x);
-    if (contains(Object.keys(abstractValue), out)){      
+    if (contains(Object.keys(abstractValue), out)){
       return abstractValue[out];
     } else {
       return out
@@ -2268,14 +1820,14 @@ var lift1 = function(f, abstractValue){
   }
 }
 
-var lift2 = function(f, abstractValue){  
+var lift2 = function(f, abstractValue){
   return function(cX, cY){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
     var x = sample(d1);
     var y = sample(d2);
     var out = f(x, y);
-    if (contains(Object.keys(abstractValue), out)){      
+    if (contains(Object.keys(abstractValue), out)){
       return abstractValue[out];
     } else {
       return out
@@ -2283,7 +1835,7 @@ var lift2 = function(f, abstractValue){
   }
 }
 
-var lift3 = function(f, abstractValue){  
+var lift3 = function(f, abstractValue){
   return function(cX, cY, cZ){
     var d1 = maxEntERP(cX, abstractValue); // could cache this
     var d2 = maxEntERP(cY, abstractValue); // could cache this
@@ -2361,7 +1913,7 @@ var getFactorScore = function(y){
     "f" : -1.5,
     "g" : -2,
     "h" : -2.5
-  }  
+  }
   return scores[y];
 }
 
@@ -2374,15 +1926,15 @@ var cGetFactorScore = lift1(getFactorScore, abstractValue);
 
 
 // Model
-                      
-var program = function(){  
+
+var program = function(){
   var cX = sample(cErp0);
   var cY = sample(cErp1);
   var cScore1 = cGetErp1Score(cX, cY) - cGetErp1MaxEntScore(cY);
   factor(cScore1);
   var cScore2 = cGetFactorScore(cY);
   factor(cScore2);
-  
+
   var x = sample(fErp0(cX));
   var y = sample(fErp1(cY));
   var score1 = getErp1Score(x, y) - getErp1MaxEntScore(y);
