@@ -4,7 +4,7 @@ set -e
 echo "Resetting webppl to latest remote..."
 cd assets/webppl
 git fetch origin
-git reset --hard origin/master
+git reset --hard origin/storepassing
 
 echo "Compiling latest remote (and committing if changed)..."
 browserify -t brfs src/main.js > compiled/webppl.js
@@ -13,7 +13,7 @@ then
    echo "Compilation resulted in changes, committing webppl..."
    git add compiled/webppl.js
    git commit -m "Updated compiled version"
-   git push origin master
+   git push origin storepassing
 else
    echo "Compilation found no changes, skipping webppl commit..."
 fi
@@ -23,7 +23,7 @@ if [[ `git status --porcelain` ]];
 then
    echo "Submodule changed, committing dippl..."
    git commit assets/webppl -m "Updated webppl submodule"
-   git push origin gh-pages
+   git push origin storepassing # gh-pages
 else
    echo "Submodule unchanged, skipping dippl commit..."
 fi
