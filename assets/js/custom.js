@@ -147,11 +147,11 @@ DrawObject.prototype.destroy = function(){
   $(this.canvas).remove();
 }
 
-function Draw(k, a, width, height, visible){
-  return setTimeout(function(){k(new DrawObject(width, height, visible));});
+function Draw(s, k, a, width, height, visible){
+  return setTimeout(function(){k(s, new DrawObject(width, height, visible));});
 }
 
-function loadImage(k, a, drawObject, url){
+function loadImage(s, k, a, drawObject, url){
   // Synchronous loading - only continue with computation once image is loaded
   var context = drawObject.canvas.getContext('2d');
   var imageObj = new Image();
@@ -159,7 +159,7 @@ function loadImage(k, a, drawObject, url){
     var raster = new drawObject.paper.Raster(imageObj);
     raster.position = drawObject.paper.view.center;
     drawObject.redraw();
-    k();
+    k(s);
   };
   imageObj.src = url;
 }
