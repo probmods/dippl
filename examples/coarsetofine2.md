@@ -406,7 +406,7 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
-    var i = indexOf(groupSymbols, abstractSymbol);
+    var i = indexOf(abstractSymbol, groupSymbols);
     return groupERPs[i];
   }
 
@@ -514,7 +514,7 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
-    var i = indexOf(groupSymbols, abstractSymbol);
+    var i = indexOf(abstractSymbol, groupSymbols);
     return groupERPs[i];
   }
 
@@ -576,7 +576,7 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
-    var i = indexOf(groupSymbols, abstractSymbol);
+    var i = indexOf(abstractSymbol, groupSymbols);
     return groupERPs[i];
   }
 
@@ -752,7 +752,7 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
-    var i = indexOf(groupSymbols, abstractSymbol);
+    var i = indexOf(abstractSymbol, groupSymbols);
     return groupERPs[i];
   }
 
@@ -1274,7 +1274,7 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
-    var i = indexOf(groupSymbols, abstractSymbol);
+    var i = indexOf(abstractSymbol, groupSymbols);
     return groupERPs[i];
   }
 
