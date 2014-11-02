@@ -7,7 +7,7 @@ description: Models with continuous variables, importance sampling, and sequenti
 
 ## Models with large state spaces
 
-For many models with large state spaces, enumeration is infeasible, even if we use smart prioritization. This is particularly clear for models with continuous random variables, where the state space is infinite. 
+For many models with large state spaces, enumeration is infeasible, even if we use smart prioritization. This is particularly clear for models with continuous random variables, where the state space is infinite.
 
 Let's look at a few examples.
 
@@ -40,9 +40,9 @@ var drawLines = function(drawObj, lines){
 var makeLines = function(n, lines, prevScore){
   // Add a random line to the set of lines
   var x1 = randomInteger(50);
-  var y1 = randomInteger(50);    
+  var y1 = randomInteger(50);
   var x2 = randomInteger(50);
-  var y2 = randomInteger(50);        
+  var y2 = randomInteger(50);
   var newLines = lines.concat([[x1, y1, x2, y2]]);
   // Compute image from set of lines
   var generatedImage = Draw(50, 50, false);
@@ -59,7 +59,7 @@ var lineDist = EnumerateDepthFirst(
   function(){
     var lines = makeLines(4, [], 0);
     var finalGeneratedImage = Draw(50, 50, true);
-	drawLines(finalGeneratedImage, lines);    
+	drawLines(finalGeneratedImage, lines);
     return lines;
    }, 10)
 
@@ -77,7 +77,7 @@ Gaussian random walk models can be used e.g. to model financial time series data
 ///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
-  var next = positions[0];  
+  var next = positions[0];
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
   drawLines(canvas, next, positions.slice(1));
 }
@@ -93,8 +93,8 @@ var init = function(dim){
 
 var transition = function(pos){
   return map(
-    pos,
-    function(x){ return gaussian(x, 10); }
+    function(x){ return gaussian(x, 10); },
+    pos
   );
 };
 
@@ -121,40 +121,24 @@ For many systems, the Markov assumption -- each point only depends on the previo
 ///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
-  var next = positions[0];  
+  var next = positions[0];
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
   drawLines(canvas, next, positions.slice(1));
 }
-
-var last = function(xs){
-  return xs[xs.length - 1];
-}
-
-var secondLast = function(xs){
-  return xs[xs.length - 2];
-}
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return []
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
 ///
 
 var init = function(dim){
   return repeat(dim, function(){ return gaussian(200, 1) });
 }
 
-var transition = function(lastPos, secondLastPos){  
+var transition = function(lastPos, secondLastPos){
   return map2(
-    lastPos,
-    secondLastPos,
-    function(lastX, secondLastX){ 
+    function(lastX, secondLastX){
       var momentum = (lastX - secondLastX) * .7;
-      return gaussian(lastX + momentum, 3); 
-    }
+      return gaussian(lastX + momentum, 3);
+    },
+	lastPos,
+    secondLastPos
   );
 };
 
@@ -181,26 +165,10 @@ We have previously seen [Hidden Markov models](/chapters/04-factorseq.html). The
 ///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
-  var next = positions[0];  
+  var next = positions[0];
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
   drawLines(canvas, next, positions.slice(1));
 }
-
-var last = function(xs){
-  return xs[xs.length - 1];
-}
-
-var secondLast = function(xs){
-  return xs[xs.length - 2];
-}
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return []
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
 
 var canvas = Draw(400, 400, true)
 ///
@@ -211,19 +179,19 @@ var init = function(dim){
 
 var observe = function(pos){
   return map(
-    pos,
-    function(x){ return gaussian(x, 5); }
+    function(x){ return gaussian(x, 5); },
+	pos
   );
 };
 
-var transition = function(lastPos, secondLastPos){  
+var transition = function(lastPos, secondLastPos){
   return map2(
-    lastPos,
-    secondLastPos,
-    function(lastX, secondLastX){ 
+    function(lastX, secondLastX){
       var momentum = (lastX - secondLastX) * .7;
-      return gaussian(lastX + momentum, 3); 
-    }
+      return gaussian(lastX + momentum, 3);
+    },
+	lastPos,
+    secondLastPos
   );
 };
 
@@ -231,7 +199,7 @@ var semiMarkovWalk = function(n, dim) {
   var prevStates = (n==2) ? [init(dim), init(dim)] : semiMarkovWalk(n-1, dim);
   var newState = transition(last(prevStates), secondLast(prevStates));
   var newObservation = observe(newState);
-  canvas.circle(newObservation[0], newObservation[1], "red", 2);  
+  canvas.circle(newObservation[0], newObservation[1], "red", 2);
   return prevStates.concat([newState]);
 };
 
@@ -248,29 +216,21 @@ How else could we model points observed in 2D space? We could posit that there a
 ///fold:
 var drawPoints = function(canvas, points){
   if (points.length > 0) {
-    var next = points[0];    
-    canvas.circle(next[0], next[1], "black", 2);    
+    var next = points[0];
+    canvas.circle(next[0], next[1], "black", 2);
     drawPoints(canvas, points.slice(1));
   }
 }
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return []
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
 ///
 
 var makeGaussian = function(dim){
   var means = repeat(dim, function(){uniform(20, 380)});
   var stds = repeat(dim, function(){uniform(5, 50)});
   return function(){
-    return map2(means, stds, gaussian);
+    return map2(gaussian, means, stds);
   }
 }
-  
+
 var mixtureWeight = uniform(0, 1);
 var gaussian1 = makeGaussian(2);
 var gaussian2 = makeGaussian(2);
@@ -318,7 +278,7 @@ var hmm = function(states, observations){
     return states;
   } else {
     return hmm(states.concat([state]), observations.slice(1));
-  }      
+  }
 }
 
 var observations = [true, true, true, true];
@@ -348,17 +308,17 @@ var cpsHmm = function(k, states, observations){
             return k(states);
           } else {
             return cpsHmm(k, states.concat([state]), observations.slice(1));
-          }      
-        },        
+          }
+        },
         (state == observations[0]) ? 0 : -1);
-    },    
-    bernoulliERP, 
+    },
+    bernoulliERP,
     [prevState ? .9 : .1]);
 }
 
 var runCpsHmm = function(k){
   var observations = [true, true, true, true];
-  var startState = false;  
+  var startState = false;
   return cpsHmm(k, [startState], observations);
 }
 ~~~~
@@ -393,17 +353,17 @@ var cpsHmm = function(k, states, observations){
             return k(states);
           } else {
             return cpsHmm(k, states.concat([state]), observations.slice(1));
-          }      
-        },        
+          }
+        },
         (state == observations[0]) ? 0 : -1);
-    },    
-    bernoulliERP, 
+    },
+    bernoulliERP,
     [prevState ? .9 : .1]);
 }
 
 var runCpsHmm = function(k){
   var observations = [true, true, true, true];
-  var startState = false;  
+  var startState = false;
   return cpsHmm(k, [startState], observations);
 }
 
@@ -435,17 +395,17 @@ var cpsHmm = function(k, states, observations){
             return k(states);
           } else {
             return cpsHmm(k, states.concat([state]), observations.slice(1));
-          }      
-        },        
+          }
+        },
         (state == observations[0]) ? 0 : -1);
-    },    
-    bernoulliERP, 
+    },
+    bernoulliERP,
     [prevState ? .9 : .1]);
 }
 
 var runCpsHmm = function(k){
   var observations = [true, true, true, true];
-  var startState = false;  
+  var startState = false;
   return cpsHmm(k, [startState], observations);
 }
 
@@ -464,22 +424,22 @@ var sampleIndex = 0;
 
 
 var priorExit = function(value){
-  
+
   // Store sampled value
   samples[sampleIndex].value = value;
-  
+
   if (sampleIndex < samples.length-1){
     // If samples left, restart computation for next sample
     sampleIndex += 1;
     return startCpsComp(priorExit);
-  } else {  
+  } else {
     // Print all samples
     samples.forEach(jsPrint);
   }
 };
 
 
-var PriorSampler = function(cpsComp, numSamples){  
+var PriorSampler = function(cpsComp, numSamples){
 
   // Create placeholders for samples
   for (var i=0; i<numSamples; i++) {
@@ -489,9 +449,9 @@ var PriorSampler = function(cpsComp, numSamples){
     };
     samples.push(sample);
   }
-  
+
   // Run computation from beginning
-  startCpsComp = cpsComp;  
+  startCpsComp = cpsComp;
   startCpsComp(priorExit);
 }
 
@@ -499,7 +459,7 @@ var PriorSampler = function(cpsComp, numSamples){
 PriorSampler(runCpsHmm, 10);
 ~~~~
 
-The factors tell us that we should be sampling some paths more often, and some paths less often. If we knew the total factor weight for each path, we would know which paths we "oversampled" by how much, and which paths we "undersampled". 
+The factors tell us that we should be sampling some paths more often, and some paths less often. If we knew the total factor weight for each path, we would know which paths we "oversampled" by how much, and which paths we "undersampled".
 
 Let's accumulate the factor weights with each sample:
 
@@ -517,17 +477,17 @@ var cpsHmm = function(k, states, observations){
             return k(states);
           } else {
             return cpsHmm(k, states.concat([state]), observations.slice(1));
-          }      
-        },        
+          }
+        },
         (state == observations[0]) ? 0 : -1);
-    },    
-    bernoulliERP, 
+    },
+    bernoulliERP,
     [prevState ? .9 : .1]);
 }
 
 var runCpsHmm = function(k){
   var observations = [true, true, true, true];
-  var startState = false;  
+  var startState = false;
   return cpsHmm(k, [startState], observations);
 }
 
@@ -546,21 +506,21 @@ var _factor = function(k, score){
 }
 
 var lwExit = function(value){
-  
+
   // Store sampled value
   samples[sampleIndex].value = value;
-  
+
   if (sampleIndex < samples.length-1){
     // If samples left, restart computation for next sample
     sampleIndex += 1;
     return startCpsComp(lwExit);
-  } else {  
+  } else {
     // Print all samples
     samples.forEach(jsPrint);
   }
 };
 
-var LikelihoodWeighting = function(cpsComp, numSamples){  
+var LikelihoodWeighting = function(cpsComp, numSamples){
 
   // Create placeholders for samples
   for (var i=0; i<numSamples; i++) {
@@ -571,9 +531,9 @@ var LikelihoodWeighting = function(cpsComp, numSamples){
     };
     samples.push(sample);
   }
-  
+
   // Run computation from beginning
-  startCpsComp = cpsComp;  
+  startCpsComp = cpsComp;
   startCpsComp(lwExit);
 }
 
@@ -620,17 +580,17 @@ var cpsHmm = function(k, states, observations){
             return k(states);
           } else {
             return cpsHmm(k, states.concat([state]), observations.slice(1));
-          }      
-        },        
+          }
+        },
         (state == observations[0]) ? 0 : -1);
-    },    
-    bernoulliERP, 
+    },
+    bernoulliERP,
     [prevState ? .9 : .1]);
 }
 
 var runCpsHmm = function(k){
   var observations = [true, true, true, true];
-  var startState = false;  
+  var startState = false;
   return cpsHmm(k, [startState], observations);
 }
 
@@ -660,22 +620,22 @@ var samples = [];
 var sampleIndex = 0;
 
 var lwrExit = function(value){
-  
+
   // Store sampled value
   samples[sampleIndex].value = value;
-  
+
   if (sampleIndex < samples.length-1){
     // If samples left, restart computation for next sample
     sampleIndex += 1;
     return startCpsComp(lwrExit);
-  } else {  
+  } else {
     samples = resample(samples); // NEW
     // Print all samples
     samples.forEach(jsPrint);
   }
 };
 
-var LikelihoodWeightingResampled = function(cpsComp, numSamples){  
+var LikelihoodWeightingResampled = function(cpsComp, numSamples){
 
   // Create placeholders for samples
   for (var i=0; i<numSamples; i++) {
@@ -686,9 +646,9 @@ var LikelihoodWeightingResampled = function(cpsComp, numSamples){
     };
     samples.push(sample);
   }
-  
+
   // Run computation from beginning
-  startCpsComp = cpsComp;  
+  startCpsComp = cpsComp;
   startCpsComp(lwrExit);
 }
 
@@ -744,17 +704,17 @@ var cpsHmm = function(k, states, observations){
             return k(states);
           } else {
             return cpsHmm(k, states.concat([state]), observations.slice(1));
-          }      
-        },        
+          }
+        },
         (state == observations[0]) ? 0 : -1);
-    },    
-    bernoulliERP, 
+    },
+    bernoulliERP,
     [prevState ? .9 : .1]);
 }
 
 var runCpsHmm = function(k){
   var observations = [true, true, true, true];
-  var startState = false;  
+  var startState = false;
   return cpsHmm(k, [startState], observations);
 }
 ///
@@ -767,23 +727,23 @@ var sampleIndex = 0;
 var _factor = function(k, score){
   samples[sampleIndex].score += score;
   samples[sampleIndex].continuation = k; // NEW
-  
+
   if (sampleIndex < samples.length-1){
     sampleIndex += 1;
   } else {
     samples = resample(samples);
     sampleIndex = 0;
-  }  
-  
+  }
+
   samples[sampleIndex].continuation();
 }
 
 
 var pfExit = function(value){
-  
+
   // Store sampled value
   samples[sampleIndex].value = value;
-  
+
   if (sampleIndex < samples.length-1){
     // If samples unfinished, resume computation for next sample
     sampleIndex += 1;
@@ -794,7 +754,7 @@ var pfExit = function(value){
 };
 
 
-var SimpleParticleFilter = function(cpsComp, numSamples){  
+var SimpleParticleFilter = function(cpsComp, numSamples){
 
   // Create placeholders for samples
   for (var i=0; i<numSamples; i++) {
@@ -805,7 +765,7 @@ var SimpleParticleFilter = function(cpsComp, numSamples){
     };
     samples.push(sample);
   }
-  
+
   // Run computation from beginning
   samples[sampleIndex].continuation();
 };
@@ -823,38 +783,22 @@ As before, we are going to generate observations by running a Hidden semi-Markov
 ///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
-  var next = positions[0];  
+  var next = positions[0];
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
   drawLines(canvas, next, positions.slice(1));
 }
 
 var drawPoints = function(canvas, positions){
   if (positions.length == 0) { return []; }
-  var next = positions[0];  
-  canvas.circle(next[0], next[1], "red", 2);    
+  var next = positions[0];
+  canvas.circle(next[0], next[1], "red", 2);
   drawPoints(canvas, positions.slice(1));
 }
 
-var last = function(xs){
-  return xs[xs.length - 1];
-}
-
-var secondLast = function(xs){
-  return xs[xs.length - 2];
-}
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return []
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
 var observe = function(pos){
   return map(
-    pos,
-    function(x){ return gaussian(x, 5); }
+    function(x){ return gaussian(x, 5); },
+	pos
   );
 };
 
@@ -862,21 +806,21 @@ var init = function(dim){
   var state1 = repeat(dim, function(){ return gaussian(200, 1) });
   var state2 = repeat(dim, function(){ return gaussian(200, 1) });
   var states = [state1, state2];
-  var observations = map(states, observe);
+  var observations = map(observe, states);
   return {
     states: states,
     observations: observations
   }
 }
 
-var transition = function(lastPos, secondLastPos){  
+var transition = function(lastPos, secondLastPos){
   return map2(
-    lastPos,
-    secondLastPos,
-    function(lastX, secondLastX){ 
+    function(lastX, secondLastX){
       var momentum = (lastX - secondLastX) * .7;
-      return gaussian(lastX + momentum, 3); 
-    }
+      return gaussian(lastX + momentum, 3);
+    },
+	lastPos,
+    secondLastPos
   );
 };
 
@@ -904,38 +848,22 @@ Now let's infer the latent walk underneath:
 ///fold:
 var drawLines = function(canvas, start, positions){
   if (positions.length == 0) { return []; }
-  var next = positions[0];  
+  var next = positions[0];
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
   drawLines(canvas, next, positions.slice(1));
 }
 
 var drawPoints = function(canvas, positions){
   if (positions.length == 0) { return []; }
-  var next = positions[0];  
-  canvas.circle(next[0], next[1], "red", 2);    
+  var next = positions[0];
+  canvas.circle(next[0], next[1], "red", 2);
   drawPoints(canvas, positions.slice(1));
 }
 
-var last = function(xs){
-  return xs[xs.length - 1];
-}
-
-var secondLast = function(xs){
-  return xs[xs.length - 2];
-}
-
-var map2 = function(ar1,ar2,fn) {
-  if (ar1.length==0 | ar2.length==0) {
-    return []
-  } else {
-    return append([fn(ar1[0], ar2[0])], map2(ar1.slice(1), ar2.slice(1), fn));
-  }
-};
-
 var observe = function(pos){
   return map(
-    pos,
-    function(x){ return gaussian(x, 5); }
+    function(x){ return gaussian(x, 5); },
+	pos
   );
 };
 
@@ -943,7 +871,7 @@ var init = function(dim){
   var state1 = repeat(dim, function(){ return gaussian(200, 1) });
   var state2 = repeat(dim, function(){ return gaussian(200, 1) });
   var states = [state1, state2];
-  var observations = map(states, observe);
+  var observations = map(observe, states);
   return {
     states: states,
     observations: observations
@@ -963,23 +891,23 @@ var semiMarkovWalk = function(n, dim) {
 };
 ///
 
-var transition = function(lastPos, secondLastPos){  
+var transition = function(lastPos, secondLastPos){
   return map2(
-    lastPos,
-    secondLastPos,
-    function(lastX, secondLastX){ 
+    function(lastX, secondLastX){
       var momentum = (lastX - secondLastX) * .7;
-      return gaussian(lastX + momentum, 3); 
-    }
+      return gaussian(lastX + momentum, 3);
+    },
+	lastPos,
+    secondLastPos,
   );
 };
 
 
 var observeConstrained = function(pos, trueObs){
   return map2(
-    pos,
-    trueObs,
-    function(x, obs){ return gaussianFactor(x, 5, obs); }
+    function(x, obs){ return gaussianFactor(x, 5, obs); },
+	pos,
+    trueObs
   );
 };
 
@@ -996,8 +924,8 @@ var initConstrained = function(dim, trueObs){
 
 var semiMarkovWalkConstrained = function(n, dim, trueObs) {
   var prevData = (
-    (n == 2) ? 
-    initConstrained(dim, trueObs.slice(0, 2)) : 
+    (n == 2) ?
+    initConstrained(dim, trueObs.slice(0, 2)) :
     semiMarkovWalkConstrained(n-1, dim, trueObs.slice(0, trueObs.length-1)));
   var prevStates = prevData.states;
   var prevObservations = prevData.observations;

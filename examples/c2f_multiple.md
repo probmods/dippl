@@ -51,15 +51,11 @@ var coarsenERP = function(erp, coarsenValue){
 	groups)
 
   var groupedVs = map(
-    function(group){
-      return map(group, first);
-      },
+    function(group){ return map(first, group); },
 	groups);
 
   var groupedPs = map(
-    function(group){
-      return map(group, second);
-      },
+    function(group){ return map(second, group); },
 	groups);
 
   // Construct unconditional (abstract) sampler and
@@ -401,7 +397,7 @@ var refinementMap = function(val, origFunction) {
   if (!_.contains(abstract_domain, val)) {
     return val
   } else {
-    var map_obj = _.object(concrete_domain, map(concrete_domain, origFunction))
+    var map_obj = _.object(concrete_domain, map(origFunction, concrete_domain))
     var inv_map = invertMap(map_obj)
     var inv_set = inv_map[val]
     var parsed = map(function(v){return v.split(',')}, inv_set)
