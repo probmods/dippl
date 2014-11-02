@@ -388,13 +388,13 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupedVs = map(
     function(group){
-      return map(group, first);
+      return map(first, group);
       },
 	groups);
 
   var groupedPs = map(
     function(group){
-      return map(group, second);
+      return map(second, group);
       },
 	groups);
 
@@ -496,13 +496,13 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupedVs = map(
     function(group){
-      return map(group, first);
+      return map(first, group);
       },
 	groups);
 
   var groupedPs = map(
     function(group){
-      return map(group, second);
+      return map(second, group);
       },
 	groups);
 
@@ -558,13 +558,13 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupedVs = map(
     function(group){
-      return map(group, first);
+      return map(first, group);
       },
 	groups);
 
   var groupedPs = map(
     function(group){
-      return map(group, second);
+      return map(second, group);
       },
 	groups);
 
@@ -734,13 +734,13 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupedVs = map(
     function(group){
-      return map(group, first);
+      return map(first, group);
       },
 	groups);
 
   var groupedPs = map(
     function(group){
-      return map(group, second);
+      return map(second, group);
       },
 	groups);
 
@@ -1256,13 +1256,13 @@ var coarsenERP = function(erp, coarsenValue){
 
   var groupedVs = map(
     function(group){
-      return map(group, first);
+      return map(first, group);
       },
 	groups);
 
   var groupedPs = map(
     function(group){
-      return map(group, second);
+      return map(second, group);
       },
 	groups);
 

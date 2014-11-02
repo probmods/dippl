@@ -898,7 +898,7 @@ var transition = function(lastPos, secondLastPos){
       return gaussian(lastX + momentum, 3);
     },
 	lastPos,
-    secondLastPos,
+    secondLastPos
   );
 };
 
