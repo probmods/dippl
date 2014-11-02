@@ -386,7 +386,8 @@ var WebpplEditor = React.createClass({
   }
 });
 
+var editorContainer = document.getElementById('reactEditor');
 
-React.renderComponent(
-  <WebpplEditor/>,
-  document.getElementById('reactEditor'));
+if (editorContainer){
+  React.renderComponent(<WebpplEditor/>, editorContainer);
+}
