@@ -29,15 +29,12 @@ var erpProduct = function(thunk1, thunk2){
 };
 
 var coarsenERP = function(erp, coarsenValue){
-
   // Get concrete values and probabilities
-
   var allVs = erp.support([]);
   var allPs = map(function(v){return Math.exp(erp.score([], v));}, allVs);
 
   // Group distribution based on equivalence classes
   // implied by coarsenValue function
-
   var groups = groupBy(
     function(vp1, vp2){
       return coarsenValue(vp1[0], erp) == coarsenValue(vp2[0], erp);
@@ -60,30 +57,20 @@ var coarsenERP = function(erp, coarsenValue){
 
   // Construct unconditional (abstract) sampler and
   // conditional (concrete) sampler
-
   var abstractPs = map(sum, groupedPs);
   var abstractSampler = makeERP(abstractPs, groupSymbols);
 
   var groupERPs = map2(makeERP, groupedPs, groupedVs);
   var getConcreteSampler = function(abstractSymbol){
-    var i = indexOf(groupSymbols, abstractSymbol);
+    var i = indexOf(abstractSymbol, groupSymbols);
     return groupERPs[i];
   }
 
   return [abstractSampler, getConcreteSampler];
-
 }
 
-var isUniformList = function(xs, value){
-  if (!xs.length) {
-    return true;
-  } else {
-    if (xs[0] == value) {
-      return isUniformList(xs.slice(1), value);
-    } else {
-      return false;
-    }
-  }
+var isUniformList = function(xs,v) {
+  return reduce(function(a,b){return a == b}, v, xs)
 }
 
 var printStates = function(states){
@@ -93,24 +80,6 @@ var printStates = function(states){
     print(states);
   }
 }
-
-var sum = function(xs){
-  if (xs.length == 0) {
-    return 0;
-  } else {
-    return xs[0] + sum(xs.slice(1));
-  }
-};
-
-var expectation = function(erp, f){
-  return sum(
-    map(
-      function(v){
-	    return Math.exp(erp.score([], v)) * f(v);
-      },
-	erp.support([])
-      ));
-};
 
 var logMeanExp = function(erp){
   return Math.log(expectation(erp, function(x){return Math.exp(x);}));
@@ -139,8 +108,6 @@ print(Enumerate(model))
 
 Now, instead of sampling from separate erps and conjoining values together at the end, we form a single erp representing the joint distribution. Note that the resulting distribution is the same.
 
-
-
 ~~~~
 ///fold:
 var makeERP = function(ps, vs){
@@ -152,7 +119,7 @@ var erp1 = makeERP([.5, .5],
 
 var erp2 = makeERP([.5, .5],
                    ["x", "y"]);
-		   ///
+///
 
 var erpProduct = function(thunk1, thunk2){
   return Enumerate(
@@ -180,9 +147,6 @@ To run coarse-to-fine inference over the We now need to specify a map from a tup
 $\Omega \times \cdots \times \Omega \rightarrow \Omega$
 
 This map is quite flexible. It could be a lookup table for every possible combination of values, or, more feasibly for large state spaces, a generic function assigning a pair of values to a coarsened value based on some property of the pair (e.g. containing an "x"). We then pass our joint ERP and the abstraction map to the same generic coarsenERP function used in the *within* variable case, which gives us a distribution over $\Omega'$. To show that the coarsened values map back to fine values correctly, we show both the original joint distribution and the two-step distribution given by mapping to $\Omega'$ and then back.
-
-
-
 
 
 ~~~~
@@ -227,9 +191,6 @@ print(
 Finally, we apply this process to the HMM example to do inference over multiple time steps simultaneously. If were doing inference over a 10 step hmm, for example, it may be more efficient to pair up each state, do inference over this set of 5 coarsened states, then use the likelihoods of these joint states to guide their individuation.
 
 Note that as in the regular case, we must construct our coarse ERPs independent of the hmm model, based on knowledge about the component states.
-
-
-
 
 ~~~~
 var abstractionMap = function(vars) {
