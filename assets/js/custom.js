@@ -181,7 +181,7 @@ function loadImage(k, a, drawObject, url){
 // Code boxes
 
 function webpplObjectToText(x){
-  return isERP(x) ? "<erp" : JSON.stringify(x);
+  return isErp(x) ? "<erp" : JSON.stringify(x);
 }
 
 var codeBoxCount = 0;
