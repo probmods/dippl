@@ -3,7 +3,6 @@
 var topK; // Top-level continuation
 var activeCodeBox;
 
-
 // Utils
 
 function euclideanDistance(v1, v2){
@@ -43,14 +42,13 @@ function print(k, a, x){
   k();
 }
 
-
 // Bar plots
 
 function barChart(containerSelector, labels, counts){
   $(containerSelector).show();
   var svg = d3.select(containerSelector)
-    .append("svg")
-    .attr("class", "barChart");
+      .append("svg")
+      .attr("class", "barChart");
   var data = [];
   for (var i=0; i<labels.length; i++){
     data.push({
@@ -69,7 +67,6 @@ function barChart(containerSelector, labels, counts){
   chart.addSeries("Count", dimple.plot.bar);
   chart.draw();
 }
-
 
 // Drawing
 
@@ -171,7 +168,6 @@ function Draw(k, a, width, height, visible){
 
 function loadImage(k, a, drawObject, url){
   // Synchronous loading - only continue with computation once image is loaded
-  var context = drawObject.canvas.getContext('2d');
   var imageObj = new Image();
   imageObj.onload = function() {
     var raster = new drawObject.paper.Raster(imageObj);
@@ -182,15 +178,10 @@ function loadImage(k, a, drawObject, url){
   imageObj.src = url;
 }
 
-
 // Code boxes
 
 function webpplObjectToText(x){
-  if (isErp(x)){
-    return "<erp>";
-  } else {
-    return JSON.stringify(x);
-  }
+  return isERP(x) ? "<erp" : JSON.stringify(x);
 }
 
 var codeBoxCount = 0;
@@ -313,7 +304,6 @@ function setupCodeBoxes(){
 
 $(setupCodeBoxes);
 
-
 // CPS and addressing forms
 
 function updateTransformForm(inputId, outputId, transformer){
@@ -355,7 +345,6 @@ var setupNamingForm = function(){
 
 $(setupNamingForm);
 
-
 // Google analytics
 
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -365,7 +354,6 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 
 ga('create', 'UA-54996-12', 'auto');
 ga('send', 'pageview');
-
 
 // Date
 
@@ -378,12 +366,11 @@ function setDate(){
 }
 
 $(setDate);
+
 // Special functions for webppl code boxes
 
 var invertMap = function (k, a, obj) {
-
   var newObj = {};
-
   for (var prop in obj) {
     if (obj.hasOwnProperty(prop)) {
       var value = obj[prop];
@@ -394,6 +381,5 @@ var invertMap = function (k, a, obj) {
       }
     }
   }
-
   return k(newObj);
 };
