@@ -67,8 +67,8 @@ var lexical_meaning = function(word) {
         return function(P){
           return function(Q){
             var first = filter(P, world)
-            // return first.length != 0 & filter(neg(Q), first).length==0
-            return first.length == world.length & filter(neg(Q), first).length==0
+            return first.length != 0 & filter(neg(Q), first).length==0
+            // return first.length == world.length & filter(neg(Q), first).length==0
           }}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
@@ -81,8 +81,8 @@ var lexical_meaning = function(word) {
         return function(P){
           return function(Q){
             var first = filter(P, world)
-            // return first.length != 0 & filter(Q, first).length==0
-            return first.length == world.length & filter(Q, first).length==0
+            return first.length != 0 & filter(Q, first).length==0
+            // return first.length == world.length & filter(Q, first).length==0
           }}},
       syn: {dir:'R',
             int:{dir:'L', int:'NP', out:'S'},
@@ -202,13 +202,11 @@ var renderImg = function(imgObj, world) {
 var worldMatch = function(world1, world2) {
   var objMatch = function(obj1, obj2) {
     // doesn't consider position distance yet
-    // return (obj1.blue == obj2.blue ? 0 : -5) + (obj1.square == obj2.square ? 0 : -10)
-    // return obj1.square != obj2.square ? -30 : (obj1.blue == obj2.blue ? -15 : 0)
     return obj1.square != obj2.square | obj1.blue != obj2.blue ? -5 : 0
   }
   var fn = function(w1, w2, _accf) {
     if (w1.length == 0 | w2.length == 0) {
-      return _accf - (Math.abs(w1.length - w2.length) * 5)
+      return _accf - (Math.abs(w1.length - w2.length) * 10)
     } else {
       var _elem = maxF(function(o2) { return objMatch(w1[0],o2) }, w2)
       return fn(w1.slice(1), remove(_elem[0], w2), _accf + _elem[1])
@@ -258,29 +256,34 @@ var printW = function(w) {
 
 var parseImage = function(img) {
   // somewhat ugly hack: does a lookup on the dataset to find correct world.
+  // this is where actual cv stuff happens :: image -> scene/world
   var r = find(function(i) {return img == i[0]}, imageDataset)
   return r[1]
 }
 
-var literalListener = function(utterance) {
+var literalListener = function(meaningFn, targetWorld) {
   ParticleFilter(function(){
-    var m = meaning(utterance)
     // var nelems = binomial(0.6,5)+1
+    // if (nelems == 0) console.log("zero elements!")
     var nelems = 3
-    var world = worldPrior(nelems,m)
-    factor(m(world) ? 0 : -Infinity)
+    var world = worldPrior(nelems,meaningFn)
+    factor(meaningFn(world) ? 0 : -Infinity)
     return world
-  }, 30)
+  }, 40)
 }
 
 var speaker = function(img) {
   ParticleFilter(function(){
-    var utterance = utterancePrior()
-    var w = literalListener(utterance)
-    var sw = sample(w)
     var pw = parseImage(img)
-    var score = worldMatch(sw,pw)
-    print([utterance, score, printW(sw)])
+    var utterance = utterancePrior()
+    var m = meaning(utterance)
+    var w = literalListener(m,pw)
+    console.log("dist size: ", w.support([]).length)
+    var score = expectation(w, function(s) {
+      // for stack size issues
+      var match = function(){ return worldMatch(pw,s) }
+      return withEmptyStack(match)
+    })
     factor(score)
     return utterance
   }, 80)
@@ -294,3 +297,11 @@ var targetImage = Draw(200, 200, true);
 renderImg(targetImage, _f[1])
 print(speaker(_f[0]))
 ~~~~
+
+#### Notes
+1. when we want stochasticity in meaning, push into literalListener, else keep
+   outside for efficiency.
+2. when particle filter is saturated with just one sample, make sure
+   expectations etc, can handle that.
+3. Clipart instead of squares and triangles, maybe slightly larger images to
+   accommodate such. (I like foxes and hens)
