@@ -199,7 +199,7 @@ var semiMarkovWalk = function(n, dim) {
   var prevStates = (n==2) ? [init(dim), init(dim)] : semiMarkovWalk(n-1, dim);
   var newState = transition(last(prevStates), secondLast(prevStates));
   var newObservation = observe(newState);
-  canvas.circle(newObservation[0], newObservation[1], "red", 2);
+  canvas.circle(newObservation[0], newObservation[1], 2, "red", "white");
   return prevStates.concat([newState]);
 };
 
@@ -217,7 +217,7 @@ How else could we model points observed in 2D space? We could posit that there a
 var drawPoints = function(canvas, points){
   if (points.length > 0) {
     var next = points[0];
-    canvas.circle(next[0], next[1], "black", 2);
+    canvas.circle(next[0], next[1], 2, "black", "white");
     drawPoints(canvas, points.slice(1));
   }
 }
@@ -791,7 +791,7 @@ var drawLines = function(canvas, start, positions){
 var drawPoints = function(canvas, positions){
   if (positions.length == 0) { return []; }
   var next = positions[0];
-  canvas.circle(next[0], next[1], "red", 2);
+  canvas.circle(next[0], next[1], 2, "red", "white");
   drawPoints(canvas, positions.slice(1));
 }
 
@@ -856,7 +856,7 @@ var drawLines = function(canvas, start, positions){
 var drawPoints = function(canvas, positions){
   if (positions.length == 0) { return []; }
   var next = positions[0];
-  canvas.circle(next[0], next[1], "red", 2);
+  canvas.circle(next[0], next[1], 2, "red", "white");
   drawPoints(canvas, positions.slice(1));
 }
 
