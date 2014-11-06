@@ -305,3 +305,6 @@ print(speaker(_f[0]))
    expectations etc, can handle that.
 3. Clipart instead of squares and triangles, maybe slightly larger images to
    accommodate such. (I like foxes and hens)
+    - google for foxes and hens
+    - google for knights and dragons
+    - [MS Abstract Scenes](http://research.microsoft.com/en-us/um/people/larryz/clipart/abstract_scenes.html)
