@@ -961,7 +961,7 @@ drawLines(canvas, inferredStates[0], inferredStates.slice(1))
 
 ### Particle filter for vision
 
-See the [vision page](/chapters/vision.html). Note the "incremental heuristic factors" pattern that we saw in the previous chapter.
+See the [vision page](/examples/vision.html). Note the "incremental heuristic factors" pattern that we saw in the previous chapter.
 
 Next chapter: [Markov Chain Monte Carlo](/chapters/06-mcmc.html)
 
