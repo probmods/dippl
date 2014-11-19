@@ -389,7 +389,7 @@ The remainder of the model is similar to the above, but with delayed denotations
 var meaning = function(utterance) {
   return combine_meanings(
     filter(function(m){return !(m.sem==undefined)},
-	       map(function(w){return lexical_meaning(w, world)},
+	       map(function(w){return lexical_meaning(w)},
 		       utterance.split(" "))))
 }
 
