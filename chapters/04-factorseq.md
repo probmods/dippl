@@ -199,12 +199,12 @@ var observe = function(s) {
 ///
 
 var hmmRecur = function(n, states, observations){
-  var newstate = transition(states[states.length-1])
-  var newobs = observe(newstate)
-  var states = states.concat([newstate])
-  var observations = observations.concat([newobs])
-  return (n==1) ? {states: states, observations: observations} : 
-                  hmmRecur(n-1,states,observations)
+  var newstate = transition(states[states.length-1]);
+  var newobs = observe(newstate);
+  var newStates = states.concat([newstate]);
+  var newObservations = observations.concat([newobs]);
+  return (n==1) ? {states: newStates, observations: newObservations} : 
+                  hmmRecur(n-1, newStates, newObservations);
 }
 
 var hmm = function(n) {
@@ -289,10 +289,10 @@ var hmmRecur = function(n, states, observations){
   var newstate = transition(states[states.length-1])
   var newobs = observe(newstate)
   factor(newobs==trueobs[observations.length] ? 0 : -Infinity)
-  var states = states.concat([newstate])
-  var observations = observations.concat([newobs])
-  return (n==1) ? {states: states, observations: observations} : 
-                  hmmRecur(n-1,states,observations)
+  var newStates = states.concat([newstate])
+  var newObservations = observations.concat([newobs])
+  return (n==1) ? {states: newStates, observations: newObservations} : 
+                  hmmRecur(n-1, newStates, newObservations)
 }
 
 var hmm = function(n) {
