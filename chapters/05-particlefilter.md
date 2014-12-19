@@ -372,7 +372,7 @@ var _factor = function(k, score){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, "addr", erp, params);
+  return sample({}, function(s, v){k(v)}, "addr", erp, params);
 }
 ///
 
@@ -414,7 +414,7 @@ var _factor = function(k, score){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, "addr", erp, params);
+  return sample({}, function(s, v){k(v)}, "addr", erp, params);
 }
 ///
 
@@ -492,7 +492,7 @@ var runCpsHmm = function(k){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, "addr", erp, params);
+  return sample({}, function(s, v){k(v)}, "addr", erp, params);
 }
 ///
 
@@ -595,7 +595,7 @@ var runCpsHmm = function(k){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, "addr", erp, params);
+  return sample({}, function(s, v){k(v)}, "addr", erp, params);
 }
 
 var _factor = function(k, score){
@@ -672,7 +672,7 @@ To enable this, we store the continuation for each sample so that we can resume 
 
 ///fold:
 var _sample = function(k, erp, params){
-  return sample(k, "addr", erp, params);
+  return sample({}, function(s, v){k(v)}, "addr", erp, params);
 }
 
 var copySample = function(s){

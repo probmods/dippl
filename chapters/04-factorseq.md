@@ -383,15 +383,14 @@ var trueobs = [false, false, false]
 ///
 
 var hmmRecur = function(n, states, observations){
-  var newstate = transition(states[states.length-1])
-//  var newobs = sample(observe(newstate))
-//  factor(newobs==trueobs[observations.length] ? 0 : -Infinity)
-  var newobs = sampleWithFactor(observe(newstate),[],
+  var newState = transition(states[states.length-1])
+  var newObs = sampleWithFactor(observe(newState),[],
                                 function(v){return v==trueobs[observations.length] ? 0 : -Infinity})
-  var states = states.concat([newstate])
-  var observations = observations.concat([newobs])
-  return (n==1) ? {states: states, observations: observations} :
-  hmmRecur(n-1,states,observations)
+  var newStates = states.concat([newState])
+  var newObservations = observations.concat([newObs])
+  return ((n==1) ? 
+          {states: newStates, observations: newObservations} :
+          hmmRecur(n-1, states, observations));
 }
 
 var hmm = function(n) {
@@ -401,7 +400,7 @@ var hmm = function(n) {
 print(Enumerate(function(){
                 var r = hmm(3)
                 return r.states
-                }, 500)  )       
+                }, 500))
 ~~~
 
 (There is one more optimizations we could do for the HMM: we could achieve dynamic programming by inserting additional marginal operators at the boundary of `hmmRecur`, and caching them.)

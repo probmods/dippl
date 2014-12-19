@@ -2,6 +2,7 @@
 
 var topK; // Top-level continuation
 var activeCodeBox;
+var _trampoline;
 
 // Utils
 
@@ -37,18 +38,19 @@ function jsPrint(x){
   }
 }
 
-function print(k, a, x){
+function print(store, k, a, x){
   jsPrint(x);
-  k();
+  k(store);
 }
+
 
 // Bar plots
 
 function barChart(containerSelector, labels, counts){
   $(containerSelector).show();
   var svg = d3.select(containerSelector)
-      .append("svg")
-      .attr("class", "barChart");
+    .append("svg")
+    .attr("class", "barChart");
   var data = [];
   for (var i=0; i<labels.length; i++){
     data.push({
@@ -57,7 +59,6 @@ function barChart(containerSelector, labels, counts){
               });
   };
   var chart = new dimple.chart(svg, data);
-  // chart.setBounds(120, 30, 540, 300);
   chart.setBounds(80, 30, 480, 250);
   var xAxis = chart.addMeasureAxis("x", "Count");
   xAxis.title = null;
@@ -67,6 +68,7 @@ function barChart(containerSelector, labels, counts){
   chart.addSeries("Count", dimple.plot.bar);
   chart.draw();
 }
+
 
 // Drawing
 
@@ -162,26 +164,36 @@ DrawObject.prototype.destroy = function(){
   $(this.canvas).remove();
 }
 
-function Draw(k, a, width, height, visible){
-  return setTimeout(function(){k(new DrawObject(width, height, visible));});
+function Draw(s, k, a, width, height, visible){
+  k(s, new DrawObject(width, height, visible));
 }
 
-function loadImage(k, a, drawObject, url){
+function loadImage(s, k, a, drawObject, url){
   // Synchronous loading - only continue with computation once image is loaded
+  var context = drawObject.canvas.getContext('2d');
   var imageObj = new Image();
   imageObj.onload = function() {
     var raster = new drawObject.paper.Raster(imageObj);
     raster.position = drawObject.paper.view.center;
     drawObject.redraw();
-    k();
+    _trampoline = function(){k(s)};
+    while (_trampoline !== null){
+      _trampoline();
+    }
   };
   imageObj.src = url;
+  _trampoline = null;
 }
+
 
 // Code boxes
 
 function webpplObjectToText(x){
-  return isErp(x) ? "<erp>" : JSON.stringify(x);
+  if (isErp(x)){
+    return "<erp>";
+  } else {
+    return JSON.stringify(x);
+  }
 }
 
 var codeBoxCount = 0;
@@ -232,7 +244,7 @@ function setupCodeBox(element){
     { "id": "result_" + codeBoxCount,
       "class": "resultDiv" });
 
-  var showResult = function(x){
+  var showResult = function(store, x){
     resultDiv.show();
     if (x !== undefined) {
       resultDiv.append(document.createTextNode(webpplObjectToText(x)));
@@ -242,7 +254,10 @@ function setupCodeBox(element){
   var runWebPPL = function(){
     var oldTopK = topK;
     var oldActiveCodeBox = activeCodeBox;
-    topK = showResult;
+    topK = function(s, x){
+      _trampoline = null;
+      showResult(s, x);
+      topK = oldTopK; };
     activeCodeBox = $element;
     activeCodeBox.parent().find("canvas").remove();
     activeCodeBox.parent().find(".resultDiv").text("");
@@ -265,7 +280,7 @@ function setupCodeBox(element){
     activeCodeBox.parent().find(".resultDiv").text("");
     try {
       var result = eval.call(window, cm.getValue());
-      showResult(result);
+      showResult({}, result);
     } catch (err) {
       resultDiv.show();
       resultDiv.append(document.createTextNode((err.stack)));
@@ -303,6 +318,7 @@ function setupCodeBoxes(){
 }
 
 $(setupCodeBoxes);
+
 
 // CPS and addressing forms
 
@@ -345,6 +361,7 @@ var setupNamingForm = function(){
 
 $(setupNamingForm);
 
+
 // Google analytics
 
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -354,6 +371,7 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 
 ga('create', 'UA-54996-12', 'auto');
 ga('send', 'pageview');
+
 
 // Date
 
@@ -367,10 +385,13 @@ function setDate(){
 
 $(setDate);
 
+
 // Special functions for webppl code boxes
 
-var invertMap = function (k, a, obj) {
+var invertMap = function (store, k, a, obj) {
+
   var newObj = {};
+
   for (var prop in obj) {
     if (obj.hasOwnProperty(prop)) {
       var value = obj[prop];
@@ -381,5 +402,6 @@ var invertMap = function (k, a, obj) {
       }
     }
   }
-  return k(newObj);
+
+  return k(store, newObj);
 };
