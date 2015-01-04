@@ -5,6 +5,18 @@ var cx = React.addons.classSet;
 var converter = new Showdown.converter();
 
 
+// For object with integer keys, return max(keys) + 1 (or 0 if empty)
+
+var nextIntegerKey = function(obj){
+  var keys = _.keys(obj).map(function(x){return parseInt(x);});
+  if (keys.length) {
+    return _.max(keys) + 1;
+  } else {
+    return 0;
+  }
+};
+
+
 // Extend _.indexOf to work with functions instead of values
 // Based on http://stackoverflow.com/questions/12356642/
 
@@ -230,6 +242,36 @@ var MarkdownOutputBox = React.createClass({
 });
 
 
+var FileSelector = React.createClass({
+
+  handleChange: function(event){
+    var selectedFile = event.target.value;
+    if (selectedFile === 'new'){
+      this.props.createFile();
+    } else {
+      this.props.loadFile(selectedFile);
+    }
+  },
+
+  render: function(){
+    return (<div id='fileSelector'>
+              <span>File:</span>
+              <select value={this.props.selectedFile} onChange={this.handleChange}>
+                {this.props.fileIdsWithNames.map(function(idWithName){
+                  return <option value={idWithName.id}>{idWithName.name}</option>;
+                })}                
+                <option value="new">New file</option>
+              </select>
+              {this.props.selectedFile != 0 ? 
+               [<button onClick={this.props.renameFile}>rename</button>,
+                <button onClick={this.props.deleteFile}>delete</button>] : 
+               []}
+           </div>);
+  }
+
+});
+
+
 var WebpplEditor = React.createClass({
 
   getInitialState: function(){
@@ -237,34 +279,120 @@ var WebpplEditor = React.createClass({
     if (localState === null){
       // block ids are separate from ordering indices (and only happen to coincide here)
       return {
-        blocks: {
-          1: {type: "text", content: "*Click here* to edit me!", orderingKey: 1},
-          2: {type: "code", content: 'print("hello world!")', orderingKey: 2}
-        },
-        markdownOutputOpen: false
+        selectedFile: 0,
+        markdownOutputOpen: false,
+        files: {
+          0 : {
+            name: 'Default',
+            blocks: {
+              1: {type: "text", content: "*Click here* to edit me!", orderingKey: 1},
+              2: {type: "code", content: 'print("hello world!")', orderingKey: 2}
+            }
+          }
+        }        
       };
     } else {
       var parsedState = JSON.parse(localState);
       parsedState.markdownOutputOpen = false;
       return parsedState;
     }
-  },
+  },  
 
   componentDidUpdate: function(prevProps, prevState) {
     localStorage.WebPPLEditorState = JSON.stringify(this.state);
+    // FIXME: with many files, this will get very slow?
   },
 
-  nextBlockId: function(){
-    var keys = _.keys(this.state.blocks).map(function(x){return parseInt(x);});
-    if (keys.length) {
-      return _.max(keys) + 1;
-    } else {
-      return 0;
+
+  // File handling
+  
+  nextFileId: function(){
+    return nextIntegerKey(this.state.files);
+  },
+
+  loadFile: function(file){
+    if (file in this.state.files){
+      this.setState({
+        selectedFile: file
+      });
     }
   },
 
+  renameFile: function(){
+    if (this.state.selectedFile == 0){
+      alert('Cannot rename default file!');
+    } else {
+      var currentName = this.state.files[this.state.selectedFile].name
+      var newName = window.prompt("Rename '" + currentName + "' to?", "");
+      if (newName){
+        var newFiles = _.clone(this.state.files);
+        newFiles[this.state.selectedFile] = _.clone(this.state.files[this.state.selectedFile]);
+        newFiles[this.state.selectedFile].name = newName;
+        this.setState({
+          files: newFiles
+        });
+      }
+    }
+  },
+
+  deleteFile: function(){
+    if (this.state.selectedFile == 0){
+      alert('Cannot delete default file!');
+    } else {
+      var newFiles = _.clone(this.state.files);
+      delete newFiles[this.state.selectedFile];
+      this.setState({
+        files: newFiles,
+        selectedFile: 0
+      });
+    }
+  },
+
+  createFile: function(){
+    // pop up alert box, ask for filename
+    var newFileId = this.nextFileId();
+    var newFileName = window.prompt("New file name?", "");
+    // check that files doesn't exist already
+    if (!newFileName || (newFileName.trim() === '')){
+      alert('Filename empty!');
+      return;
+    }
+    if (newFileName in _.keys(this.state.files)){
+      alert('File ' + newFileName + ' already exists!');
+      return;
+    }
+    // create empty file in state
+    // and set new filename as current filename
+    newFiles = _.clone(this.state.files);
+    newFiles[newFileId] = { name: newFileName, blocks: {} };
+    this.setState({
+      selectedFile: newFileId,
+      files: newFiles
+    });
+  },
+
+
+  // Block handling
+
+  updateBlocks: function(blocks){
+    var newFiles = _.clone(this.state.files);
+    newFiles[this.state.selectedFile] = _.clone(this.state.files[this.state.selectedFile]);
+    newFiles[this.state.selectedFile].blocks = blocks
+    this.setState({
+      files: newFiles
+    });
+  },
+  
+  currentBlocks: function(){
+    return this.state.files[this.state.selectedFile].blocks;
+  },
+  
+  nextBlockId: function(){
+    return nextIntegerKey(this.currentBlocks());
+  },
+
   nextOrderingKey: function(){
-    var keys = _.values(this.state.blocks).map(function(block){return block.orderingKey;});
+    var keys = _.values(this.currentBlocks()).map(function(block){return block.orderingKey;});
     if (keys.length) {
       return _.max(keys) + 1;
     } else {
@@ -273,14 +401,14 @@ var WebpplEditor = React.createClass({
   },
 
   addBlock: function(type, content){
-    var newBlocks = _.clone(this.state.blocks);
+    var newBlocks = _.clone(this.currentBlocks());
     var newBlock = {
       type: type,
       content: content,
       orderingKey: this.nextOrderingKey()
     };
     newBlocks[this.nextBlockId()] = newBlock;
-    this.setState({blocks: newBlocks});
+    this.updateBlocks(newBlocks);
   },
 
   addCodeBlock: function(){
@@ -292,22 +420,22 @@ var WebpplEditor = React.createClass({
   },
 
   updateBlockContent: function(blockId, content){
-    var newBlocks = _.clone(this.state.blocks);
-    var updatedBlock = _.clone(this.state.blocks[blockId]);
+    var newBlocks = _.clone(this.currentBlocks());
+    var updatedBlock = _.clone(this.currentBlocks()[blockId]);
     updatedBlock.content = content;
     newBlocks[blockId] = updatedBlock;
-    this.setState({blocks: newBlocks});
+    this.updateBlocks(newBlocks);
   },
 
   removeBlock: function(blockId){
-    var newBlocks = _.clone(this.state.blocks);
+    var newBlocks = _.clone(this.currentBlocks());
     delete newBlocks[blockId];
-    this.setState({blocks: newBlocks});
+    this.updateBlocks(newBlocks);
   },
 
   moveBlock: function(blockId, direction){
     // Get ordered list of blocks (with ids)
-    var orderedBlockList = getOrderedBlockList(this.state.blocks);
+    var orderedBlockList = getOrderedBlockList(this.currentBlocks());
 
     // Figure out where blockId is in that list
     var i = _.indexOf(orderedBlockList, function(block){return block.id == blockId;});
@@ -337,7 +465,7 @@ var WebpplEditor = React.createClass({
       newBlocks[id] = block;
     });
 
-    this.setState({blocks: newBlocks});
+    this.updateBlocks(newBlocks);
   },
 
   toggleMarkdownOutput: function(){
@@ -350,7 +478,14 @@ var WebpplEditor = React.createClass({
 
   render: function() {
     var that = this;
-    var orderedBlocks = getOrderedBlockList(this.state.blocks);
+    var fileIdsWithNames = [];
+    _.pairs(this.state.files).forEach(function(filePair){
+      fileIdsWithNames.push({
+        id: filePair[0],
+        name: filePair[1].name
+      });
+    });
+    var orderedBlocks = getOrderedBlockList(this.currentBlocks());
     var renderedBlocks = [];
     orderedBlocks.map(function(block){
       if (block.type === "text") {
@@ -359,14 +494,14 @@ var WebpplEditor = React.createClass({
                                                removeMe={that.removeBlock.bind(that, block.id)}
                                                moveUp={that.moveBlock.bind(that, block.id, "up")}
                                                moveDown={that.moveBlock.bind(that, block.id, "down")}
-                                               key={block.id} />);
+                                               key={that.state.selectedFile + '-' + block.id} />);
       } else if (block.type === "code") {
         var renderedBlock = (<CodeInputBox initialCode={block.content}
                                            updateCode={that.updateBlockContent.bind(that, block.id)}
                                            removeMe={that.removeBlock.bind(that, block.id)}
                                            moveUp={that.moveBlock.bind(that, block.id, "up")}
                                            moveDown={that.moveBlock.bind(that, block.id, "down")}
-                                           key={block.id} />);
+                                           key={that.state.selectedFile + '-' + block.id} />);
       } else {
         console.error("Unknown block type: ", block.type);
       }
@@ -377,11 +512,17 @@ var WebpplEditor = React.createClass({
           {renderedBlocks}
         </div>
         <div id="editorControls">
+          <FileSelector fileIdsWithNames={fileIdsWithNames} 
+                        selectedFile={this.state.selectedFile}
+                        loadFile={this.loadFile} 
+                        createFile={this.createFile} 
+                        deleteFile={this.deleteFile} 
+                        renameFile={this.renameFile} />
           <button onClick={this.addCodeBlock}>add code</button>
           <button onClick={this.addTextBlock}>add text</button>
           <button onClick={this.toggleMarkdownOutput}>toggle output</button>
         </div>
-        <MarkdownOutputBox blocks={this.state.blocks} open={this.state.markdownOutputOpen}/>
+        <MarkdownOutputBox blocks={this.currentBlocks()} open={this.state.markdownOutputOpen}/>
       </div>);
   }
 });
