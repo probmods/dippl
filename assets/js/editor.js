@@ -276,6 +276,21 @@ var WebpplEditor = React.createClass({
 
   getInitialState: function(){
     var localState = localStorage.getItem("WebPPLEditorState");
+
+    if (localState.blocks){
+      // deprecated single-file version of LocalStorage
+      return {
+        selectedFile: 0,
+        markdownOutputOpen: false,
+        files: {
+          0 : {
+            name: 'Default',
+            blocks: localState.blocks
+          }
+        }        
+      };
+    }
+
     if (localState === null){
       // block ids are separate from ordering indices (and only happen to coincide here)
       return {
