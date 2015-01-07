@@ -8,7 +8,6 @@ Requirements:
 
 - [git](http://git-scm.com/)
 - [nodejs](http://nodejs.org)
-- [bower](http://bower.io/)
 - [jekyll](http://jekyllrb.com/)
 
 Installation:
@@ -18,6 +17,7 @@ Installation:
     git submodule update --init --recursive
     npm install
     npm install -g browserify    
+    npm install -g bower
     bower install
 
 Run local webserver:
