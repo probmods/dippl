@@ -109,6 +109,7 @@ a.navbar-brand strong {
 pre {
    border: none;
    background-color: #fff;
+   white-space: pre-wrap;
 }
 
 .CodeMirror, .resultDiv {
