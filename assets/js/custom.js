@@ -80,7 +80,7 @@ function DrawObject(width, height, visible){
   })[0];
   if (visible==true){
     $(this.canvas).css({"display": "inline"});
-    $(activeCodeBox).append(this.canvas);
+    $(activeCodeBox).parent().append(this.canvas);
   };
   this.paper = new paper.PaperScope();
   this.paper.setup(this.canvas);
@@ -245,8 +245,8 @@ function setupCodeBox(element){
       "class": "resultDiv" });
 
   var showResult = function(store, x){
-    resultDiv.show();
     if (x !== undefined) {
+      resultDiv.show();
       resultDiv.append(document.createTextNode(webpplObjectToText(x)));
     }
   };
@@ -298,13 +298,16 @@ function setupCodeBox(element){
       }
     });
 
-  $element.parent().append(resultDiv);
+  var runButtonDiv = $("<div/>");
+  runButtonDiv.append(runButton);
 
   if (getLanguage() == "static"){
     cm.setValue(cm.getValue().split("\n").slice(1).join("\n").trim());
   } else {
-    $element.parent().append(runButton);
+    $element.parent().append(runButtonDiv);
   }
+
+  $element.parent().append(resultDiv);
 
   codeBoxCount += 1;
 
