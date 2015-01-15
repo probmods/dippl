@@ -45,7 +45,7 @@ ExploreFirst(binomial)
 ~~~
 
 This set of functions does indeed go back and forth between the binomial computation and the 'randomness handling' functions to explore a possible execution of the program. 
-However, it is only able to explore a single path through the computation.... We would like to be able to 'return' from the `sample` function *multiple times* with different values. If we could do so, we could try each value from the support to see what return values ultimately come from the computation. We can't do this by an ordinary function return, however; we need an explicit handle to the return context, that is we need to reify the *future of the computation* from the point that `sample` is called. Such a reified computation future is called a **continuation**.
+However, it is only able to explore a single path through the computation.... We would like to be able to 'return' from the `_sample` function *multiple times* with different values. If we could do so, we could try each value from the support to see what return values ultimately come from the computation. We can't do this by an ordinary function return, however; we need an explicit handle to the return context. We need to reify the *future of the computation* from the point that `sample` is called. Such a reified computation future is called a **continuation**.
 
 ## Continuations
 
@@ -112,8 +112,7 @@ Look at the `else` branch and note how continuation-passing style turns nested f
 Compare to another way of writing the factorial function, the **tail-recursive** form. In this form, standard style and continuation-passing style are basically identical:
 
 ~~~~
-// Standard version:
-
+// Standard tail-recursive version:
 var factorial2 = function(n, a) {
   if (n == 0) {
     return a;
@@ -122,9 +121,7 @@ var factorial2 = function(n, a) {
   }
 }
 
-
 // CPS version:
-
 var cpsFactorial2 = function(k, n, a) {
   if (n == 0) {
     k(a);
@@ -132,7 +129,6 @@ var cpsFactorial2 = function(k, n, a) {
     cpsFactorial2(k, n-1, n*a);
   }
 }
-
 
 print(factorial2(5, 1))
 
@@ -171,7 +167,6 @@ As a final example, let's write our earlier binomial function in CPS:
 
 ~~~
 // Standard version:
-
 var binomial = function(){
   var a = sample(bernoulliERP, [0.5])
   var b = sample(bernoulliERP, [0.5])
@@ -179,9 +174,7 @@ var binomial = function(){
   return a + b + c
 }
 
-
 // CPS version:
-
 var cpsSample = function(k, erp, params){
   return k(sample(erp, params))
 }

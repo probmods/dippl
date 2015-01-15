@@ -28,11 +28,12 @@ Following the notation from the [Mozilla Parser API](https://developer.mozilla.o
 - *ArrayExpression* - e.g. `[1, 2, 3]`
 - *MemberExpression* - e.g. `Math.log`
 - *BinaryExpression* - e.g. `3 + 4`
+- *LogicalExpression* - e.g. `true || false`
 - *UnaryExpression* - e.g. `-5`
 - *ObjectExpression* - e.g. `{a: 1, b: 2}` (currently object properties cannot be functions)
 
-Note that there are no *AssignmentExpression*s or looping constructs. This is because a purely functional language is much easier to transform into Continuation Passing Style (CPS), which the WebPPL implementation uses to implement inference algorithms such as Enumeration and Particle Filtering.
-While these restrictions mean that common Javascript programming patterns aren't possible, this subset is still universal, because we allow recursive and higher-order functions. It encourages a functional style, similar to Haskel or LISP, that is pretty easy to use (once you get use to thinking functionally!).
+Note that there are no *AssignmentExpression*s or looping constructs (e.g., `for`, `while`, `do`). This is because a purely functional language is much easier to transform into Continuation Passing Style (CPS), which the WebPPL implementation uses to implement inference algorithms such as Enumeration and Particle Filtering.
+While these restrictions mean that common Javascript programming patterns aren't possible, this subset is still universal, because we allow recursive and higher-order functions. It encourages a functional style, similar to Haskell or LISP, that is pretty easy to use (once you get used to thinking functionally!).
 
 Here is a (very boring) program that uses most of the syntax we have available:
 
