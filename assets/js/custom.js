@@ -53,10 +53,12 @@ function barChart(containerSelector, labels, counts){
     .attr("class", "barChart");
   var data = [];
   for (var i=0; i<labels.length; i++){
-    data.push({
-                "Label": JSON.stringify(labels[i]),
-                "Count": counts[i]
-              });
+    if (counts[i] > 0) {
+      data.push({
+        "Label": JSON.stringify(labels[i]),
+        "Count": counts[i]
+      });
+    }
   };
   var chart = new dimple.chart(svg, data);
   chart.setBounds(80, 30, 480, 250);
