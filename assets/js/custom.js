@@ -38,7 +38,7 @@ function jsPrint(x){
   }
 }
 
-function hist(store, s, k, lst) {
+function hist(s, k, a, lst) {
   var resultDiv = $(activeCodeBox.parent().find(".resultDiv"));
   var frequencyDict = _(lst).countBy(function(x) { return x + ""});
   var labels = _(frequencyDict).keys();
