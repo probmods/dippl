@@ -38,6 +38,17 @@ function jsPrint(x){
   }
 }
 
+function hist(store, s, k, lst) {
+  var resultDiv = $(activeCodeBox.parent().find(".resultDiv"));
+  var frequencyDict = _(lst).countBy(function(x) { return x + ""});
+  var labels = _(frequencyDict).keys();
+  var counts = _(frequencyDict).values();
+
+  var resultDivSelector = "#" + resultDiv.attr('id');
+
+  k(s, barChart(resultDivSelector, labels, counts));
+}
+
 function print(store, k, a, x){
   jsPrint(x);
   k(store);
