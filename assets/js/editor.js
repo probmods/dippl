@@ -254,6 +254,7 @@ var FileSelector = React.createClass({
   },
 
   render: function(){
+    $("title").text("Editor: " + this.props.fileIdsWithNames[ parseInt(this.props.selectedFile) ].name);    
     return (<div id='fileSelector'>
               <span>File:</span>
               <select value={this.props.selectedFile} onChange={this.handleChange}>
