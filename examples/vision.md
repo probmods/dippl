@@ -180,7 +180,7 @@ A richer image prior:
 
 ~~~~
 ///fold:
-var targetImage = Draw(50, 50, true);
+var targetImage = Draw(50, 50, false);
 loadImage(targetImage, "/assets/img/beach.png")
 
 var uniformDraw = function(xs){
@@ -224,7 +224,7 @@ var makeLines = function(n, lines){
   var x1 = randomInteger(50);
   var y1 = randomInteger(50);
   var x2 = randomInteger(50);
-  var y2 = randomInteger(50);
+  var y2 = y1;
   var strokeWidth = randomStrokeWidth();
   var opacity = randomOpacity();
   var color = randomColor();
@@ -233,14 +233,29 @@ var makeLines = function(n, lines){
 }
 ///
 
+var counter = [];
+
 MH(
   function(){
     var lines = makeLines(8, []);
-    var finalGeneratedImage = Draw(50, 50, true);
+    
+
+    var showOutputImage = (counter.length % 100 == 0);
+    var finalGeneratedImage = Draw(50, 50, showOutputImage);
+
     drawLines(finalGeneratedImage, lines);
     var newScore = -targetImage.distance(finalGeneratedImage)/1000; // Increase to 10000 to see more diverse samples
     factor(newScore);
-    // print(newScore);
+    
+    if (!showOutputImage) {
+      finalGeneratedImage.destroy()
+    }
+    
+    counter.push(1);
+    
     return lines
-   }, 1000)
+   }, 2500);
+
+// show target image for comparison
+loadImage(Draw(50, 50, true), "/assets/img/beach.png")
 ~~~~
