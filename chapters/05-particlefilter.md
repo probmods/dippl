@@ -333,7 +333,7 @@ var _factor = function(k, score){
 }
 
 var _sample = function(k, erp, params){
-  return sample(k, "addr", erp, params);
+  return sample({}, k, "addr", erp, params);
 }
 ~~~~
 
