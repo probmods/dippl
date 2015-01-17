@@ -25,6 +25,7 @@ function isErpWithSupport(x){
 
 function jsPrint(x){
   var resultDiv = $(activeCodeBox.parent().find(".resultDiv"));
+  resultDiv.show();
   if (isErpWithSupport(x)){
     var params = Array.prototype.slice.call(arguments, 2);
     var labels = x.support(params);
@@ -291,12 +292,11 @@ function setupCodeBox(element){
     activeCodeBox = $element;
     activeCodeBox.parent().find("canvas").remove();
     activeCodeBox.parent().find(".resultDiv").text("");
-    // Show result div s.t. jsPrint can write to it
-    resultDiv.show();
     try {
       var result = eval.call(window, cm.getValue());
       showResult({}, result);
     } catch (err) {
+      resultDiv.show();
       resultDiv.append(document.createTextNode((err.stack)));
       throw err;
     }
