@@ -291,11 +291,12 @@ function setupCodeBox(element){
     activeCodeBox = $element;
     activeCodeBox.parent().find("canvas").remove();
     activeCodeBox.parent().find(".resultDiv").text("");
+    // Show result div s.t. jsPrint can write to it
+    resultDiv.show();
     try {
       var result = eval.call(window, cm.getValue());
       showResult({}, result);
     } catch (err) {
-      resultDiv.show();
       resultDiv.append(document.createTextNode((err.stack)));
       throw err;
     }
