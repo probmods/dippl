@@ -29,7 +29,12 @@ function jsPrint(x){
   if (isErpWithSupport(x)){
     var params = Array.prototype.slice.call(arguments, 2);
     var labels = x.support(params);
-    var counts = _.map(labels, function(label){return Math.exp(x.score(params, label));});
+    var scores = _.map(labels, function(label){return x.score(params, label);});
+    if (_.find(scores, isNaN) !== undefined){
+      resultDiv.append(document.createTextNode("ERP with NaN scores!\n"));
+      return;
+    }
+    var counts = scores.map(Math.exp);
     var resultDivSelector = "#" + resultDiv.attr('id');
     barChart(resultDivSelector, labels, counts);
   } else {
