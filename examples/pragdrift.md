@@ -6,7 +6,7 @@ title: Pragmatic Broadening
 A number of extensions of RSA rely on the notion of pragmatic broadening, where the meaning of a word is "broadened" or "extended" in a context dependent manner so as to facilitate the understanding of non-literal utterances.
 This page describes the process of pragmatic broadening in a unified manner (synthesizing work on hyperbole and metaphor) and outlines implications of this process in models of language learning/change.
 
-## What is pragmatic broadening?
+## Definitions etc.
 
 Broadening refers to the modification of a words semantics such that it returns true for more worlds than it did previously. 
 More formally, broadening refers to the replacing of a words semantic meaning by a broadened semantic meaning, which is relevantly entailed by the original meaning. 
