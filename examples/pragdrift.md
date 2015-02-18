@@ -43,10 +43,10 @@ var litListener = function(utt, proj, lex) {
 
 // Input: a world, a semantic projection, a rationality weight, and a lexicon
 // Output: an utterance that is likely to make the litListener give high posterior to the world 
-var speaker = function(world, proj, alpha, lex) {
+var speaker = function(world, proj, lex) {
   Enumerate(function() {
     var utt = sample(uttPrior);
-    factor(alpha * litListener(utt, proj, lex).score([], world));
+    factor(litListener(utt, proj, lex).score([], world));
     return utt;
   });
 }
@@ -59,7 +59,7 @@ var pragListenerSample = function(utt, sAlpha, lex, retVal) {
   // sample worlds
   var world = sample(worldPrior);
   // condition on speaker saying utterance given world and projection
-  factor(speaker(world, proj, sAlpha, lex).score([], utt));
+  factor(sAlpha * speaker(world, proj, lex).score([], utt));
   if (retVal == "proj") {
     return proj;
   } else if (retVal == "state") {
@@ -1735,7 +1735,6 @@ Again, note that this lexicalization is very different from the examples of broa
 As a final case, we consider the lexicalization of specificity implicatures, in particular the classic case "some" vs "all". 
 
 ~~~~
-// world is two booleans: isCamp = is there coordinated group action, and isMil = is there military action
 var makeWorldPrior = function(weights) {
   Enumerate(function() { 
     var worlds = ['SOMENOTALL', 'ALL', 'NONE'];
@@ -1766,7 +1765,6 @@ var makeUttPrior = function(weights) {
 // prior reflects assumed costs, "null campaign" is costlier than two word phrases.
 var uttPrior = makeUttPrior([1, 1, 0.01]);
 
-// possible lexica (include incorrect one)
 var lexica = [
   // original meaning
   function(utt, world, proj) {
@@ -1930,6 +1928,7 @@ print(meanDiriDist(last(iterateComplexLearning("some", 1.0, lexDiriPrior, 10, 10
 These simulations show that the "incorrect" refinement to "all" is suppressed (as expected).
 Moreover, the "original" meaning dominates and in fact as the context implicates "some but not all" more and more the "simple" distribution over lexica converges to having half of the probability mass on the refined meaning and half on the "original".
 In other words, this type of refinement is not strongly lexicalized (since the refined meaning also falls out of the pragmatics).
+
 
 ## TODOs
 
