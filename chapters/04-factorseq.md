@@ -147,7 +147,7 @@ var binomial = function(){
   return a + b + c
 }
 
-print(Enumerate(binomial, 2))
+print(Enumerate(binomial, 3))
 ~~~
 
 It is clear first of all that we can move the factor up, to the point when it's first dependency is bound. In general factor statements can be moved anywhere in the same control scope as they started (i.e. they must be reached in the same program executions and not cross a marginalization boundary). In this case:
@@ -161,7 +161,7 @@ var binomial = function(){
   return a + b + c
 }
 
-print(Enumerate(binomial, 2))
+print(Enumerate(binomial, 3))
 ~~~
 
 But we can do much better by noticing that this factor can be broken into an equivalent two factors, and again one can be moves up:
