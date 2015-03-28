@@ -535,7 +535,7 @@ var WebpplEditor = React.createClass({
                         renameFile={this.renameFile} />
           <button className="btn btn-default" onClick={this.addCodeBlock}>add code</button>
           <button className="btn btn-default" onClick={this.addTextBlock}>add text</button>
-          <button className="btn btn-default hidden-xs" onClick={this.toggleMarkdownOutput}>toggle output</button>
+          <button className="btn btn-default hidden-xs" onClick={this.toggleMarkdownOutput}>.md</button>
         </div>
         <MarkdownOutputBox blocks={this.currentBlocks()} open={this.state.markdownOutputOpen}/>
       </div>);
