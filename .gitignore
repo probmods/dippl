@@ -3,3 +3,4 @@ _site/*
 node_modules/.bin/
 node_modules/browserify/
 node_modules/paper/
+assets/js/webppl.js

@@ -2,8 +2,6 @@
 
 A web book, available online at [dippl.org](http://dippl.org/)
 
-[WebPPL](https://github.com/probmods/webppl) is included as a submodule.
-
 Requirements:
 
 - [git](http://git-scm.com/)
@@ -24,11 +22,7 @@ Run local webserver:
 
     jekyll serve --watch
 
-Pull upstream changes to repo:
+Update webppl:
 
-    git pull origin gh-pages
-    git submodule update --recursive
-
-Update submodule to latest version of webppl and compile webppl for use in browser:
-
-    ./update-webppl
+    browserify -t brfs PATH/TO/webppl/src/main.js > assets/js/webppl.js
+    uglifyjs assets/js/webppl.js -b ascii_only=true,beautify=false > assets/js/webppl.min.js
