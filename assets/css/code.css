@@ -69,6 +69,10 @@ div#editorControls div#fileSelector {
    float: left;
 }
 
+div#editorControls button {
+   margin-left: 5px
+}
+
 div#fileSelector span {
    margin-right: 5px;
 }
