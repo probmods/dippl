@@ -905,7 +905,7 @@ var transition = function(lastPos, secondLastPos){
 
 var observeConstrained = function(pos, trueObs){
   return map2(
-    function(x, obs){ return gaussianFactor(x, 5, obs); },
+    function(x, obs){ return factor(gaussianERP.score([x, 5], obs)); },    
 	pos,
     trueObs
   );

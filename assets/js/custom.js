@@ -1,8 +1,6 @@
 "use strict";
 
-var topK; // Top-level continuation
 var activeCodeBox;
-var _trampoline;
 
 // Utils
 
@@ -52,12 +50,12 @@ function hist(s, k, a, lst) {
 
   var resultDivSelector = "#" + resultDiv.attr('id');
 
-  k(s, barChart(resultDivSelector, labels, counts));
+  return k(s, barChart(resultDivSelector, labels, counts));
 }
 
 function print(store, k, a, x){
   jsPrint(x);
-  k(store);
+  return k(store);
 }
 
 
@@ -184,7 +182,7 @@ DrawObject.prototype.destroy = function(){
 }
 
 function Draw(s, k, a, width, height, visible){
-  k(s, new DrawObject(width, height, visible));
+  return k(s, new DrawObject(width, height, visible));
 }
 
 function loadImage(s, k, a, drawObject, url){
@@ -195,13 +193,13 @@ function loadImage(s, k, a, drawObject, url){
     var raster = new drawObject.paper.Raster(imageObj);
     raster.position = drawObject.paper.view.center;
     drawObject.redraw();
-    _trampoline = function(){k(s)};
-    while (_trampoline !== null){
-      _trampoline();
+    var trampoline = k(s);
+    while (trampoline){
+      trampoline = trampoline();
     }
   };
   imageObj.src = url;
-  _trampoline = null;
+  return false;
 }
 
 
@@ -271,26 +269,12 @@ function setupCodeBox(element){
   };
 
   var runWebPPL = function(){
-    var oldTopK = topK;
     var oldActiveCodeBox = activeCodeBox;
-    topK = function(s, x){
-      _trampoline = null;
-      showResult(s, x);
-      topK = oldTopK; };
     activeCodeBox = $element;
     activeCodeBox.parent().find("canvas").remove();
     activeCodeBox.parent().find(".resultDiv").text("");
-    try {
-      var compiled = webppl.compile(cm.getValue(), true);
-      eval.call(window, compiled);
-    // } catch (err) {
-    //   resultDiv.show();
-    //   resultDiv.append(document.createTextNode((err.stack)));
-      // throw err;
-    } finally {
-      // topK = oldTopK;
-      // activeCodeBox = oldActiveCodeBox;
-    }
+    var compiled = webppl.compile(cm.getValue(), true);
+    eval.call(window, compiled)({}, showResult, '');
   };
 
   var runJS = function(){
@@ -370,7 +354,12 @@ var setupCpsForm = function(){
   setupTransformForm("#cpsInput", "#cpsOutput", updateCpsForm);
 };
 
-$(setupCpsForm);
+$(function(){
+  if ($("#cpsInput").length){
+    $(setupCpsForm);
+  }
+});
+
 
 // Naming
 
@@ -381,7 +370,11 @@ var setupNamingForm = function(){
   setupTransformForm("#namingInput", "#namingOutput", updateNamingForm);
 };
 
-$(setupNamingForm);
+$(function(){
+  if ($("#namingInput").length){
+    $(setupNamingForm);
+  }
+});
 
 
 // Google analytics

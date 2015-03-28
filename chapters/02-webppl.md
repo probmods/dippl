@@ -51,13 +51,6 @@ foo(5)
 
 Functions from the Javscript environment that WebPPL is called from can be used in a WebPPL program, with a few restrictions. First, these external functions must be deterministic and can carry no state from one call to another. (That is, the functions must be 'referentially transparent': calling obj.foo(args) must always return the same value when called with given arguments.) Second, external functions can't be called with a WebPPL function as an argument (that is, they can't be higher-order). Third, external functions must be invoked as the method of an object (indeed, this is the only use of object method invocation currently possible in WebPPL). So the use of `Math.log()` in the above example is allowed: it is a deterministic function invoked as a method of the `Math` object (which is a standard object in the Javascript global environment).
 
-Functions defines in the top level of a WebPPL program also become available in the Javascript environment. So we can, for instance, use the above function `foo` without re-declaring it:
-
-~~~
-foo(3)
-~~~
-
-
 ## With random sampling
 
 WebPPL is not just a subset of Javascript: is is a subset augmented with the ability to represent and manipulate *probability distributions*. Elementary Random Primitives (ERPs) are the basic object type that represents distributions. Under the hood an ERP `e` has a method `e.sample` that returns a sample from the distribution, a method `e.score` that returns the log-probability of a possible sampled value, and (optionally) a method `e.support` that returns the support of the distribution. However, these methods should not be called directly -- in order for inference operators (described later) to work ERPs should be used through the WebPPL keywords `sample`, `factor`, and so on. 
