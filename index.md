@@ -46,7 +46,7 @@ N. D. Goodman and A. Stuhlmüller (electronic). The Design and Implementation of
 - [Book content](https://github.com/probmods/dippl)<br>
   *Markdown code for the book chapters*
 
-- [WebPPL](https://github.com/probmods/webppl)<br>
+- [WebPPL](http://webppl.org)<br>
   *A probabilistic programming language for the web*
 
 ### Acknowledgments
