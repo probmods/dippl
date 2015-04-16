@@ -18,7 +18,17 @@ We use program transformations to expose the information required by these algor
 We illustrate these ideas with examples drawn from semantic parsing, natural language pragmatics, and procedural graphics.
 
 **Citing:** Please cite this book as: 
-N. D. Goodman and A. Stuhlmüller (electronic). The Design and Implementation of Probabilistic Programming Languages. Retrieved <span id="date"></span> from `http://dippl.org`.
+N. D. Goodman and A. Stuhlmüller (electronic). The Design and Implementation of Probabilistic Programming Languages. Retrieved <span class="date"></span> from `http://dippl.org`. <a id="toggle-bibtex" href="#">[bibtex]</a>
+
+<pre id="bibtex">
+@misc{dippl,
+  title = {% raw %}{{The Design and Implementation of Probabilistic Programming Languages}}{% endraw %},
+  author = {Goodman, Noah D and Stuhlm\"{u}ller, Andreas},
+  year = {2014},
+  howpublished = {\url{http://dippl.org}},
+  note = {Accessed: <span class="date"></span>}
+}
+</pre>
 
 {% assign sorted_pages = site.pages | sort:"name" %}
 

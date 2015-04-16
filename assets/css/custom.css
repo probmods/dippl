@@ -105,3 +105,10 @@ a.navbar-brand strong {
 div.container ul {
    margin-bottom: 1em;
 }
+
+
+/* Bibtex */
+
+pre#bibtex {
+   display: none;
+}

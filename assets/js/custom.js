@@ -395,11 +395,19 @@ function setDate(){
   var dd = today.getDate();
   var mm = today.getMonth() + 1; //January is 0!
   var yyyy = today.getFullYear();
-  $("#date").text(yyyy+'/'+mm+'/'+dd);
+  $(".date").text(yyyy+'-'+mm+'-'+dd);
 }
 
 $(setDate);
 
+
+// Bibtex
+
+function setBibtex(){
+  $('#toggle-bibtex').click(function(){$('#bibtex').toggle(); return false;});
+}
+
+$(setBibtex)
 
 // Special functions for webppl code boxes
 
