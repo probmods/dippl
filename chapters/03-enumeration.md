@@ -21,7 +21,7 @@ var binomial = function(){
 print(Enumerate(binomial))
 ~~~
 
-We can view `sample` and `factor` as simple 'side-computations' for exploring the main `binomial` computation. To make this concrete, let's implement `sample` as an ordinary function that always choose the first element of the support of any random choice. We will kick-off this exploration by calling `ExploreFirst`, which simply calls the computation. (In the following we rename `sample` to `_sample` to avoid conflicting with the WebPPL built in `sample` function.)
+We can view `sample` and `factor` as simple 'side-computations' for exploring the main `binomial` computation. To make this concrete, let's implement `sample` as an ordinary function that always chooses the first element of the support of any random choice. We will kick-off this exploration by calling `ExploreFirst`, which simply calls the computation. (In the following we rename `sample` to `_sample` to avoid conflicting with the WebPPL built in `sample` function.)
 
 ~~~
 // language: javascript
