@@ -14,7 +14,7 @@ Let's look at a few examples.
 
 ### Vision
 
-In this example, we are trying to compute the posterior distribution on lines based on a factor that encourages that the lines approximately match the target image:
+In this example, we are trying to compute the posterior distribution on lines based on a factor that encourages lines which approximately match the target image:
 
 ~~~~
 var targetImage = Draw(50, 50, true);
@@ -66,12 +66,12 @@ var lineDist = EnumerateDepthFirst(
 print(lineDist)
 ~~~~
 
-We first explore all images where *all* lines start at the bottom-rightmost pixel, and one of the lines ends a few pixels further up. Looking at the histogram, we see that all of these images are equally bad -- none of the lines overlap with the lines in the target image. This is probably not the ideal exploration strategy for a state space that contains more than a trillion possible program executions.
+We first explore all images where *all* lines start at the bottom-rightmost pixel, and one of these lines ends a few pixels further up. Looking at the histogram, we see that all of these images are equally bad -- none of the lines overlap with the lines in the target image. This is probably not the ideal exploration strategy for a state space that contains more than a trillion possible program executions.
 
 
 ### Gaussian random walk
 
-Gaussian random walk models can be used e.g. to model financial time series data. Here we show a two-dimensional random walk:
+Gaussian random walk models are used, for example, to model financial time series data. Here we show a two-dimensional random walk:
 
 ~~~~
 ///fold:
@@ -115,7 +115,7 @@ drawLines(canvas, positions[0], positions.slice(1))
 
 ### Semi-Markov random walk
 
-For many systems, the Markov assumption -- each point only depends on the previous point -- does not quite hold. In such cases, we can introduce dependence on multiple previous time steps. For example, the model below uses a momentum term that depends on the last two time steps:
+The Markov assumption -- each point only depends on the previous point -- does not quite hold for many systems. In such cases, we can introduce dependence on multiple previous time steps. For example, the model below uses a momentum term that depends on the last two time steps:
 
 ~~~~
 ///fold:
@@ -159,7 +159,7 @@ drawLines(canvas, positions[0], positions.slice(1))
 
 ### Hidden Semi-Markov model
 
-We have previously seen [Hidden Markov models](/chapters/04-factorseq.html). There, the latent state was unobserved and we only got to observe a stochastic function of the latent state at each time step. We can apply the same principle to semi-Markov models. The model below could be used (for example) to model radar observations of the flight path of a plane.
+Previously, we saw [Hidden Markov models](/chapters/04-factorseq.html). There, the latent state was unobserved, and we were only able to observe a stochastic function of the latent state at each time step. We can apply the same principle to semi-Markov models. The model below could be used (for example) to model radar observations of the flight path of a plane.
 
 ~~~~
 ///fold:
@@ -210,7 +210,7 @@ print("done")
 
 ### Gaussian mixture
 
-How else could we model points observed in 2D space? We could posit that there are two clusters around which the points tend to center:
+How else could we model points observed in a two-dimensional space? We could posit that there are two clusters around which the points tend to center:
 
 ~~~~
 ///fold:
@@ -255,17 +255,17 @@ drawPoints(canvas, points)
 
 ## Likelihood weighting
 
-How can we estimate the marginal distribution for models such as the ones above?
+How can we estimate marginal distributions for models such as the ones above?
 
-If there are a large number of execution paths, it is clear that we cannot explore all paths individually. This leaves two possibilities: either we reason about paths more abstractly, or we explore only a subset of paths. In these notes, we focus on the second possibility[^1].
+If there is a large number of execution paths, clearly, we cannot explore all paths individually. This leaves two possibilities: either we reason about paths more abstractly, or we explore only a subset of paths. In these notes, we focus on the second possibility[^1].
 
 [^1]: Dynamic Programming (caching) can be viewed as an instance of reasoning about many concrete paths at once.
 
-Previously, we have enumerated paths using depth-first search, breadth-first search, and a probability-based priority queue. However, this approach can result in an unrepresentative set of paths for models with large state spaces, and for uncountably infinite state spaces it isn't even clear what exactly we are enumerating.
+Earlier we enumerated paths using depth-first search, breadth-first search, and a probability-based priority queue. However, this approach can result in an unrepresentative set of paths for models with large state spaces, and for uncountably infinite state spaces, we aren't sure what exactly we are enumerating.
 
-Random sampling is a promising alternative: if we could sample paths in proportion to their posterior probability -- i.e. taking into account factor weights -- we could easily get a representative picture of the marginal distribution.
+Random sampling is a promising alternative: if we could sample paths in proportion to their posterior probability -- take into account factor weights -- we could easily get a representative picture of the marginal distribution.
 
-Let's go back to the HMM and let's think about how we could make this work.
+Let's go back to the HMM and think about how we could make this work.
 
 Here is a simple HMM with binary states and observations:
 
@@ -337,7 +337,7 @@ var _sample = function(k, erp, params){
 }
 ~~~~
 
-If we run the HMM with these sample and factor functions, we see that we sample latent states that reflect the prior distribution of the HMM, but not the posterior distribution that takes into account observations using factors:
+If we run the HMM with these sample and factor functions, we see that we sample latent states that reflect the prior distribution of the HMM, but not the posterior distribution that uses factors to take the observations into account:
 
 ~~~~
 // language: javascript
@@ -379,7 +379,7 @@ var _sample = function(k, erp, params){
 runCpsHmm(jsPrint);
 ~~~~
 
-Let's write some scaffolding so that we can take multiple samples from the prior -- i.e. without taking into account factors -- more easily:
+Let's write some scaffolding so that we can more easily take multiple samples from the prior, that is, without taking into account factors:
 
 ~~~~
 // language: javascript
@@ -459,7 +459,7 @@ var PriorSampler = function(cpsComp, numSamples){
 PriorSampler(runCpsHmm, 10);
 ~~~~
 
-The factors tell us that we should be sampling some paths more often, and some paths less often. If we knew the total factor weight for each path, we would know which paths we "oversampled" by how much, and which paths we "undersampled".
+The factors tell us that we should be sampling some paths more often, and some paths less often. If we knew the total factor weight for each path, we could determine from the weights which paths we "oversampled" and which paths we "undersampled".
 
 Let's accumulate the factor weights with each sample:
 
@@ -547,7 +547,7 @@ At this point, we can already use our weighted samples to estimate properties of
 
 ## Resampling
 
-What if we simply want samples, not weighted samples? We can always turn a set of weighted samples into a set of unweighted samples by resampling (with replacement) from the set in proportion to the weights:
+What if we simply want samples, not weighted samples? We can always turn a set of weighted samples into a set of unweighted samples by resampling with replacement from the set in proportion to the weights:
 
 ~~~~
 // language: javascript
@@ -656,14 +656,14 @@ var LikelihoodWeightingResampled = function(cpsComp, numSamples){
 LikelihoodWeightingResampled(runCpsHmm, 10);
 ~~~~
 
-As we increase the number of samples, the samples get closer to true posterior samples. In particular, the most common sampled latent state is `[false,true,true,true,true]`, which is the best explanation for starting state `false` and subsequent observations `[true,true,true,true]`.
+As we increase the number of samples, the samples get closer to the true posterior samples. In particular, the most common sampled latent state is `[false,true,true,true,true]`, which is the best explanation for starting state `false` and subsequent observations `[true,true,true,true]`.
 
 
 ## Particle filters
 
 How can we improve upon likelihood weighting? Let's apply the idea from the lecture on [Early, incremental evidence](/chapters/04-factorseq.html): instead of waiting until the end to resample, we could resample earlier. In particular, we can resample at each factor.
 
-This requires a slight change in our approach: previously, we ran each sample until the end before we started the next one. Now, we want to run each sample until we hit the first factor statement; resample; run each sample up to the next factor statement; resample; and so on.
+This requires a slight change in our approach. Previously, we ran each sample until the end before we started the next one. Now, we want to run each sample until we hit the first factor statement; resample; run each sample up to the next factor statement; resample; and so on.
 
 To enable this, we store the continuation for each sample so that we can resume computation at the correct point. We are also going to refer to (potentially incomplete) samples as "particles".
 
@@ -777,7 +777,7 @@ SimpleParticleFilter(runCpsHmm, 20);
 
 ## A particle filter for the semi-Markov random walk
 
-As before, we are going to generate observations by running a Hidden semi-Markov model:
+As before, we are going to generate observations by running a hidden semi-Markov model:
 
 ~~~~
 ///fold:
