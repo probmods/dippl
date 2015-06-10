@@ -61,7 +61,7 @@ var square = function(x) {
 print(square(3))
 ~~~~
 
-At the point in the computation where the function returns `3 * 3`, what is it that the computation "does next" with this value? In this case, we print it to the screen. When a computer executes this program, it knows this (has it stored on the stack), but this information is not explicitly available during the execution of the program. The continuation is a function that represents this information explicitly. **Continuation-passing style** (CPS) is a way of writing programs such that the current continuation is always explicitly available.
+At the point in the computation where the function returns `3 * 3`, what is it that the computation "does next" with this value? In this case, we print it to the screen. When a computer executes this program, it knows this (has stored it on the stack), but this information is not explicitly available during the execution of the program. The continuation is a function that represents this information explicitly. **Continuation-passing style** (CPS) is a way of writing programs such that the current continuation is always explicitly available.
 
 Let's rewrite the program above with an explicit continuation function `k`:
 
@@ -107,7 +107,7 @@ var cpsFactorial = function(k, n) {
 cpsFactorial(print, 5)
 ~~~~
 
-Look at the `else` branch and note how continuation-passing style turns nested function applications "inside-out": in standard style, the product is on the outside and the result of the call to `factorial` is one of its arguments. In CPS, the call to `cpsFactorial` is on the outside, and it is its continuation argument that contains the information that the result of this function will be multiplied with `n`.
+Look at the `else` branch and note how continuation-passing style turns nested function applications "inside-out" In standard style, the product is on the outside and the result of the call to `factorial` is one of its arguments. In CPS, the call to `cpsFactorial` is on the outside, and it is its continuation argument that contains the information that the result of this function will be multiplied with `n`.
 
 Compare to another way of writing the factorial function, the **tail-recursive** form. In this form, standard style and continuation-passing style are basically identical:
 
@@ -381,7 +381,7 @@ We can now do marginal inference by enumeration of an arbitrary (finite) computa
 
 A program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants. 
 
-Note: in the following examples, `CpsTransform` is to be read as a macro that transforms source code, not as an object-level function.
+Note: In the following examples, `CpsTransform` is to be read as a macro that transforms source code, not as an object-level function.
 
 Function expressions take an additional argument, the continuation `k`:
 
@@ -451,7 +451,7 @@ f(3);</textarea>
 
 Above we have maintained a first-in-last-out queue of continuations; this results in a depth-first search strategy over program executions. Often a more useful approach is to enumerate the highest priority continuation first, based on some heuristic notion of priority. For instance, using the score-so-far as priority results in a most-likely-first strategy. We can achieve this by simply changing the above code to use a priority queue (instead of `push` and `pop`). 
 
-Here we compare different enumeration orders for a simple computation. The argument to the Enumerate methods indicates how many executions to complete before stopping -- try reducing it to 1, 2, and 3 to see what the first few executions found by each method are.
+Here we compare different enumeration orders for a simple computation. The argument to the Enumerate methods indicates how many executions to complete before stopping -- try reducing it to 1, 2, and 3 to see what are the first few executions found by each method.
 
 ~~~
 var binomial = function(){
@@ -473,7 +473,7 @@ print(EnumerateLikelyFirst(binomial, numexec))
 
 ## Caching
 
-Because the return value from `Enumerate(foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution. 
+Because the return value from `Enumerate(foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times even if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution. 
 
 Next chapter: [Early, incremental evidence](/chapters/04-factorseq.html)
 
