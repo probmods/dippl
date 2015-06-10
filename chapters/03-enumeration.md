@@ -45,7 +45,7 @@ ExploreFirst(binomial)
 ~~~
 
 This set of functions does indeed go back and forth between the binomial computation and the 'randomness handling' functions to explore a possible execution of the program. 
-However, it is only able to explore a single path through the computation.... We would like to be able to 'return' from the `_sample` function *multiple times* with different values. If we could do so, we could try each value from the support to see what return values ultimately come from the computation. We can't do this by an ordinary function return, however; we need an explicit handle to the return context. We need to reify the *future of the computation* from the point that `sample` is called. Such a reified computation future is called a **continuation**.
+However, it is only able to explore a single path through the computation. We would like to be able to 'return' from the `_sample` function *multiple times* with different values. If we could do so, we could try each value from the support to see what return values ultimately come from the computation. We can't do this by an ordinary function return, however; we need an explicit handle to the return context. We need to reify the *future of the computation* from the point that `sample` is called. Such a reified computation future is called a **continuation**.
 
 ## Continuations
 
