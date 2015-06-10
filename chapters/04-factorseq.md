@@ -4,13 +4,13 @@ title: Early, incremental evidence
 description: Inserting and commuting factor statements to get the right incremental sequencing.
 ---
 
-Many important models in applications have state spaces so large that, when the model is naively written, information only becomes available to guide inference at the very end of the computation. This makes it difficult for sequential exploration strategies, like enumeration and particle filtering, to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally we will consider a harder class of models with 'global' conditions.
+Many important models in applications have state spaces so large that, when the model is naively written, information only becomes available to guide inference at the very end of the computation. This makes it difficult for sequential exploration strategies, like enumeration and particle filtering, to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally, we will consider a harder class of models with 'global' conditions.
 
 ## Unfolding data structures
 
 ### The HMM
  
-Below, we assume that `transition` is a stochastic transition function from hidden states to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
+Below, we assume that `transition` is a stochastic transition function from hidden to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
 
 ~~~
 var transition = function(s) {
@@ -131,7 +131,7 @@ print(Enumerate(function(){
           }, 20))
 ~~~
 
-This program computes the probability distribution on the next word of a sentence that starts 'tall John....' It finds a few parses that start this way... but this grammar was specially chosen to place the highest probability on such sentences. Try looking for completions of 'salty soup...' and you will be less happy.
+This program computes the probability distribution on the next word of a sentence that starts 'tall John....' It finds a few parses that start this way. However, this grammar was specially chosen to place the highest probability on such sentences. Try looking for completions of 'salty soup...' and you will be less happy.
 
 
 ## Decomposing and interleaving factors
@@ -150,7 +150,7 @@ var binomial = function(){
 print(Enumerate(binomial, 3))
 ~~~
 
-First of all, clearly, we can move the factor up, to the point when it's first dependency is bound. In general, factor statements can be moved anywhere in the same control scope in which they started (i.e., they must be reached in the same program executions and not cross a marginalization boundary). In this case:
+First of all, we can clearly move the factor up, to the point when it's first dependency is bound. In general, factor statements can be moved anywhere in the same control scope in which they started (i.e., they must be reached in the same program executions and not cross a marginalization boundary). In this case:
 
 ~~~
 var binomial = function(){
@@ -184,7 +184,7 @@ Notice that this version will find the best execution very early!
 
 ### Exposing the intermediate state for HMM and PCFG
 
-In order to apply the above tricks, decomposing and moving up factors, to more complex models, it helps to put them into a form that explicitly constructs the intermediate states.
+In order to apply the above tricks, decomposing and moving up factors, to more complex models, it helps to put the model into a form that explicitly constructs the intermediate states.
 This version of the HMM is equivalent to the earlier one, but recurses the other way, passing along the partial state sequences:
 
 ~~~
@@ -305,7 +305,7 @@ print(Enumerate(function(){
 }, 100))
 ~~~
 
-Try varying the number of executions explored in this version and the original version. Start with 1.... How do they differ?
+Try varying the number of executions explored in this version and the original version. Start with 1 and increase.... How do they differ?
 
 Similarly for the PCFG:
 
@@ -403,7 +403,7 @@ print(Enumerate(function(){
                 }, 500))
 ~~~
 
-(There is one more optimization we could do for the HMM. We could achieve dynamic programming by inserting additional marginal operators at the boundary of `hmmRecur` and caching them.)
+(There is one more optimization for the HMM. We could achieve dynamic programming by inserting additional marginal operators at the boundary of `hmmRecur` and caching them.)
 
 
 
@@ -441,6 +441,6 @@ print(Enumerate(binomial, 2))
 
 This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For examples of this technique, see the [incremental semantic parsing example](semanticparsing.html#incremental-world-building) and the [vision example](vision.html).
 
-There is no reason not to *learn* heuristic factors that help guide search, as long as they cancel by the end they won't compromise the correctness of the computed distribution (in the limit). While it wouldn't be worth the time to learn heuristic factors for a single marginalization, it may be very useful to do so across multiple related marginal distributions -- this is an example of *amortized* or *meta-* inference. (Note this is a topic of ongoing research by the authors....)
+There is no reason not to *learn* heuristic factors that help guide search, as long as they cancel by the end they won't compromise the correctness of the computed distribution (in the limit). While it would be a waste of time to learn heuristic factors for a single marginalization, it may be very useful to do so across multiple related marginal distributions -- this is an example of *amortized* or *meta-* inference. (Note this is a topic of ongoing research by the authors....)
 
 Next chapter: [Particle Filtering](/chapters/05-particlefilter.html)
