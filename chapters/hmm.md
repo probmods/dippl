@@ -6,7 +6,7 @@ description: Various representations of the HMM, and the inference tricks that f
 
 # The basic HMM
  
-Below, we assume that `transition` is a stochastic transition function from hidden states to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
+Below, we assume that `transition` is a stochastic transition function from hidden to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
 
 ~~~
 var transition = function(s) {
@@ -22,7 +22,7 @@ var init = function() {
 }
 ~~~
 
-And we will initially use this helper function to compare arrays:
+Initially, we will use this helper function to compare arrays:
 
 ~~~
 var arrayEq = function(a, b){
@@ -63,7 +63,7 @@ print(Enumerate(function(){
 }, 100))
 ~~~
 
-We could also do inference with a particle filter (or other method):
+We could also use a particle filter or other method to perform inference:
 
 ~~~
 var trueobs = [true, true, true]
@@ -102,7 +102,7 @@ hmm(4)
 
 We now explore different ways to optimize inference in the above models. First, we decompose the factor and push the pieces earlier in the computation. This gives us a better, more incremental particle filter and a better enumeration sequence.
  
-First, notice that adding `factor(s); factor(-s);` anywhere in the program is equivalent to adding `factor(s-s)` which is `factor(0)`, which has no effect on the final distribution of the program. So we can insert these "intermediate factors" wherever we want:
+Notice that adding `factor(s); factor(-s);` anywhere in the program is equivalent to adding `factor(s-s)` which is `factor(0)`, which has no effect on the final distribution of the program. So we can insert these "intermediate factors" wherever we want:
 
 ~~~
 var trueobs = [true, true, true];
@@ -132,7 +132,7 @@ print(ParticleFilter(function(){
 }, 100))
 ~~~
 
-Notice that `arrayEq` will be true if all of `a` matches the prefix of `b`, even if `a` is shorter. Thus we've inserted a factor that checks if the observations so far match `trueobs`. However, these canceling pairs so far have no effect. But we can rearrange, by pushing the second factor through the return, into the next recursion (or function return). This means that the information from the factors accumulates more incrementally as choices are made:
+Notice that `arrayEq` will be true if all of `a` matches the prefix of `b`, even if `a` is shorter. Thus we've inserted a factor that checks if the observations so far match `trueobs`. However, these canceling pairs have no effect so far. But we can rearrange, by pushing the second factor through the return, into the next recursion (or function return). This means that the information from the factors accumulates more incrementally as choices are made:
 
 ~~~
 var trueobs = [true, true, true];
@@ -189,9 +189,9 @@ print(ParticleFilter(function(){
 }, 100))
 ~~~
 
-Fun exercise: Use Enumeration with this most recent version that uses intermediate factors and with the first hmm above. Vary the number of executions explored, starting at 1. How do they differ?
+Fun exercise: Use Enumeration with this most recent version that uses intermediate factors and with the first hmm above. Vary the number of executions explored, starting at 1 then increasing. How do they differ?
 
-Note: There's one more optimization we'd like to do: we'd like to incorporate the factor when we actually sample newobs, so that we only try observations consistent with trueobs. To do so we need to marginalize out observe(..) to get an immediate ERP sample and then use sampleWithFactor(..) to simultaneously sample and incorporate the factor. However, we haven't implemented sampleWithFactor yet.
+Note: There's one more optimization we'd like to do: we'd like to incorporate the factor when we actually sample newobs, so that we only try observations consistent with trueobs. To do so we need to marginalize out observe(..) to get an immediate ERP sample and then use sampleWithFactor(..) to simultaneously sample and incorporate the factor. However, we haven't yet implemented sampleWithFactor.
 
 
 # Dynamic programming
