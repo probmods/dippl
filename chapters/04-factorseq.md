@@ -4,7 +4,7 @@ title: Early, incremental evidence
 description: Inserting and commuting factor statements to get the right incremental sequencing.
 ---
 
-Many models that are important in applications have state spaces so large that, when the model is naively written, information only becomes available to guide inference at the very end of the computation. This makes it very hard for sequential exploration strategies (such as enumeration and particle filtering) to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally we will consider a harder class of models with 'global' conditions.
+Many important models in applications have state spaces so large that, when the model is naively written, information only becomes available to guide inference at the very end of the computation. This makes it difficult for sequential exploration strategies, like enumeration and particle filtering, to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally we will consider a harder class of models with 'global' conditions.
 
 ## Unfolding data structures
 
