@@ -5,13 +5,13 @@ description: A small probabilistic language embedded in Javascript.
 ---
 
 
-WebPPL (pronounced 'web people'), is a small probabilistic programming language built on top of a (purely functional) subset of Javascript. 
+WebPPL (pronounced 'web people') is a small probabilistic programming language built on top of a purely functional subset of Javascript. 
 The language is intended to be simple to implement, fairly pleasant to write models in, and a good intermediate target for other languages, like [Church](https://probmods.org).
 This page documents the language, illustrating with some very simple examples. Further examples are presented in the [examples pages](../index.html#examples).
 
 ## The language: A subset of Javascript
 
-Following the notation from the [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API) our language consists of the subset of Javascript that can be built from the following syntax elements, shown with an `example`:
+Following the notation from the [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API), our language consists of the subset of Javascript that can be built from the following syntax elements, shown with an `example`:
 
 - *Program* - a complete program, consisting of a sequence of statements
 - *BlockStatement* - a sequence of statements surrounded by braces, `{ var x=1; var y=2; }`
@@ -32,10 +32,10 @@ Following the notation from the [Mozilla Parser API](https://developer.mozilla.o
 - *UnaryExpression* - `-5`
 - *ObjectExpression* - `{a: 1, b: 2}` (currently object properties cannot be functions)
 
-Note that there are no *AssignmentExpression*s or looping constructs (e.g., `for`, `while`, `do`). This is because a purely functional language is much easier to transform into Continuation-Passing Style (CPS), which the WebPPL implementation uses to implement inference algorithms such as Enumeration and Particle Filtering.
+Note that there are no *AssignmentExpression*s nor looping constructs (e.g., `for`, `while`, `do`). This is because a purely functional language is much easier to transform into Continuation-Passing Style (CPS), which the WebPPL implementation uses to implement inference algorithms such as Enumeration and Particle Filtering.
 While these restrictions mean that common Javascript programming patterns aren't possible, this subset is still universal, because we allow recursive and higher-order functions. It encourages a functional style, similar to Haskell or LISP, that is pretty easy to use (once you get used to thinking functionally!).
 
-Here is a (very boring) program that uses most of the available syntax:
+Here is a dull little program that uses most of the available syntax:
 
 ~~~~
 var foo = function(x) {
@@ -61,9 +61,9 @@ You can sample from an ERP with the `sample` operator. For example, using the bu
 sample(bernoulliERP, [0.5])
 ~~~~
 
-There are a set of pre-defined ERPs including `bernoulliERP`, `randomIntegerERP`, etc. (Since `sample(bernoulliERP, [p])` is very common it is aliased to `flip(p)`, as is `randomInteger` and other functions.) It is also possible to define new ERPs directly, but most ERPs you will use will be either built in or built as the marginal distribution of some computation, via inference functions (see below).
+There is a set of pre-defined ERPs including `bernoulliERP`, `randomIntegerERP`. (Since `sample(bernoulliERP, [p])` is very common it is aliased to `flip(p)`, as is `randomInteger` and other functions.) It is also possible to define new ERPs directly, but most ERPs you will use will be either built in or built as the marginal distribution of some computation, via inference functions (see below).
 
-With only the ability to sample from primitive distributions and do deterministic computation, the language is already universal! This is due to the ability to construct *stochastically recursive* functions. For instance we can define a geometric distribution in terms of a bernoulli:
+With only the ability to sample from primitive distributions and perform deterministic computations, the language is already universal! This is due to the ability to construct *stochastically recursive* functions. For instance we can define a geometric distribution in terms of a bernoulli distribution:
 
 ~~~
 var geometric = function(p) {
@@ -78,7 +78,7 @@ geometric(0.5)
 
 WebPPL is equipped with a variety of implementations of *marginalization*: the operation of normalizing a (sub-)computation to construct the marginal distribution on return values. These marginalization functions (which we will generally call inference functions) take a random computation represented as a function with no arguments and return an ERP that captures the marginal distribution on return values. How they get this marginal ERP differs between inference functions, and is the topic of most of the [tutorial](../index.html).
 
-As an example consider a simple binomial distribution: the number of times that three fair coin tosses comes up heads:
+As an example, consider a simple binomial distribution, the number of times a head comes up in three tosses of a fair coin:
 
 ~~~
 var binomial = function(){
@@ -94,7 +94,7 @@ print(binomialERP)
 
 The distribution on return values from `binomial()` and `sample(binomialERP)` are the same -- but `binomialERP` has already collapsed out the intermediate random choices to represent this distribution as a primitive.
 
-What if we wanted to adjust the above `binomial` computation to favor executions in which `a` or `b` was true? The `factor` keyword re-weights an execution by adding the given number to the log-probability of that execution. For instance:
+What if we wanted to adjust the above `binomial` computation to favor executions in which either `a` or `b` was true? The `factor` keyword re-weights an execution by adding the given number to the log-probability of that execution. For instance:
 
 ~~~
 var funnybinomial = function(){
@@ -109,7 +109,7 @@ var funnybinomialERP = Enumerate(funnybinomial)
 print(funnybinomialERP)
 ~~~
 
-It is easier to build useful models that use `factor`, for instance, to condition on data. But `factor` by itself doesn't do anything -- it interacts with *marginalization* functions that normalize the computation they are applied to. For this reason running a computation with `factor` in it at the top level -- that is, not inside a marginalization operator -- results in an error. Try running `funnybinomial` directly....
+It is easier to build useful models that use `factor`, for instance, to condition on data. But `factor` by itself doesn't do anything -- it interacts with *marginalization* functions that normalize the computation they are applied to. For this reason running a computation with `factor` in it at the top level, that is, not inside a marginalization operator, results in an error. Try running `funnybinomial` directly....
 
 WebPPL has several inference operators, including `Enumerate` and `ParticleFilter`. These are all implemented by providing a coroutine that receives the current continuation at `sample` and `factor` statements. We explain these ideas and techniques in the next few sections. To get an idea what you can do with WebPPL take a look at the examples on [pragmatics](/examples/pragmatics.html), [semantic parsing](/examples/semanticparsing.html), and [computer graphics](/examples/vision.html); or for PPLs more generally, look at [forestdb.org](http://forestdb.org).
 
