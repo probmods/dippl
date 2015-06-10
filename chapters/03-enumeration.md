@@ -438,11 +438,11 @@ This is only a sketch. For a more detailed exposition, see [How to compile with 
 The form below shows the transform that we actually use for WebPPL programs. Try it out - expressions entered below will automatically be transformed:
 
 <div id="cpsTransform">
-  <textarea id="cpsInput" style="overflow: hidden; word-wrap: break-word; resize: horizontal; height:105px;">var f = function(x){
+    <textarea id="cpsInput">var f = function(x){
   return x + 1;
 }
 f(3);</textarea>
-    <textarea id="cpsOutput" style="overflow: hidden; word-wrap: break-word; resize: horizontal; height:141px;"></textarea>
+    <textarea id="cpsOutput"></textarea>
 </div>
 
 
