@@ -210,7 +210,7 @@ print("done")
 
 ### Gaussian mixture
 
-How else could we model points observed in 2D space? We could posit that there are two clusters around which the points tend to center:
+How else could we model points observed in a two-dimensional space? We could posit that there are two clusters around which the points tend to center:
 
 ~~~~
 ///fold:
@@ -261,7 +261,7 @@ If there is a large number of execution paths, clearly, we cannot explore all pa
 
 [^1]: Dynamic Programming (caching) can be viewed as an instance of reasoning about many concrete paths at once.
 
-Previously, we have enumerated paths using depth-first search, breadth-first search, and a probability-based priority queue. However, this approach can result in an unrepresentative set of paths for models with large state spaces, and for uncountably infinite state spaces, we aren't sure what exactly we are enumerating.
+Earlier we enumerated paths using depth-first search, breadth-first search, and a probability-based priority queue. However, this approach can result in an unrepresentative set of paths for models with large state spaces, and for uncountably infinite state spaces, we aren't sure what exactly we are enumerating.
 
 Random sampling is a promising alternative: if we could sample paths in proportion to their posterior probability -- take into account factor weights -- we could easily get a representative picture of the marginal distribution.
 
@@ -337,7 +337,7 @@ var _sample = function(k, erp, params){
 }
 ~~~~
 
-If we run the HMM with these sample and factor functions, we see that we sample latent states that reflect the prior distribution of the HMM, but not the posterior distribution that takes into account observations using factors:
+If we run the HMM with these sample and factor functions, we see that we sample latent states that reflect the prior distribution of the HMM, but not the posterior distribution that uses factors to take the observations into account:
 
 ~~~~
 // language: javascript
@@ -459,7 +459,7 @@ var PriorSampler = function(cpsComp, numSamples){
 PriorSampler(runCpsHmm, 10);
 ~~~~
 
-The factors tell us that we should be sampling some paths more often, and some paths less often. If we knew the total factor weight for each path, we could determine from the weight which paths we "oversampled" and which paths we "undersampled".
+The factors tell us that we should be sampling some paths more often, and some paths less often. If we knew the total factor weight for each path, we could determine from the weights which paths we "oversampled" and which paths we "undersampled".
 
 Let's accumulate the factor weights with each sample:
 
