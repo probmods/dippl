@@ -21,7 +21,7 @@ var binomial = function(){
 print(Enumerate(binomial))
 ~~~
 
-We can view `sample` and `factor` as simple 'side-computations' for exploring the main `binomial` computation. To make this concrete, let's implement `sample` as an ordinary function that always chooses the first element of the support of any random choice. We will kick-off this exploration by calling `ExploreFirst`, which simply calls the computation. (In the following we rename `sample` to `_sample` to avoid conflicting with the WebPPL built in `sample` function.)
+We can view `sample` and `factor` as simple 'side-computations' for exploring the main `binomial` computation. To make this concrete, let's implement `sample` as an ordinary function that always chooses the first element of the support of any random choice. We will kick-off this exploration by calling `ExploreFirst`, which simply calls the computation. (In the following we rename `sample` to `_sample` to avoid conflicting with the built-in WebPPL `sample` function.)
 
 ~~~
 // language: javascript
@@ -75,7 +75,7 @@ cpsSquare(print, 3)
 
 Now, when we get to `k(x * x)`, the variable `k` contains the function `print`, which is "what happens next" in the sense that we pass the value of `x * x` to this function instead of returning.
 
-It is helpful to think that, in continuation-passing style, functions never return -- they only ever call continuations with the values that they would otherwise have returned.
+It is helpful to think that, in continuation-passing style, functions never return -- they will only call continuations with the values that they would otherwise have returned.
 
 Let's look at another example, the factorial function:
 
@@ -139,7 +139,7 @@ A function is **tail-recursive** when the recursive call happens as the final ac
 
 Continuation-passing style is useful because it allows us to manipulate the execution of the program in ways that would otherwise be difficult. For example, we can use CPS to implement exception handling.
 
-Let's look at `cpsFactorial` again. Suppose we want to throw an error when `n < 0`. By "throw an error", we mean that we stop whatever computations we would have done next and instead pass control to an error handler. This is easy in continuation-passing style: since there is no implicit stack -- i.e. no computations waiting to be performed -- all we have to do is call an error continuation.
+Let's look at `cpsFactorial` again. Suppose we want to throw an error when `n < 0`. By "throw an error", we mean that we stop whatever computations we would have done next and instead pass control to an error handler. This is easy in continuation-passing style: since there is no implicit stack -- no computations waiting to be performed -- all we have to do is call an error continuation.
 
 ~~~~
 var totalCpsFactorial = function(k, err, n) {
@@ -202,12 +202,12 @@ There are two things to note here:
 
 First, we had to wrap the primitive function `sample` such that it takes a continuation. The same kind of wrapping can be applied to all functions that are defined outside of the code we are transforming. 
 
-Second, the sequence of definition statements was sequentialized in in a way similar to how we transformed function applications above: We evaluate the (cps-ed) version of the first statement and pass the result to a continuation function that then evaluates the (cps-ed) version of the second statement, which then calls the (cps-ed) version of the third statement. When `a`, `b`, and `c` are all evaluated, we can pass `a + b + c` to the global continuation function `k`.
+Second, the sequence of definition statements was sequentialized in a way similar to how we transformed function applications above: We evaluate the (cps-ed) version of the first statement and pass the result to a continuation function that then evaluates the (cps-ed) version of the second statement, which then calls the (cps-ed) version of the third statement. When `a`, `b`, and `c` are all evaluated, we can pass `a + b + c` to the global continuation function `k`.
 
 
 ## Coroutines: functions that receive continuations
 
-Now we'll re-write the code above so that the `sample` function gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way. This pattern: a function that receives the continuation (often called a 'callback') from the main computation and returns only by calling the continuation is called a *coroutine*. (The above definition of `cpsBinomial`, using `_sample` again to avoid conflict with built ins, is above the fold.)
+Now we'll re-write the code above so that the `sample` function gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way. This pattern: a function that receives the continuation (often called a 'callback') from the main computation and returns only by calling the continuation is called a *coroutine*. (The above definition of `cpsBinomial`, using `_sample` again to avoid conflict with built-ins, is above the fold.)
 
 ~~~
 // language: javascript
@@ -379,7 +379,7 @@ We can now do marginal inference by enumeration of an arbitrary (finite) computa
 
 ## Continuation-passing transform
 
-Program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants. 
+A program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants. 
 
 Note: in the following examples, `CpsTransform` is to be read as a macro that transforms source code, not as an object-level function.
 
@@ -451,7 +451,7 @@ f(3);</textarea>
 
 Above we have maintained a first-in-last-out queue of continuations; this results in a depth-first search strategy over program executions. Often a more useful approach is to enumerate the highest priority continuation first, based on some heuristic notion of priority. For instance, using the score-so-far as priority results in a most-likely-first strategy. We can achieve this by simply changing the above code to use a priority queue (instead of `push` and `pop`). 
 
-Here we compare different enumeration orders for a simple computation. The argument to the Enumerate methods indicates how many executions to complete before stoping -- try reducing it to 1, 2, and 3 to see what the first few executions found by each method are.
+Here we compare different enumeration orders for a simple computation. The argument to the Enumerate methods indicates how many executions to complete before stopping -- try reducing it to 1, 2, and 3 to see what the first few executions found by each method are.
 
 ~~~
 var binomial = function(){
