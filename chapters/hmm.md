@@ -6,7 +6,7 @@ description: Various representations of the HMM, and the inference tricks that f
 
 # The basic HMM
  
-All of the below assume that `transition` is a stochastic transition function from hidden states to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
+Below, we assume that `transition` is a stochastic transition function from hidden states to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
 
 ~~~
 var transition = function(s) {
@@ -30,7 +30,7 @@ var arrayEq = function(a, b){
 }
 ~~~
 
-First here is a fairly standard, 'direct', version that never explicitly represents the partial state sequences:
+First, this is a fairly standard, 'direct', version that never explicitly represents the partial state sequences:
 
 ~~~
 var hmminit = function(){
@@ -77,7 +77,7 @@ print(ParticleFilter(function(){
 
 # Exposing the intermediate state
 
-This version is equivalent, but recurses the other way, and passes along the partial state sequences more explicitly:
+This version is equivalent, but recurses the other way, and more explicitly passes along the partial state sequences:
 
 ~~~
 var hmm_recur = function(n, states, observations){
@@ -100,7 +100,7 @@ hmm(4)
 
 # Decomposing and interleaving factors
 
-We now explore different ways to optimize inference in the above models. First we decompose the factor and push the pieces earlier in the computation. This gives us a better, more incremental particle filter and better enumeration sequence.
+We now explore different ways to optimize inference in the above models. First, we decompose the factor and push the pieces earlier in the computation. This gives us a better, more incremental particle filter and a better enumeration sequence.
  
 First, notice that adding `factor(s); factor(-s);` anywhere in the program is equivalent to adding `factor(s-s)` which is `factor(0)`, which has no effect on the final distribution of the program. So we can insert these "intermediate factors" wherever we want:
 
@@ -132,7 +132,7 @@ print(ParticleFilter(function(){
 }, 100))
 ~~~
 
-Notice that `arrayEq` will be true if all of `a` matches the prefix of `b`, even if `a` is shorter; thus we've inserted a factor that checks if the observations so far match `trueobs`. However, these canceling pairs so far have no effect. But we can rearrange, by pushing the second factor through the return, into the next recursion (or function return). This means that the information from the factors accumulates more incrementally as choices are made:
+Notice that `arrayEq` will be true if all of `a` matches the prefix of `b`, even if `a` is shorter. Thus we've inserted a factor that checks if the observations so far match `trueobs`. However, these canceling pairs so far have no effect. But we can rearrange, by pushing the second factor through the return, into the next recursion (or function return). This means that the information from the factors accumulates more incrementally as choices are made:
 
 ~~~
 var trueobs = [true, true, true];
@@ -162,7 +162,7 @@ print(ParticleFilter(function(){
 }, 100))
 ~~~
 
-Finally, if `a' = a.slice(0,-1)`, then `arrayEq(a,b)` will be false if `arrayEq(a',b)` is. This allows us to simplify the two factors in `hmm_recur`.
+Finally, if `a' = a.slice(0,-1)`, then `arrayEq(a,b)` will be false if `arrayEq(a',b)` is false. This allows us to simplify the two factors in `hmm_recur`.
 
 ~~~
 var trueobs = [true, true, true];
@@ -189,12 +189,12 @@ print(ParticleFilter(function(){
 }, 100))
 ~~~
 
-Fun excercise: use Enumeration with this most recent version that uses intermediate factors and also with the initial hmm above. vary the number of executions explored, starting with just 1 and increasing... how do they differ?
+Fun exercise: Use Enumeration with this most recent version that uses intermediate factors and with the first hmm above. Vary the number of executions explored, starting at 1. How do they differ?
 
-Note: there's one more optimization we'd like to do: we'd like to incorporate the factor when we actually sample newobs, so that we only try observations consistent with trueobs. To do so we need to marginalize out observe(..) (to get an immediate ERP sample) and then use sampleWithFactor(..) to simultaneously sample and incorporate the factor -- we haven't implemented sampleWithFactor yet though.
+Note: There's one more optimization we'd like to do: we'd like to incorporate the factor when we actually sample newobs, so that we only try observations consistent with trueobs. To do so we need to marginalize out observe(..) to get an immediate ERP sample and then use sampleWithFactor(..) to simultaneously sample and incorporate the factor. However, we haven't implemented sampleWithFactor yet.
 
 
 # Dynamic programming
 
-Then we achieve dynamic programming by additionally inserting marginal operators, and caching them.
+We then achieve dynamic programming by inserting additional marginal operators and caching them.
 
