@@ -4,11 +4,11 @@ title: Markov Chain Monte Carlo
 description: Trace-based implementation of MCMC.
 ---
 
-A popular way to estimate a difficult distribution is to sample the distribution by constructing a random walk that will visit each state in proportion to its probability -- this is called [Markov chain Monte Carlo](http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo). 
+A popular way to estimate a difficult distribution is to sample the distribution by constructing a random walk that will visit each state in proportion to its probability -- this is called [Markov chain Monte Carlo (MCMC)](http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo). 
 
 ## A random walk over executions
 
-Imagine doing a random walk around the space of execution traces of a computation. Before we worry about getting the right distribution, let's just make *any* random walk. To do so we will record the continuation at each `sample` call, making a trace of the computation. We can then generate a next computation by randomly choosing a choice and re-generating the computation from that point. Adapting the code we used for [enumeration](03-enumeration.html):
+Imagine taking a random walk around the space of execution traces of a computation. Before we worry about getting the right distribution, let's just take *any* random walk. To do so we will record the continuation at each `sample` call, making a trace of the computation. We can then generate a next computation by randomly choosing a choice and re-generating the computation from that point. Adapting the code we used for [enumeration](03-enumeration.html):
 
 ~~~
 // language: javascript
@@ -92,7 +92,7 @@ var skewBinomial = function(){
 print(Enumerate(skewBinomial))
 ~~~
 
-For the Metropolis-Hastings sampler, we add a step which accepts or rejects the new state to the earlier algorithm. The probability of acceptance is given by:
+For the Metropolis-Hastings (MH) sampler, the new step we add to the earlier algorithm accepts or rejects the new state. The probability of acceptance is given by:
 
 ~~~
 function MHacceptProb(trace, oldTrace, regenFrom){
@@ -411,10 +411,10 @@ The auto-updating form below shows the addressing transform we actually use for 
     <textarea id="namingOutput"></textarea>
 </div>
 
-WebPPL uses this addressing transform to make names available for MH. Overall, the original programs undergoes two transformations in order to make information available to the probabilistic primitives. The naming transform makes stack-addresses available, and the CPS transform then makes continuations available. 
+WebPPL uses this addressing transform to make names available for MH. Overall, the original program undergoes two transformations in order to make information available to the probabilistic primitives. The naming transform makes stack-addresses available, and the CPS transform then makes continuations available. 
 
 ## Particle filters with rejuvenation
 
-One flaw with [particle filtering](05-particlefilter.html) is that the 'past' of the particles cannot be adjusted. This can result in poor performance for some models. In contrast, MCMC is all about local adjustment to the execution history. These methods can be combined in what is often called particle filtering with *rejuvenation*: after each time the particles are resampled the MH operator is applied to each particle, adjusting the 'history so far' of the particle. To do so we must keep track of the trace of each particle, and we must change the above implementation of MH to stop when the latest point executed by the particle is reached. In WebPPL this algorithm is available as `ParticleFilterRejuv`.
+One flaw with [particle filtering](05-particlefilter.html) is that the 'past' of the particles cannot be adjusted. This can result in poor performance for some models. In contrast, MCMC is all about local adjustment to the execution history. These methods can be combined in what is often called particle filtering with *rejuvenation*: after each time the particles are resampled the MH operator is applied to each particle, adjusting the 'history so far' of the particle. To do so we must keep track of the trace of each particle, and we must change the above implementation of MH to stop when the latest point executed by the particle is reached. WebPPL provides this algorithm as `ParticleFilterRejuv`.
 
 <!-- TODO: mixture model.. -->
