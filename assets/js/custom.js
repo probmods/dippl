@@ -58,6 +58,21 @@ function print(store, k, a, x){
   return k(store);
 }
 
+function bar(store, k, a, labels, counts){
+  var resultDiv = $(activeCodeBox.parent().find(".resultDiv"));
+  resultDiv.show();
+  var resultDivSelector = "#" + resultDiv.attr('id');
+  barChart(resultDivSelector, labels, counts);
+  return k(store);
+}
+
+function line(store, k, a, labels, counts){
+  var resultDiv = $(activeCodeBox.parent().find(".resultDiv"));
+  resultDiv.show();
+  var resultDivSelector = "#" + resultDiv.attr('id');
+  lineChart(resultDivSelector, labels, counts);
+  return k(store);
+}
 
 // Bar plots
 
@@ -83,6 +98,32 @@ function barChart(containerSelector, labels, counts){
   var yAxis = chart.addCategoryAxis("y", "Label");
   yAxis.title = null;
   chart.addSeries("Count", dimple.plot.bar);
+  chart.draw();
+}
+
+function lineChart(containerSelector, labels, counts){
+  $(containerSelector).show();
+  var svg = d3.select(containerSelector)
+    .append("svg")
+    .attr("class", "barChart");
+  var data = [];
+  for (var i=0; i<labels.length; i++){
+    if (counts[i] > 0) {
+      data.push({
+        "Label": JSON.stringify(labels[i]),
+        "Count": counts[i]
+      });
+    }
+  };
+  var chart = new dimple.chart(svg, data);
+  chart.setBounds(80, 30, 480, 250);
+  var xAxis = chart.addMeasureAxis("x", "Label");
+  xAxis.title = null;
+  xAxis.tickFormat = ",.2f";
+  var yAxis = chart.addMeasureAxis("y", "Count");
+  yAxis.title = null;
+  yAxis.tickFormat = ",.2f";
+  chart.addSeries("Label", dimple.plot.line);
   chart.draw();
 }
 
