@@ -4,13 +4,13 @@ title: Early, incremental evidence
 description: Inserting and commuting factor statements to get the right incremental sequencing.
 ---
 
-Many models that are important in applications have very large state spaces such that, when the model is naively written, no information becomes available to guide inference until the very end of the computation. This makes it very hard for sequential exploration strategies (such as enumeration and particle filtering) to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally we will consider a harder class of models with 'global' conditions.
+Many models that are important in applications have state spaces so large that, when the model is naively written, information only becomes available to guide inference at the very end of the computation. This makes it difficult for sequential exploration strategies (such as enumeration and particle filtering) to work. Two common examples are the hidden Markov model (HMM) and the probabilistic context free grammar (PCFG). We first introduce these models, then describe techniques to transform them into a form that makes sequential inference more efficient. Finally, we will consider a harder class of models with 'global' conditions.
 
 ## Unfolding data structures
 
 ### The HMM
  
-All of the below assume that `transition` is a stochastic transition function from hidden states to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
+Below, we assume that `transition` is a stochastic transition function from hidden to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
 
 ~~~
 var transition = function(s) {
@@ -81,11 +81,11 @@ print(Enumerate(function(){
 }, 100))
 ~~~
 
-Notice that if we allow `Enumerate` only a few executions (the last argument) it will not find the correct state: it doesn't realize until 'the end' that the observations must match the `trueobs` and hence the hidden state is likely to have been `[false, false, false]`.
+Notice that if we allow `Enumerate` only a few executions (the last argument), it will not find the correct state. It doesn't realize until 'the end' that the observations must match the `trueobs`. Hence, the hidden state is likely to have been `[false, false, false]`.
 
 ### The PCFG
 
-The PCFG is very similar to the HMM, except it has an underlying tree (instead of linear) structure.
+The PCFG is very similar to the HMM, except it has an underlying tree structure instead of a linear one.
 
 ~~~
 var pcfgtransition = function(symbol) {
@@ -131,7 +131,7 @@ print(Enumerate(function(){
           }, 20))
 ~~~
 
-This program computes the probability distribution on the next word of a sentence that starts 'tall John...'. It finds a few parses that start this way... but this grammar was specially chosen to place the highest probability on such sentences. Try looking for completions of 'salty soup...' and you will be less happy.
+This program computes the probability distribution on the next word of a sentence that starts 'tall John....' It finds a few parses that start this way. However, this grammar was specially chosen to place the highest probability on such sentences. Try looking for completions of 'salty soup...' and you will be less happy.
 
 
 ## Decomposing and interleaving factors
@@ -150,7 +150,7 @@ var binomial = function(){
 print(Enumerate(binomial, 3))
 ~~~
 
-It is clear first of all that we can move the factor up, to the point when it's first dependency is bound. In general factor statements can be moved anywhere in the same control scope as they started (i.e. they must be reached in the same program executions and not cross a marginalization boundary). In this case:
+First of all, we can clearly move the factor up, to the point when it's first dependency is bound. In general, factor statements can be moved anywhere in the same control scope in which they started (i.e., they must be reached in the same program executions and not cross a marginalization boundary). In this case:
 
 ~~~
 var binomial = function(){
@@ -164,7 +164,7 @@ var binomial = function(){
 print(Enumerate(binomial, 3))
 ~~~
 
-But we can do much better by noticing that this factor can be broken into an equivalent two factors, and again one can be moves up:
+But we can do much better by noticing that this factor can be broken into an equivalent two factors, and again one can be moved up:
 
 ~~~
 var binomial = function(){
@@ -184,7 +184,7 @@ Notice that this version will find the best execution very early!
 
 ### Exposing the intermediate state for HMM and PCFG
 
-In order to apply the above tricks (decomposing and moving up factors) for the more complex models it helps to put them into a form that explicitly constructs the intermediate states.
+In order to apply the above tricks, decomposing and moving up factors, to more complex models, it helps to put the model into a form that explicitly constructs the intermediate states.
 This version of the HMM is equivalent to the earlier one, but recurses the other way, passing along the partial state sequences:
 
 ~~~
@@ -224,7 +224,7 @@ print(Enumerate(function(){
 }, 100))
 ~~~
 
-Similarly the PCFG can be written as:
+Similarly, the PCFG can be written as:
 
 ~~~
 ///fold:
@@ -270,7 +270,7 @@ print(Enumerate(function(){
 
 ### Incrementalizing the HMM and PCFG
 
-We can now decompose and move factors. In the HMM we first observe that the factor `factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )` can be seen as `factor(r.observations[0]==trueobs[0] ? 0 : -Infinity); factor(r.observations[1]==trueobs[1] ? 0 : -Infinity); ...`. Then we observe that these factors can be moved 'up' into the recursion to give:
+We can now decompose and move factors. In the HMM, we first observe that the factor `factor( arrayEq(r.observations, trueobs) ? 0 : -Infinity )` can be seen as `factor(r.observations[0]==trueobs[0] ? 0 : -Infinity); factor(r.observations[1]==trueobs[1] ? 0 : -Infinity); ...`. Then we observe that these factors can be moved 'up' into the recursion to give:
 
 ~~~
 ///fold:
@@ -305,7 +305,7 @@ print(Enumerate(function(){
 }, 100))
 ~~~
 
-Try varying the number of executions explored, in this version and the original version, starting with just 1 and increasing... how do they differ?
+Try varying the number of executions explored in this version and the original version. Start with 1 and increase... how do they differ?
 
 Similarly for the PCFG:
 
@@ -352,7 +352,7 @@ print(Enumerate(function(){
 
 ### sampleWithFactor
 
-It is fairly common, as above, to end up with a factor, providing some evidence, just after the sampled value it depends on. If we separate the `sample` and `factor` then we will often try to explore sample paths that the factor will shortly tell us are very bad. To account for this we introduce a compound operator `sampleWithFactor`, that takes the ERP distribution and parameters, like `sample`, and also takes a function that applies to the sampled value to compute a score for `factor`. By default, marginalization functions will simply treat `sampleWithFactor(dist,params,scoreFn)` as `var v = sample(dist,params); factor(scoreFn(v))`, however some implementations will use this information more efficiently. The WebPPL `Enumerate` operator immediately adds the additional score to the score for the state as it is added to the queue -- this means that the additional score is included when prioritizing which states to explore next.
+It is fairly common to end up with a factor that provides some evidence just after the sampled value it depends on. If we separate `sample` and `factor`, we will often try to explore sample paths that the factor will shortly tell us are very bad. To account for this, we introduce a compound operator `sampleWithFactor`, that takes the ERP distribution and parameters, like `sample`, and also takes a function that is applied to the sampled value to compute a score for `factor`. By default, marginalization functions will simply treat `sampleWithFactor(dist,params,scoreFn)` as `var v = sample(dist,params); factor(scoreFn(v))`; however, some implementations will use this information more efficiently. The WebPPL `Enumerate` operator immediately adds the additional score to the score for the state as it is added to the queue -- this means that the additional score is included when prioritizing which states to explore next.
 
 The binomial example becomes:
 
@@ -367,7 +367,7 @@ var binomial = function(){
 print(Enumerate(binomial, 2))
 ~~~
 
-More usefully, the for the HMM this trick allows us to ensure that each `newobs` will be equal to the observed `trueobs`. We need to first marginalize out `observe(..)` (to get an immediate ERP from which to sample) and then use `sampleWithFactor(..)` to simultaneously sample and incorporate the factor:
+More usefully, for the HMM, this trick allows us to ensure that each `newobs` will be equal to the observed `trueobs`. We first marginalize out `observe(..)` to get an immediate ERP from which to sample, and then use `sampleWithFactor(..)` to simultaneously sample and incorporate the factor:
 
 ~~~
 ///fold:
@@ -403,7 +403,7 @@ print(Enumerate(function(){
                 }, 500))
 ~~~
 
-(There is one more optimizations we could do for the HMM: we could achieve dynamic programming by inserting additional marginal operators at the boundary of `hmmRecur`, and caching them.)
+(There is one more optimization for the HMM: We could achieve dynamic programming by inserting additional marginal operators at the boundary of `hmmRecur` and caching them.)
 
 
 
@@ -423,7 +423,7 @@ var binomial = function(){
 print(Enumerate(binomial, 2))
 ~~~
 
-We can still insert 'heuristic' factors that will help the inference algorithm explore more usefully, as long as they cancel by the end. That is, `factor(s); factor(-s)` has no effect on the meaning of the model, and so is always allowed (even if the two factors are separated, as long as they aren't separated by a marginalization operator). For instance:
+We can still insert 'heuristic' factors that will help the inference algorithm explore more effectively, as long as they cancel by the end. That is, `factor(s); factor(-s)` has no effect on the meaning of the model, and so is always allowed (even if the two factors are separated, as long as they aren't separated by a marginalization operator). For instance:
 
 ~~~
 var binomial = function(){
@@ -441,6 +441,6 @@ print(Enumerate(binomial, 2))
 
 This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For examples of this technique, see the [incremental semantic parsing example](semanticparsing.html#incremental-world-building) and the [vision example](vision.html).
 
-There is no reason not to *learn* heuristic factors that help guide search, as long as they cancel by the end they won't compromise the correctness of the computed distribution (in the limit). While it wouldn't be worth the time to learn heuristic factors for a single marginalization, it may be very useful to do so across multiple related marginal distributions -- this is an example of *amortized* or *meta-* inference. (Note this is a topic of ongoing research by the authors....)
+There is no reason not to *learn* heuristic factors that help guide search, as long as they cancel by the end they won't compromise the correctness of the computed distribution (in the limit). While it wouldn't be worth the expense to learn heuristic factors for a single marginalization, it may be very useful to do so across multiple related marginal distributions -- this is an example of *amortized* or *meta-* inference. (Note this is a topic of ongoing research by the authors....)
 
 Next chapter: [Particle Filtering](/chapters/05-particlefilter.html)

@@ -6,7 +6,7 @@ description: Various representations of the HMM, and the inference tricks that f
 
 # The basic HMM
  
-All of the below assume that `transition` is a stochastic transition function from hidden states to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
+Below, we assume that `transition` is a stochastic transition function from hidden to hidden states, `observe` is an observation function from hidden to observed states, and `init` is an initial distribution.
 
 ~~~
 var transition = function(s) {
@@ -22,7 +22,7 @@ var init = function() {
 }
 ~~~
 
-And we will initially use this helper function to compare arrays:
+Initially, we will use this helper function to compare arrays:
 
 ~~~
 var arrayEq = function(a, b){
@@ -30,7 +30,7 @@ var arrayEq = function(a, b){
 }
 ~~~
 
-First here is a fairly standard, 'direct', version that never explicitly represents the partial state sequences:
+First, here is a fairly standard, 'direct', version that never explicitly represents the partial state sequences:
 
 ~~~
 var hmminit = function(){
@@ -77,7 +77,7 @@ print(ParticleFilter(function(){
 
 # Exposing the intermediate state
 
-This version is equivalent, but recurses the other way, and passes along the partial state sequences more explicitly:
+This version is equivalent, but recurses the other way, and more explicitly passes along the partial state sequences:
 
 ~~~
 var hmm_recur = function(n, states, observations){
@@ -100,9 +100,9 @@ hmm(4)
 
 # Decomposing and interleaving factors
 
-We now explore different ways to optimize inference in the above models. First we decompose the factor and push the pieces earlier in the computation. This gives us a better, more incremental particle filter and better enumeration sequence.
+We now explore different ways to optimize inference in the above models. First, we decompose the factor and push the pieces earlier in the computation. This gives us a better, more incremental particle filter and a better enumeration sequence.
  
-First, notice that adding `factor(s); factor(-s);` anywhere in the program is equivalent to adding `factor(s-s)` which is `factor(0)`, which has no effect on the final distribution of the program. So we can insert these "intermediate factors" wherever we want:
+Notice that adding `factor(s); factor(-s);` anywhere in the program is equivalent to adding `factor(s-s)` which is `factor(0)`, which has no effect on the final distribution of the program. So we can insert these "intermediate factors" wherever we want:
 
 ~~~
 var trueobs = [true, true, true];
@@ -162,7 +162,7 @@ print(ParticleFilter(function(){
 }, 100))
 ~~~
 
-Finally, if `a' = a.slice(0,-1)`, then `arrayEq(a,b)` will be false if `arrayEq(a',b)` is. This allows us to simplify the two factors in `hmm_recur`.
+Finally, if `a' = a.slice(0,-1)`, then `arrayEq(a,b)` will be false if `arrayEq(a',b)` is false. This allows us to simplify the two factors in `hmm_recur`.
 
 ~~~
 var trueobs = [true, true, true];
@@ -196,5 +196,5 @@ Note: there's one more optimization we'd like to do: we'd like to incorporate th
 
 # Dynamic programming
 
-Then we achieve dynamic programming by additionally inserting marginal operators, and caching them.
+We then achieve dynamic programming by inserting additional marginal operators and caching them.
 

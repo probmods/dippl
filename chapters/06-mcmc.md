@@ -4,11 +4,11 @@ title: Markov Chain Monte Carlo
 description: Trace-based implementation of MCMC.
 ---
 
-A popular way to estimate a difficult distribution is to sample from it by constructing a random walk that will visit each state in proportion to it's probability -- this is called [Markov chain Monte Carlo](http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo). 
+A popular way to estimate a difficult distribution is to sample from it by constructing a random walk that will visit each state in proportion to its probability -- this is called [Markov chain Monte Carlo](http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo). 
 
 ## A random walk over executions
 
-Imagine doing a random walk around the space of execution traces of a computation. Before we worry about getting the right distribution, let's just make *any* random walk. To do so we will record the continuation at each `sample` call, making a trace of the computation. We can then generate a next computation by randomly choosing a choice and re-generating the computation from that point. Adapting the code we used for [enumeration](03-enumeration.html):
+Imagine doing a random walk in the space of execution traces of a computation. Before we worry about getting the right distribution, let's just create *any* random walk. To do so we will record the continuation at each `sample` call, making a trace of the computation. We can then generate a next computation by randomly choosing a choice and re-generating the computation from that point. Adapting the code we used for [enumeration](03-enumeration.html):
 
 ~~~
 // language: javascript
@@ -76,7 +76,7 @@ function RandomWalk(cpsComp) {
 RandomWalk(cpsBinomial)
 ~~~
 
-We have successfully done a random walk around the space of executions... and it even matches the desired binomial distribution. However, we have not handled `factor` statements (or used the computation scores in any way). This will not match the desired distribution when the computation contains factors (or when the number of random choices may change across executions). The [Metropolis Hastings](http://en.wikipedia.org/wiki/Metropolis-Hastings_algorithm) algorithm gives a way to 'patch up' this random walk to get the right distribution.
+We have successfully created a random walk in the space of executions. Moreover, it matches the desired binomial distribution. However, we have not handled `factor` statements (or used the computation scores in any way). This will not match the desired distribution when the computation contains factors (or when the number of random choices may change across executions). The [Metropolis Hastings](http://en.wikipedia.org/wiki/Metropolis-Hastings_algorithm) algorithm gives a way to 'patch up' this random walk to get the right distribution.
 
 Before we give the code, here's an example we'd like to compute:
 
@@ -105,7 +105,7 @@ function MHacceptProb(trace, oldTrace, regenFrom){
 }
 ~~~
 
-This somewhat opaque probability is constructed to guarantee that, in the limit, the random walk will sample from the desired distribution. The full algorithm:
+This somewhat cryptic probability is constructed to guarantee that, in the limit, the random walk will sample from the desired distribution. The full algorithm:
 
 ~~~
 // language: javascript
@@ -216,7 +216,7 @@ MH(cpsSkewBinomial)
 
 ## Reusing more of the trace
 
-Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. If we knew which sampled value was which, then we could look into the previous trace as the execution runs and reuse its values. That is, imagine that each call to `sample` was passed a (unique) name: `sample(name, erp, params)`. Then the sample function could try to look-up and reuse values:
+Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. If we knew which sampled value was which, then we could look into the previous trace as the execution runs and reuse its values. That is, imagine that each call to `sample` was passed a (unique) name: `sample(name, erp, params)`. Then the sample function could try to look up and reuse values:
 
 ~~~
 function _sample(cont, name, erp, params, forceSample) {
@@ -231,7 +231,7 @@ function _sample(cont, name, erp, params, forceSample) {
 }
 ~~~
 
-Notice that, in addition to reusing existing sampled choices, we add the name and mark whether this choice has been sampled fresh. We must account for this in the MH acceptance calculation:
+Notice that, in addition to reusing existing sampled choices, we add the name and mark whether this choice has been resampled. We must account for this in the MH acceptance calculation:
 
 ~~~
 function MHacceptProb(trace, oldTrace, regenFrom){
@@ -367,7 +367,7 @@ MH(cpsSkewBinomial)
 
 This version will now reuse most of the choices from the old trace in making a proposal. 
 
-Unfortunately it is impractical to add names by hand to distinguish calls to sample; fortunately there is a way to do this automatically!
+Unfortunately, it is impractical to add names by hand to distinguish calls to sample. Fortunately, there is a way to do this automatically!
 
 
 ### The addressing transform
@@ -404,17 +404,17 @@ f(address.concat('_1'), x);
 
 Note that `'_1'` is an example of a unique symbol; we generate a different one for each syntactic function application.
 
-The auto-updating form below shows the addressing transform that we actually use for WebPPL programs. Try it out:
+The auto-updating form below shows the addressing transform we actually use for WebPPL programs. Try it out:
 
 <div id="namingTransform">
     <textarea id="namingInput">f(x)</textarea>
     <textarea id="namingOutput"></textarea>
 </div>
 
-WebPPL uses this addressing transform to make names available for MH. Overall, two transformations happen to the original program, in order to make information available to the probabilistic primitives: the naming transform makes stack-addresses available, and the CPS transform then makes continuations available. 
+WebPPL uses this addressing transform to make names available for MH. Overall, the original program undergoes two transformations in order to make information available to the probabilistic primitives. The naming transform makes stack-addresses available, and the CPS transform then makes continuations available. 
 
 ## Particle filters with rejuvenation
 
-One flaw with [particle filtering](05-particlefilter.html) is that there is no way to adjust the 'past' of the particles. This can result in poor performance for some models. MCMC in contrast is all about local adjustment to the execution history. These methods can be combined in what is often called particle filtering with *rejuvenation*: after each time the particles are resampled the MH operator is applied to each particle, adjusting the 'history so far' of the particle. To do so we must keep track of the trace of each particle, and we must change the above implementation of MH to stop when the latest point executed by the particle is reached. In WebPPL this algorithm is available as `ParticleFilterRejuv`.
+One flaw with [particle filtering](05-particlefilter.html) is that there is no way to adjust the 'past' of the particles. This can result in poor performance for some models. MCMC in contrast is all about local adjustment to the execution history. These methods can be combined in what is often called particle filtering with *rejuvenation*: after each time the particles are resampled the MH operator is applied to each particle, adjusting the 'history so far' of the particle. To do so we must keep track of the trace of each particle, and we must change the above implementation of MH to stop when the latest point executed by the particle is reached. WebPPL provides this algorithm as `ParticleFilterRejuv`.
 
 <!-- TODO: mixture model.. -->
