@@ -24,5 +24,5 @@ Run local webserver:
 
 Update webppl:
 
-    browserify -t brfs PATH/TO/webppl/src/main.js > assets/js/webppl.js
+    browserify -t brfs PATH/TO/webppl/src/browser.js > assets/js/webppl.js
     uglifyjs assets/js/webppl.js -b ascii_only=true,beautify=false > assets/js/webppl.min.js
