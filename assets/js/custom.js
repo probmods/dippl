@@ -38,7 +38,7 @@ function jsPrint(x){
   } else {
     resultDiv.append(
       document.createTextNode(
-        JSON.stringify(x) + "\n"));
+        (typeof x == 'string' ? x : JSON.stringify(x)) + "\n"));
   }
 }
 
