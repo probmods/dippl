@@ -23,7 +23,11 @@ Run local webserver:
 
 Update webppl:
 
-    cd webppl
+    cd /PATH/TO/webppl
     browserify -t [./src/bundle.js --require webppl-viz] -g brfs ./src/browser.js > compiled/webppl.js
     uglifyjs compiled/webppl.js -b ascii_only=true,beautify=false > compiled/webppl.min.js
     mv compiled/webppl.min.js /PATH/TO/dippl/assets/js/webppl.min.js
+
+This requires the `webppl-viz` package to be available. To install it globally, run:
+
+    npm install --prefix ~/.webppl erindb/webppl-viz
