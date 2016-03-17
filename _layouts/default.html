@@ -27,8 +27,7 @@
     <script src="{{ site.baseurl }}/bower_components/d3/d3.min.js"></script>
     <script src="{{ site.baseurl }}/bower_components/dimple/dist/dimple.v2.1.0.js"></script>
     <script src="{{ site.baseurl }}/bower_components/underscore/underscore.js"></script>
-    <script src="{{ site.baseurl }}/bower_components/react/JSXTransformer.js"></script>
-    <script src="{{ site.baseurl }}/bower_components/react/react-with-addons.min.js"></script>
+
     <script src="{{ site.baseurl }}/bower_components/showdown/compressed/showdown.js"></script>
     <script src="{{ site.baseurl }}/assets/js/custom.js"></script>
     <script type="text/jsx" src="{{ site.baseurl }}/assets/js/editor.js"></script>
@@ -37,6 +36,25 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    {% if page.custom_css %}
+      {% for stylesheet in page.custom_css %}
+      <link rel="stylesheet" href="{{ stylesheet }}.css" media="screen" type="text/css">
+      {% endfor %}
+    {% endif %}
+
+    {% if page.custom_js %}
+      {% for js_file in page.custom_js %}
+      <script src='{{ js_file }}' type="text/javascript"></script>
+      {% endfor %}
+      {% endif %}
+    {% if page.custom_js %}
+      {% for js_file in page.custom_jsx %}
+      <script src='{{ js_file }}' type="text/jsx"></script>
+      {% endfor %}
+    {% endif %}
+
+
 
   </head>
   <body>
