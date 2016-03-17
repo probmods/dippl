@@ -1,0 +1,37 @@
+svg {
+}
+
+.bar {
+	fill: steelblue;
+}
+
+.axis text {
+	font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+.line {
+	fill: none;
+	stroke: steelblue;
+	stroke-width: 1.5px;
+}
+
+.marginals {
+	padding: 30px;
+}
+
+.scatters {
+	padding: 30px;
+}
+
+.plot_header {
+	display: block;
+	margin: auto auto;
+	text-align: center;
+}
