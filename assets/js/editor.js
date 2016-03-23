@@ -71137,8 +71137,14 @@ var CodeEditor = React.createClass({
   // TODO: remove hist and barChart once webppl-viz stabilizes
   // ------------------------------------------------------------
   print: function (s, k, a, x) {
-    this.addResult({ type: 'text', message: x });
-    return k(s);
+    // if x has a custom printer, use it
+    if (x.__print__) {
+      return k(s, x.__print__(x));
+    } else {
+      this.addResult({ type: 'text',
+        message: typeof x == 'object' ? JSON.stringify(x) : x });
+      return k(s);
+    }
   },
   hist: function (s, k, a, samples) {
     var frequencyDict = _(samples).countBy(function (x) {
@@ -71386,7 +71392,14 @@ var globalExport = {
       }
     };
   },
-  set: function (item, key) {
+  put: function () {
+    var item, key;
+    if (arguments.length == 1) {
+      item = arguments[0];
+    } else {
+      key = arguments[0];
+      item = arguments[1];
+    }
     if (!key) {
       numTopStoreKeys++;
       key = 'r' + numTopStoreKeys;
