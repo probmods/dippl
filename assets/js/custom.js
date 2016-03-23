@@ -17,7 +17,10 @@ function euclideanDistance(v1, v2){
 
 // Code boxes
 function setupCodeBoxes(){
-  $("pre").map(function(i,el) { wpEditor.setup(el, {language: 'webppl'}); })
+  $("pre:not(#bibtex)").map(function(i,el) {
+    // remove trailing newline
+    el.children[0].innerHTML = el.children[0].innerHTML.trim();
+    wpEditor.setup(el, {language: 'webppl'}); })
 }
 
 $(setupCodeBoxes);
