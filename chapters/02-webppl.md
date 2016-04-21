@@ -53,9 +53,9 @@ Functions from the Javascript environment that WebPPL is called from can be used
 
 ## With random sampling
 
-WebPPL is not just a subset of Javascript: is is a subset augmented with the ability to represent and manipulate *probability distributions*. Elementary Random Primitives (ERPs) are the basic object type that represents distributions. Under the hood an ERP `e` has a method `e.sample` that returns a sample from the distribution, a method `e.score` that returns the log-probability of a possible sampled value, and (optionally) a method `e.support` that returns the support of the distribution. However, these methods should not be called directly -- in order for inference operators (described later) to work ERPs should be used through the WebPPL keywords `sample`, `factor`, and so on. 
+WebPPL is not just a subset of Javascript: is is a subset augmented with the ability to represent and manipulate *probability distributions*. Elementary Random Primitives (ERPs) are the basic object type that represents distributions. Under the hood an ERP `e` has a method `e.sample` that returns a sample from the distribution, a method `e.score` that returns the log-probability of a possible sampled value, and (optionally) a method `e.support` that returns the support of the distribution. Of these, `e.sample` should not be called directly -- in order for inference operators (described later) to work correctly, use the `sample` operator.
 
-You can sample from an ERP with the `sample` operator. For example, using the built-in `bernoulliERP`:
+For example, using the built-in `bernoulliERP`:
 
 ~~~~
 sample(bernoulliERP, [0.5])
