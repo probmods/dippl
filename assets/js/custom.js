@@ -38,7 +38,7 @@ function jsPrint(x){
   } else {
     resultDiv.append(
       document.createTextNode(
-        (typeof x == 'string' ? x : JSON.stringify(x)) + "\n"));
+        (typeof x == 'string' ? x : util.serialize(x)) + "\n"));
   }
 }
 
@@ -209,7 +209,7 @@ function webpplObjectToText(x){
   if (isErp(x)){
     return "<erp>";
   } else {
-    return JSON.stringify(x);
+    return util.serialize(x);
   }
 }
 
