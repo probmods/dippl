@@ -44,7 +44,7 @@ var binomial = function(){
 ExploreFirst(binomial)
 ~~~
 
-This set of functions does indeed go back and forth between the binomial computation and the 'randomness handling' functions to explore a possible execution of the program. 
+This set of functions does indeed go back and forth between the binomial computation and the 'randomness handling' functions to explore a possible execution of the program.
 However, it is only able to explore a single path through the computation. We would like to be able to 'return' from the `_sample` function *multiple times* with different values. If we could do so, we could try each value from the support to see what return values ultimately come from the computation. We can't do this by an ordinary function return, however; we need an explicit handle to the return context. We need to reify the *future of the computation* from the point that `sample` is called. Such a reified computation future is called a **continuation**.
 
 ## Continuations
@@ -191,16 +191,16 @@ var cpsBinomial = function(k){
             bernoulliERP, [0.5])
         },
         bernoulliERP, [0.5])
-    }, 
+    },
     bernoulliERP, [0.5])
 }
 
 cpsBinomial(print)
 ~~~
 
-There are two things to note here: 
+There are two things to note here:
 
-First, we had to wrap the primitive function `sample` such that it takes a continuation. The same kind of wrapping can be applied to all functions that are defined outside of the code we are transforming. 
+First, we had to wrap the primitive function `sample` such that it takes a continuation. The same kind of wrapping can be applied to all functions that are defined outside of the code we are transforming.
 
 Second, the sequence of definition statements was sequentialized in a way similar to how we transformed function applications above: We evaluate the (cps-ed) version of the first statement and pass the result to a continuation function that then evaluates the (cps-ed) version of the second statement, which then calls the (cps-ed) version of the third statement. When `a`, `b`, and `c` have all been evaluated, we can pass `a + b + c` to the global continuation function `k`.
 
@@ -225,7 +225,7 @@ function cpsBinomial(k){
             bernoulliERP, [0.5])
         },
         bernoulliERP, [0.5])
-    }, 
+    },
     bernoulliERP, [0.5])
 }
 ///
@@ -244,14 +244,14 @@ function exit(val) {
   returnVals.push(val)
   if( unexploredFutures.length > 0 ) {
     unexploredFutures.pop()()
-  } 
+  }
 }
 
 function Explore(cpsComp) {
   cpsComp(exit)
   return returnVals
 }
-    
+
 Explore(cpsBinomial)
 ~~~
 
@@ -273,7 +273,7 @@ function cpsBinomial(k){
             bernoulliERP, [0.5])
         },
         bernoulliERP, [0.5])
-    }, 
+    },
     bernoulliERP, [0.5])
 }
 ///
@@ -327,7 +327,7 @@ function cpsBinomial(k){
             bernoulliERP, [0.5])
         },
         bernoulliERP, [0.5])
-    }, 
+    },
     bernoulliERP, [0.5])
 }
 ///
@@ -359,7 +359,7 @@ function exit(val) {
 
 function Marginalize(cpsComp) {
   cpsComp(exit)
-  
+
   //normalize:
   var norm = 0
   for (var v in returnHist) {
@@ -379,7 +379,7 @@ We can now do marginal inference by enumeration of an arbitrary (finite) computa
 
 ## Continuation-passing transform
 
-A program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants. 
+A program can automatically be transformed into continuation-passing style. Let's look at what a naive transformation looks like for function expressions, function application, and constants.
 
 Note: In the following examples, `CpsTransform` is to be read as a macro that transforms source code, not as an object-level function.
 
@@ -449,7 +449,7 @@ f(3);</textarea>
 
 ## Best-first enumeration
 
-Above we have maintained a first-in-last-out queue of continuations; this results in a depth-first search strategy over program executions. Often a more useful approach is to enumerate the highest priority continuation first, based on some heuristic notion of priority. For instance, using the score-so-far as priority results in a most-likely-first strategy. We can achieve this by simply changing the above code to use a priority queue (instead of `push` and `pop`). 
+Above we have maintained a first-in-last-out queue of continuations; this results in a depth-first search strategy over program executions. Often a more useful approach is to enumerate the highest priority continuation first, based on some heuristic notion of priority. For instance, using the score-so-far as priority results in a most-likely-first strategy. We can achieve this by simply changing the above code to use a priority queue (instead of `push` and `pop`).
 
 Here we compare different enumeration orders for a simple computation. The argument to the `Enumerate` methods indicates how many executions to complete before stopping. Try reducing it to 1, 2, and 3 to see what each method finds in the first few executions.
 
@@ -469,11 +469,11 @@ print(EnumerateBreadthFirst(binomial, numexec))
 
 print(EnumerateLikelyFirst(binomial, numexec))
 ~~~
- 
+
 
 ## Caching
 
-Because the return value from `Enumerate(foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times even if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution. 
+Because the return value from `Enumerate(foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times even if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution.
 
 Next chapter: [Early, incremental evidence](/chapters/04-factorseq.html)
 
