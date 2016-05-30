@@ -35,3 +35,17 @@ svg {
 	margin: auto auto;
 	text-align: center;
 }
+
+.wviz-table {
+    border-collapse: collapse;
+    margin: 0.5em;
+    font-size: 12px;
+}
+
+.wviz-table th, .wviz-table tr, .wviz-table td {
+    border: 1px solid #ccc;
+}
+
+.wviz-table th, .wviz-table td {
+    padding: 0.2em 0.4em
+}

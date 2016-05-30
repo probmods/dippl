@@ -17,10 +17,12 @@ function euclideanDistance(v1, v2){
 
 // Code boxes
 function setupCodeBoxes(){
+  // TODO: optimize this, (maybe have wpEditor.setup take a content option?)
   $("pre:not(#bibtex)").map(function(i,el) {
-    // remove trailing newline
-    el.children[0].innerHTML = el.children[0].innerHTML.trim();
-    wpEditor.setup(el, {language: 'webppl'}); })
+    var firstLine = $(el).text().split("\n")[0];
+    var language = (firstLine == '// language: javascript' ? 'javascript' : 'webppl');
+    wpEditor.setup(el, {language: language})
+  })
 }
 
 $(setupCodeBoxes);

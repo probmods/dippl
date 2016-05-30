@@ -70950,97 +70950,6 @@ var ResultText = React.createClass({
   }
 });
 
-var ResultBarChart = React.createClass({
-  displayName: 'ResultBarChart',
-
-  shouldComponentUpdate: pureSCU,
-  componentDidMount: function () {
-    var ivs = this.props.ivs;
-    var dvs = this.props.dvs;
-
-    var frequencyDf = _.zip(ivs, dvs).map(function (a) {
-      return { iv: a[0], dv: a[1] };
-    });
-
-    // TODO: why did the hovering stuff stop working all of a sudden?
-    // i can't even get it working on test-vega.html
-    var vgspec = {
-      "width": 400,
-      "height": ivs.length * 30,
-      // "padding": {"top": 10, "left": 30, "bottom": 20, "right": 30},
-
-      "data": [{
-        "name": "table",
-        "values": frequencyDf
-      }],
-
-      "signals": [{
-        "name": "tooltip",
-        "init": {},
-        "streams": [{ "type": "rect:mouseover", "expr": "datum" }, { "type": "rect:mouseout", "expr": "{}" }]
-      }],
-
-      "predicates": [{
-        "name": "tooltip", "type": "==",
-        "operands": [{ "signal": "tooltip._id" }, { "arg": "id" }]
-      }],
-
-      "scales": [{ "name": "yscale", "type": "ordinal", "range": "height",
-        "domain": { "data": "table", "field": "iv" } }, { "name": "xscale", "range": "width", "nice": true,
-        "domain": { "data": "table", "field": "dv" } }],
-
-      "axes": [{ "type": "x", "scale": "xscale" }, { "type": "y", "scale": "yscale" }],
-
-      marks: [{
-        "type": "rect",
-        "from": { "data": "table" },
-        "properties": {
-          "enter": {
-            "x": { "scale": "xscale", value: 0 },
-            x2: { scale: 'xscale', field: 'dv' },
-            "y": { "scale": "yscale", "field": "iv" },
-            "height": { "scale": "yscale", "band": true, "offset": -1 }
-          },
-          "update": { "fill": { "value": "steelblue" } },
-          "hover": { "fill": { "value": "red" } }
-        }
-      }, {
-        "type": "text",
-        "properties": {
-          "enter": {
-            "align": { "value": "center" },
-            "fill": { "value": "#333" }
-          },
-          "update": {
-            "x": { "scale": "xscale", "signal": "tooltip.dv", "offset": 10 },
-            "y": { "scale": "yscale", "signal": "tooltip.iv", "offset": 3 },
-            "dy": { "scale": "yscale", "band": true, "mult": 0.5 },
-            "text": { "signal": "tooltip.count" },
-            "fillOpacity": {
-              "rule": [{
-                "predicate": { "name": "tooltip", "id": { "value": null } },
-                "value": 0
-              }, { "value": 1 }]
-            }
-          }
-        }
-      }]
-    };
-
-    var div = this.refs.div;
-
-    vg.parse.spec(vgspec, function (error, chart) {
-      var view = chart({ renderer: 'svg' }).update();
-      var img = document.createElement('img');
-      img.src = 'data:image/svg+xml;utf8,' + view.svg();
-      ReactDOM.findDOMNode(div).innerHTML = "<img src='data:image/svg+xml;utf8," + view.svg() + "'></img>";
-    });
-  },
-  render: function () {
-    return React.createElement('div', { ref: 'div' });
-  }
-});
-
 var wait = function (ms, f) {
   return setTimeout(f, ms);
 };
@@ -71109,7 +71018,7 @@ var ResultList = React.createClass({
     });
 
     var style = {
-      minHeight: this.props.executionState == 'idle' ? 0 : this.state.minHeight
+      minHeight: this.state.minHeight
     };
 
     return React.createElement(
@@ -71146,19 +71055,6 @@ var CodeEditor = React.createClass({
       return k(s);
     }
   },
-  hist: function (s, k, a, samples) {
-    var frequencyDict = _(samples).countBy(function (x) {
-      return typeof x === 'string' ? x : JSON.stringify(x);
-    });
-    var labels = _(frequencyDict).keys();
-    var counts = _(frequencyDict).values();
-    this.addResult({ type: 'barChart', ivs: labels, dvs: counts });
-    return k(s);
-  },
-  barChart: function (s, k, a, ivs, dvs) {
-    this.addResult({ type: 'barChart', ivs: ivs, dvs: dvs });
-    return k(s);
-  },
   makeResultContainer: function () {
     // TODO: take property arguments so that we can, e.g., make the div inline or have a border or something
     this.addResult(_.extend({ type: 'DOM' }));
@@ -71175,17 +71071,25 @@ var CodeEditor = React.createClass({
     this.endJob();
   },
   runCode: function () {
-    // TODO: detect resultDivStyle minHeight here
 
     var resultList = this.refs.resultList;
     var $resultsDiv = $(ReactDOM.findDOMNode(resultList));
 
+    // set the minimum height property for the result list
+    // to be its current height so that we don't have the janky reflow
+    // of it shrinking because it's empty and growing again as
+    // results populate
     resultList.setState(function (state, props) {
-      console.log('setting minheight to be ' + $resultsDiv.height());
-      return _.extend({}, state, { minHeight: $resultsDiv.height() });
+      //return _.extend({}, state, {minHeight: $resultsDiv.height()})
+
+      return _.extend({}, state, { minHeight: util.sum($resultsDiv.contents().map(function (i, x) {
+          return $(x).height();
+        }))
+      });
     });
 
-    // global.localStorage.setItem('code',this.state.code); // TODO: enable only in dev mode
+    // enable only in dev mode
+    // global.localStorage.setItem('code',this.state.code);
 
     this.setState({ newborn: false, results: [] });
 
@@ -71203,11 +71107,7 @@ var CodeEditor = React.createClass({
 
     var cleanup = function () {
       window.onerror = null;
-      comp.setState({ execution: 'idle' }, function () {
-        // set resultList minHeight with callback because we need to make sure the idle style is applied first
-        // i.e., the css min-height attribute is set to 0 so we can actually measure the height of the div
-        //comp.refs['resultList'].setState({minHeight: $resultsDiv.height()})
-      });
+      comp.setState({ execution: 'idle' });
 
       // remove completed job
       jobsQueue.shift();
@@ -71219,6 +71119,19 @@ var CodeEditor = React.createClass({
 
     var job = function () {
 
+      // run vanilla js
+      // TODO: detect language from codemirror value, not React prop
+      if (language == 'javascript') {
+        // TODO: grey out the run button but don't show a cancel button
+        try {
+          var res = eval(code);
+          endJob({}, eval(code));
+        } catch (e) {
+          comp.addResult({ type: 'error', message: e.message, stack: e.stack });
+          cleanup();
+        }
+      }
+
       // if webppl hasn't loaded yet, wait 250ms before trying again
       if (typeof webppl == 'undefined') {
         comp.setState({ execution: 'loading webppl' });
@@ -71226,7 +71139,7 @@ var CodeEditor = React.createClass({
       }
 
       // inject this component's side effect methods into global
-      var sideEffectMethods = ["print", "hist", "barChart"];
+      var sideEffectMethods = ["print"];
       _.each(sideEffectMethods, function (name) {
         global[name] = comp[name];
       });
@@ -71341,7 +71254,11 @@ var setupCode = function (preEl, options) {
     language: options.language
   });
 
+  // TODO: figure out if this is an anti-pattern
+  var ret = {};
+
   ReactDOM.render(r, editorDiv, function () {
+    ret = this;
     var cm = this.refs.editor.codeMirror;
     requestAnimationFrame(function () {
       parentDiv.replaceChild(editorDiv, preEl);
@@ -71358,6 +71275,8 @@ var setupCode = function (preEl, options) {
       }
     });
   });
+
+  return ret;
 };
 
 var numTopStoreKeys = 0;
