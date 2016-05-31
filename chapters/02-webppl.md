@@ -53,21 +53,29 @@ Functions from the Javascript environment that WebPPL is called from can be used
 
 ## With random sampling
 
-WebPPL is not just a subset of Javascript: is is a subset augmented with the ability to represent and manipulate *probability distributions*. Elementary Random Primitives (ERPs) are the basic object type that represents distributions. Under the hood an ERP `e` has a method `e.sample` that returns a sample from the distribution, a method `e.score` that returns the log-probability of a possible sampled value, and (optionally) a method `e.support` that returns the support of the distribution. Of these, `e.sample` should not be called directly -- in order for inference operators (described later) to work correctly, use the `sample` operator.
+WebPPL is not just a subset of Javascript: is is a subset augmented with the ability to represent and manipulate probability distributions. We will distinguish between *distributions* and *distribution types*. 
 
-For example, using the built-in `bernoulliERP`:
+A istribution type (or constructor) takes parameters and returns a distribution. Under the hood, a distribution `d` has a method `d.sample` that returns a sample from the distribution, a method `d.score` that returns the log-probability of a possible sampled value, and (optionally) a method `d.support` that returns the support of the distribution. Of these, `d.sample` should not be called directly -- in order for inference operators (described later) to work correctly, use the `sample` operator.
+
+For example, using the built-in `Bernoulli` type:
 
 ~~~~
-sample(bernoulliERP, [0.5])
+sample(Bernoulli({p: 0.5}))
 ~~~~
 
-There is a set of pre-defined ERPs including `bernoulliERP`, `randomIntegerERP`, etc. (Since `sample(bernoulliERP, [p])` is very common it is aliased to `flip(p)`. Similarly `randomInteger`, and so on.) It is also possible to define new ERPs directly, but most ERPs you will use will be either built in or built as the marginal distribution of some computation, via inference functions (see below).
+We can also visualize the distribution:
+
+~~~~
+viz.auto(Bernoulli({p: 0.5}))
+~~~~
+
+There is a set of pre-defined distribution types including `Bernoulli`, `RandomInteger`, etc. (Since `sample(Bernoulli({p: p}))` is very common it is aliased to `flip(p)`. Similarly `randomInteger`, and so on.) It is also possible to define new distribution types, but most distribution you will use will be either built in or built as the marginal distribution of some computation, via inference functions (see below).
 
 With only the ability to sample from primitive distributions and perform deterministic computations, the language is already universal! This is due to the ability to construct *stochastically recursive* functions. For instance we can define a geometric distribution in terms of a bernoulli distribution:
 
 ~~~
 var geometric = function(p) {
-  return flip(p)?1+geometric(p):1
+  return flip(p) ? 1 + geometric(p) : 1
 }
 
 geometric(0.5)
@@ -76,41 +84,42 @@ geometric(0.5)
 
 ## And inference
 
-WebPPL is equipped with a variety of implementations of *marginalization*: the operation of normalizing a (sub-)computation to construct the marginal distribution on return values. These marginalization functions (which we will generally call inference functions) take a random computation represented as a function with no arguments and return an ERP that captures the marginal distribution on return values. How they get this marginal ERP differs between inference functions, and is the topic of most of the [tutorial](../index.html).
+WebPPL is equipped with a variety of implementations of *marginalization*: the operation of normalizing a (sub-)computation to construct the marginal distribution on return values. These marginalization functions (which we will generally call inference functions) take a random computation represented as a function with no arguments and return the marginal distribution on return values. How they get this marginal distribution differs between inference functions, and is the topic of most of the [tutorial](../index.html).
 
 As an example, consider a simple binomial distribution: the number of times that three fair coin tosses come up heads:
 
 ~~~
-var binomial = function(){
-  var a = sample(bernoulliERP, [0.5])
-  var b = sample(bernoulliERP, [0.5])
-  var c = sample(bernoulliERP, [0.5])
-  return a + b + c}
+var binomial = function() {
+  var a = sample(Bernoulli({p: 0.5}))
+  var b = sample(Bernoulli({p: 0.5}))
+  var c = sample(Bernoulli({p: 0.5}))
+  return a + b + c
+}
 
-var binomialERP = Enumerate(binomial)
+var binomialDist = Infer({method: 'enumerate'}, binomial)
 
-print(binomialERP)
+viz.auto(binomialDist)
 ~~~
 
-The distribution on return values from `binomial()` and `sample(binomialERP)` are the same -- but `binomialERP` has already collapsed out the intermediate random choices to represent this distribution as a primitive.
+The distribution on return values from `binomial()` and `sample(binomialDist)` are the same -- but `binomialDist` has already collapsed out the intermediate random choices to represent this distribution as a primitive.
 
 What if we wanted to adjust the above `binomial` computation to favor executions in which `a` or `b` was true? The `factor` keyword re-weights an execution by adding the given number to the log-probability of that execution. For instance:
 
 ~~~
-var funnybinomial = function(){
-  var a = sample(bernoulliERP, [0.5])
-  var b = sample(bernoulliERP, [0.5])
-  var c = sample(bernoulliERP, [0.5])
-  factor( (a|b) ? 0 : -2)
+var funnyBinomial = function(){
+  var a = sample(Bernoulli({p: 0.5}))
+  var b = sample(Bernoulli({p: 0.5}))
+  var c = sample(Bernoulli({p: 0.5}))
+  factor( (a || b) ? 0 : -2)
   return a + b + c}
 
-var funnybinomialERP = Enumerate(funnybinomial)
+var funnyBinomialDist = Infer({method: 'enumerate'}, funnyBinomial)
 
-print(funnybinomialERP)
+viz.auto(funnyBinomialDist)
 ~~~
 
-It is easier to build useful models (that, for instance, condition on data) with `factor`. But `factor` by itself doesn't do anything -- it interacts with *marginalization* functions that normalize the computation they are applied to. For this reason running a computation with `factor` in it at the top level -- that is, not inside a marginalization operator -- results in an error. Try running `funnybinomial` directly....
+It is easier to build useful models (that, for instance, condition on data) with `factor`. But `factor` by itself doesn't do anything -- it interacts with *marginalization* functions that normalize the computation they are applied to. For this reason running a computation with `factor` in it at the top level -- that is, not inside a marginalization operator -- results in an error. Try running `funnyBinomial` directly....
 
-WebPPL has several inference operators, including `Enumerate` and `ParticleFilter`. These are all implemented by providing a coroutine that receives the current continuation at `sample` and `factor` statements. We explain these ideas and techniques in the next few sections. To get an idea what you can do with WebPPL take a look at the examples on [pragmatics](/examples/pragmatics.html), [semantic parsing](/examples/semanticparsing.html), and [computer graphics](/examples/vision.html); or for PPLs more generally, look at [forestdb.org](http://forestdb.org).
+WebPPL has several inference methods, including `enumerate` and `MCMC`. These are all implemented by providing a coroutine that receives the current continuation at `sample` and `factor` statements. We explain these ideas and techniques in the next few sections. To get an idea what you can do with WebPPL take a look at the examples on [pragmatics](/examples/pragmatics.html), [semantic parsing](/examples/semanticparsing.html), and [computer graphics](/examples/vision.html); or for PPLs more generally, look at [forestdb.org](http://forestdb.org).
 
 Next chapter: [Exploring the executions of a random computation](/chapters/03-enumeration.html)
