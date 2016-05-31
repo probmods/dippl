@@ -29,6 +29,6 @@ Update webppl:
 
 ## Assets
 
-- webppl dev branch: 767ddab
-- webppl-editor: eecad01
-- webppl-viz: 811098f
+- webppl: 258bea8 (v0.7.0 daipp)
+- webppl-editor: 95236b9
+- webppl-viz: 2450784

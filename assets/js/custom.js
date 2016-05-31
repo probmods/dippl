@@ -78,8 +78,3 @@ var invertMap = function (store, k, a, obj) {
 
   return k(store, newObj);
 };
-
-//
-if (ERP) {
-  ERP.prototype.__print__ = viz.print;
-}
