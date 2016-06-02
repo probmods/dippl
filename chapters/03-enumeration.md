@@ -2,6 +2,8 @@
 layout: chapter
 title: Exploring the executions of a random computation
 description: Implementing marginal inference by enumeration using continuations, coroutines, and CPS.
+custom_js:
+  /assets/js/transform.js
 ---
 
 All inference techniques involve exploring the space of executions of a random computation in one way or another. In this section we consider how the many paths through a computation can be explored, aiming for an implementation that computes the marginal distribution of a computation by *enumerating* all possible executions.
@@ -12,32 +14,32 @@ Consider the simple binomial example from [earlier](WebPPL.html).
 
 ~~~
 var binomial = function(){
-  var a = sample(bernoulliERP, [0.5])
-  var b = sample(bernoulliERP, [0.5])
-  var c = sample(bernoulliERP, [0.5])
+  var a = sample(Bernoulli({p: 0.5}))
+  var b = sample(Bernoulli({p: 0.5}))
+  var c = sample(Bernoulli({p: 0.5}))
   return a + b + c
 }
 
-print(Enumerate(binomial))
+var binomialDist = Infer({method: 'enumerate'}, binomial)
+
+viz.auto(binomialDist)
 ~~~
 
 We can view `sample` and `factor` as simple 'side-computations' for exploring the main `binomial` computation. To make this concrete, let's implement `sample` as an ordinary function that always chooses the first element of the support of any random choice. We will kick-off this exploration by calling `ExploreFirst`, which simply calls the computation. (In the following we rename `sample` to `_sample` to avoid conflicting with the built-in WebPPL `sample` function.)
 
 ~~~
-// language: javascript
-
-function _sample(erp, params) {
-  return erp.support()[0]
+var _sample = function(dist) {
+  return dist.support()[0]
 }
 
-function ExploreFirst(comp) {
+var ExploreFirst = function(comp) {
   return comp()
 }
 
 var binomial = function(){
-  var a = _sample(bernoulliERP, [0.5])
-  var b = _sample(bernoulliERP, [0.5])
-  var c = _sample(bernoulliERP, [0.5])
+  var a = _sample(Bernoulli({p: 0.5}))
+  var b = _sample(Bernoulli({p: 0.5}))
+  var c = _sample(Bernoulli({p: 0.5}))
   return a + b + c
 }
 
@@ -168,15 +170,15 @@ As a final example, let's write our earlier binomial function in CPS:
 ~~~
 // Standard version:
 var binomial = function(){
-  var a = sample(bernoulliERP, [0.5])
-  var b = sample(bernoulliERP, [0.5])
-  var c = sample(bernoulliERP, [0.5])
+  var a = sample(Bernoulli({p: 0.5}))
+  var b = sample(Bernoulli({p: 0.5}))
+  var c = sample(Bernoulli({p: 0.5}))
   return a + b + c
 }
 
 // CPS version:
-var cpsSample = function(k, erp, params){
-  return k(sample(erp, params))
+var cpsSample = function(k, dist){
+  return k(sample(dist))
 }
 
 var cpsBinomial = function(k){
@@ -188,11 +190,11 @@ var cpsBinomial = function(k){
             function(c){
               k(a + b + c);
             },
-            bernoulliERP, [0.5])
+            Bernoulli({p: 0.5}))
         },
-        bernoulliERP, [0.5])
+        Bernoulli({p: 0.5}))
     },
-    bernoulliERP, [0.5])
+    Bernoulli({p: 0.5}))
 }
 
 cpsBinomial(print)
@@ -207,13 +209,17 @@ Second, the sequence of definition statements was sequentialized in a way simila
 
 ## Coroutines: functions that receive continuations
 
-Now we'll re-write the code above so that the `sample` function gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way. This pattern for a function that receives the continuation (often called a 'callback') from the main computation and returns only by calling the continuation is called a *coroutine*. (The above definition of `cpsBinomial`, using `_sample` again to avoid conflict with built-ins, is above the fold.)
+Now we'll re-write the code above so that the `sample` function gets the continuation of the point where it is called, and keeps going by calling this continuation (perhaps several times), rather than by returning in the usual way. This pattern for a function that receives the continuation (often called a 'callback') from the main computation and returns only by calling the continuation is called a *coroutine*. (The above definition of `cpsBinomial`, using `_sample` again to avoid conflict with built-ins, is above the fold. Note also that we're switching to Javascript so that we can use mutation.)
 
 ~~~
 // language: javascript
 
 ///fold:
-function cpsBinomial(k){
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
+var cpsBinomial = function(k){
   _sample(
     function(a){
       _sample(
@@ -222,28 +228,29 @@ function cpsBinomial(k){
             function(c){
               k(a + b + c);
             },
-            bernoulliERP, [0.5])
+            Bernoulli({p: 0.5}))
         },
-        bernoulliERP, [0.5])
+        Bernoulli({p: 0.5}))
     },
-    bernoulliERP, [0.5])
+    Bernoulli({p: 0.5}))
 }
 ///
 
-unexploredFutures = []
+var unexploredFutures = []
 
-function _sample(cont, erp, params) {
-  var sup = erp.support(params)
+function _sample(cont, dist) {
+  var sup = dist.support()
   sup.forEach(function(s){unexploredFutures.push(function(){cont(s)})})
   unexploredFutures.pop()()
 }
 
-returnVals = []
+var returnVals = []
 
 function exit(val) {
   returnVals.push(val)
-  if( unexploredFutures.length > 0 ) {
-    unexploredFutures.pop()()
+  if (unexploredFutures.length > 0) {
+    var next = unexploredFutures.pop()
+    next()
   }
 }
 
@@ -261,6 +268,10 @@ The above code explores all the executions of the computation, but does not keep
 // language: javascript
 
 ///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
 function cpsBinomial(k){
   _sample(
     function(a){
@@ -270,21 +281,21 @@ function cpsBinomial(k){
             function(c){
               k(a + b + c);
             },
-            bernoulliERP, [0.5])
+            Bernoulli({p: 0.5}))
         },
-        bernoulliERP, [0.5])
+        Bernoulli({p: 0.5}))
     },
-    bernoulliERP, [0.5])
+    Bernoulli({p: 0.5}))
 }
 ///
 
-unexploredFutures = []
-currScore = 0
+var unexploredFutures = []
+var currScore = 0
 
-function _sample(cont, erp, params) {
-  var sup = erp.support(params)
+function _sample(cont, dist, params) {
+  var sup = dist.support(params)
   sup.forEach(function(s){
-  var newscore = currScore + erp.score(params, s);
+  var newscore = currScore + dist.score(s);
   unexploredFutures.push({k: function(){cont(s)}, score: newscore})})
   runNext()
 }
@@ -294,7 +305,7 @@ function runNext(){
   currScore = next.score
   next.k()}
 
-returnHist = {}
+var returnHist = {}
 
 function exit(val) {
   returnHist[val] = (returnHist[val] || 0) + Math.exp(currScore)
@@ -315,6 +326,10 @@ Finally, we need to deal with factor statements -- easy because they simply add 
 // language: javascript
 
 ///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
 function cpsBinomial(k){
   _sample(
     function(a){
@@ -324,23 +339,23 @@ function cpsBinomial(k){
             function(c){
               k(a + b + c);
             },
-            bernoulliERP, [0.5])
+            Bernoulli({p: 0.5}))
         },
-        bernoulliERP, [0.5])
+        Bernoulli({p: 0.5}))
     },
-    bernoulliERP, [0.5])
+    Bernoulli({p: 0.5}))
 }
 ///
 
-unexploredFutures = []
-currScore = 0
+var unexploredFutures = []
+var currScore = 0
 
 function _factor(s) { currScore += s}
 
-function _sample(cont, erp, params) {
-  var sup = erp.support(params)
+function _sample(cont, dist, params) {
+  var sup = dist.support(params)
   sup.forEach(function(s){
-    var newscore = currScore + erp.score(params, s);
+    var newscore = currScore + dist.score(s);
     unexploredFutures.push({k: function(){cont(s)}, score: newscore})})
   runNext()
 }
@@ -350,7 +365,7 @@ function runNext(){
   currScore = next.score
   next.k()}
 
-returnHist = {}
+var returnHist = {}
 
 function exit(val) {
   returnHist[val] = (returnHist[val] || 0) + Math.exp(currScore)
@@ -455,25 +470,43 @@ Here we compare different enumeration orders for a simple computation. The argum
 
 ~~~
 var binomial = function(){
-    var a = sample(bernoulliERP, [0.1])
-    var b = sample(bernoulliERP, [0.9])
-    var c = sample(bernoulliERP, [0.1])
+    var a = sample(Bernoulli({p: 0.1}))
+    var b = sample(Bernoulli({p: 0.9}))
+    var c = sample(Bernoulli({p: 0.1}))
     return a + b + c
 }
 
-var numexec = 10
+var maxExec = 10
 
-print(EnumerateDepthFirst(binomial, numexec))
+viz.auto(Infer(
+  {
+    method: 'enumerate', 
+    maxExecutions: maxExec, 
+    strategy: 'depthFirst'
+  }, 
+  binomial));
 
-print(EnumerateBreadthFirst(binomial, numexec))
+viz.auto(Infer(
+  {
+    method: 'enumerate', 
+    maxExecutions: maxExec, 
+    strategy: 'breadthFirst'
+  }, 
+  binomial));
 
-print(EnumerateLikelyFirst(binomial, numexec))
+viz.auto(Infer(
+  {
+    method: 'enumerate', 
+    maxExecutions: maxExec, 
+    strategy: 'likelyFirst'
+  }, 
+  binomial));
 ~~~
 
 
 ## Caching
 
-Because the return value from `Enumerate(foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times even if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution.
+Because the return value from `Infer({method: 'enumerate'}, foo)` is a deterministic marginal distribution, there is no reason to compute it multiple times even if it is used multiple times. Instead we can explicitly instruct the system to *cache* the marginal distribution.
 
 Next chapter: [Early, incremental evidence](/chapters/04-factorseq.html)
 
