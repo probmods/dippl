@@ -2,6 +2,8 @@
 layout: chapter
 title: Particle Filtering
 description: Models with continuous variables, importance sampling, and sequential Monte Carlo.
+custom_js:
+  /assets/js/draw.js
 ---
 
 
@@ -55,15 +57,16 @@ var makeLines = function(n, lines, prevScore){
   return (n==1) ? newLines : makeLines(n-1, newLines, newScore);
 }
 
-var lineDist = EnumerateDepthFirst(
+var lineDist = Infer(
+  { method: 'enumerate', strategy: 'depthFirst', maxExecutions: 10 },
   function(){
     var lines = makeLines(4, [], 0);
     var finalGeneratedImage = Draw(50, 50, true);
-	drawLines(finalGeneratedImage, lines);
+    drawLines(finalGeneratedImage, lines);
     return lines;
-   }, 10)
+  })
 
-print(lineDist)
+viz.table(lineDist)
 ~~~~
 
 We first explore all images where *all* lines start at the bottom-rightmost pixel, and one of these lines ends a few pixels further up. Looking at the histogram, we see that all of these images are equally bad -- none of the lines overlap with the lines in the target image. This is probably not the ideal exploration strategy for a state space that contains more than a trillion possible program executions.
@@ -80,6 +83,7 @@ var drawLines = function(canvas, start, positions){
   var next = positions[0];
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
   drawLines(canvas, next, positions.slice(1));
+  return;
 }
 
 var last = function(xs){
@@ -124,6 +128,7 @@ var drawLines = function(canvas, start, positions){
   var next = positions[0];
   canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
   drawLines(canvas, next, positions.slice(1));
+  return;
 }
 ///
 
@@ -162,16 +167,7 @@ drawLines(canvas, positions[0], positions.slice(1))
 We have already encountered Hidden Markov models in [Chapter 4](/chapters/04-factorseq.html). There, the latent state was unobserved and we only got to observe a stochastic function of the latent state at each time step. We can apply the same principle to semi-Markov models. The model below could be used (for example) to model radar observations of the flight path of a plane.
 
 ~~~~
-///fold:
-var drawLines = function(canvas, start, positions){
-  if (positions.length == 0) { return []; }
-  var next = positions[0];
-  canvas.line(start[0], start[1], next[0], next[1], 4, 0.2);
-  drawLines(canvas, next, positions.slice(1));
-}
-
 var canvas = Draw(400, 400, true)
-///
 
 var init = function(dim){
   return repeat(dim, function(){ return gaussian(200, 1) });
@@ -272,7 +268,7 @@ Here is a simple HMM with binary states and observations:
 ~~~~
 var hmm = function(states, observations){
   var prevState = states[states.length - 1];
-  var state = sample(bernoulliERP, [prevState ? .9 : .1]);
+  var state = sample(Bernoulli({p: prevState ? .9 : .1}));
   factor((state == observations[0]) ? 0 : -2);
   if (observations.length == 0) {
     return states;
@@ -284,7 +280,8 @@ var hmm = function(states, observations){
 var observations = [true, true, true, true];
 var startState = false;
 
-print(Enumerate(
+viz.table(Infer(
+  {method: 'enumerate'},
   function(){
     return hmm([startState], observations)
   }
@@ -297,6 +294,12 @@ As in [lecture 3](/chapters/03-enumeration.html), we are going to think about ex
 
 ~~~~
 // language: javascript
+
+///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+///
 
 var cpsHmm = function(k, states, observations){
   var prevState = states[states.length - 1];
@@ -312,8 +315,7 @@ var cpsHmm = function(k, states, observations){
         },
         (state == observations[0]) ? 0 : -1);
     },
-    bernoulliERP,
-    [prevState ? .9 : .1]);
+    Bernoulli({p: prevState ? .9 : .1}));
 }
 
 var runCpsHmm = function(k){
@@ -332,8 +334,8 @@ var _factor = function(k, score){
   k(undefined);
 }
 
-var _sample = function(k, erp, params){
-  return sample({}, k, "addr", erp, params);
+var _sample = function(k, dist){
+  k(dist.sample());
 }
 ~~~~
 
@@ -343,6 +345,10 @@ If we run the HMM with these sample and factor functions, we see that we sample 
 // language: javascript
 
 ///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
 var cpsHmm = function(k, states, observations){
   var prevState = states[states.length - 1];
   _sample(
@@ -357,8 +363,7 @@ var cpsHmm = function(k, states, observations){
         },
         (state == observations[0]) ? 0 : -1);
     },
-    bernoulliERP,
-    [prevState ? .9 : .1]);
+    Bernoulli({p: prevState ? .9 : .1}));
 }
 
 var runCpsHmm = function(k){
@@ -371,12 +376,17 @@ var _factor = function(k, score){
   k(undefined);
 }
 
-var _sample = function(k, erp, params){
-  return sample({}, function(s, v){k(v)}, "addr", erp, params);
+var _sample = function(k, dist){
+  k(dist.sample());
 }
 ///
 
-runCpsHmm(jsPrint);
+var printResult = function(x){
+  var container = wpEditor.makeResultContainer();
+  container.appendChild(document.createTextNode(x))
+}
+
+runCpsHmm(printResult);
 ~~~~
 
 Let's write some scaffolding so that we can more easily take multiple samples from the prior, that is, without taking into account factors:

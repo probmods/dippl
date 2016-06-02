@@ -6,7 +6,8 @@ function DrawObject(width, height, visible){
   })[0];
   if (visible==true){
     $(this.canvas).css({"display": "inline"});
-    $(activeCodeBox).parent().append(this.canvas);
+    var container = wpEditor.makeResultContainer();
+    $(container).append(this.canvas);
   };
   this.paper = new paper.PaperScope();
   this.paper.setup(this.canvas);
@@ -103,9 +104,7 @@ function loadImage(s, k, a, drawObject, url){
     raster.position = drawObject.paper.view.center;
     drawObject.redraw();
     var trampoline = k(s);
-    while (trampoline){
-      trampoline = trampoline();
-    }
+    resumeTrampoline(trampoline)
   };
   imageObj.src = url;
   return false;
