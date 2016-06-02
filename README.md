@@ -29,6 +29,6 @@ Update webppl:
 
 ## Assets
 
-- webppl: 258bea8 (v0.7.0 daipp)
-- webppl-editor: 95236b9
+- webppl: 77553e2 (v0.7.0 daipp)
+- webppl-editor: d888aa2
 - webppl-viz: 2450784
