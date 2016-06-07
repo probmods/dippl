@@ -2,6 +2,8 @@
 layout: chapter
 title: Markov Chain Monte Carlo
 description: Trace-based implementation of MCMC.
+custom_js:
+  /assets/js/transform.js
 ---
 
 A popular way to estimate a difficult distribution is to sample from it by constructing a random walk that will visit each state in proportion to its probability -- this is called [Markov chain Monte Carlo](http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo). 
