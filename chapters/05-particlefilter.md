@@ -381,12 +381,7 @@ var _sample = function(k, dist){
 }
 ///
 
-var printResult = function(x){
-  var container = wpEditor.makeResultContainer();
-  container.appendChild(document.createTextNode(x))
-}
-
-runCpsHmm(printResult);
+runCpsHmm(print);
 ~~~~
 
 Let's write some scaffolding so that we can more easily take multiple samples from the prior, that is, without taking into account factors:
@@ -395,6 +390,10 @@ Let's write some scaffolding so that we can more easily take multiple samples fr
 // language: javascript
 
 ///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
 var cpsHmm = function(k, states, observations){
   var prevState = states[states.length - 1];
   _sample(
@@ -409,8 +408,7 @@ var cpsHmm = function(k, states, observations){
         },
         (state == observations[0]) ? 0 : -1);
     },
-    bernoulliERP,
-    [prevState ? .9 : .1]);
+    Bernoulli({p: prevState ? .9 : .1}));
 }
 
 var runCpsHmm = function(k){
@@ -423,8 +421,8 @@ var _factor = function(k, score){
   k(undefined);
 }
 
-var _sample = function(k, erp, params){
-  return sample({}, function(s, v){k(v)}, "addr", erp, params);
+var _sample = function(k, dist){
+  return k(dist.sample());
 }
 ///
 
@@ -444,7 +442,7 @@ var priorExit = function(value){
     return startCpsComp(priorExit);
   } else {
     // Print all samples
-    samples.forEach(jsPrint);
+    samples.forEach(function(x){print(JSON.stringify(x));});
   }
 };
 
@@ -477,6 +475,10 @@ Let's accumulate the factor weights with each sample:
 // language: javascript
 
 ///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
 var cpsHmm = function(k, states, observations){
   var prevState = states[states.length - 1];
   _sample(
@@ -491,8 +493,7 @@ var cpsHmm = function(k, states, observations){
         },
         (state == observations[0]) ? 0 : -1);
     },
-    bernoulliERP,
-    [prevState ? .9 : .1]);
+    Bernoulli({p: prevState ? .9 : .1}));
 }
 
 var runCpsHmm = function(k){
@@ -501,8 +502,12 @@ var runCpsHmm = function(k){
   return cpsHmm(k, [startState], observations);
 }
 
-var _sample = function(k, erp, params){
-  return sample({}, function(s, v){k(v)}, "addr", erp, params);
+var _factor = function(k, score){
+  k(undefined);
+}
+
+var _sample = function(k, dist){
+  return k(dist.sample());
 }
 ///
 
@@ -526,7 +531,7 @@ var lwExit = function(value){
     return startCpsComp(lwExit);
   } else {
     // Print all samples
-    samples.forEach(jsPrint);
+    samples.forEach(function(x){print(JSON.stringify(x));});
   }
 };
 
@@ -580,6 +585,10 @@ The only change to the algorithm is a resampling step at the end:
 // language: javascript
 
 ///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
 var cpsHmm = function(k, states, observations){
   var prevState = states[states.length - 1];
   _sample(
@@ -594,8 +603,7 @@ var cpsHmm = function(k, states, observations){
         },
         (state == observations[0]) ? 0 : -1);
     },
-    bernoulliERP,
-    [prevState ? .9 : .1]);
+    Bernoulli({p: prevState ? .9 : .1}));
 }
 
 var runCpsHmm = function(k){
@@ -604,13 +612,13 @@ var runCpsHmm = function(k){
   return cpsHmm(k, [startState], observations);
 }
 
-var _sample = function(k, erp, params){
-  return sample({}, function(s, v){k(v)}, "addr", erp, params);
+var _factor = function(k, score){
+  samples[sampleIndex].score += score;
+  k(undefined);
 }
 
-var _factor = function(k, score){
-  samples[sampleIndex].score += score; // NEW
-  k(undefined);
+var _sample = function(k, dist){
+  return k(dist.sample());
 }
 
 var resample = function(samples){
@@ -618,7 +626,7 @@ var resample = function(samples){
     function(sample){return Math.exp(sample.score);});
   var newSamples = [];
   for (var i=0; i<samples.length; i++){
-    var j = multinomialSample(weights);
+    var j = dists.discreteSample(weights);
     newSamples.push(samples[j]);
   }
   return newSamples;
@@ -641,7 +649,7 @@ var lwrExit = function(value){
   } else {
     samples = resample(samples); // NEW
     // Print all samples
-    samples.forEach(jsPrint);
+    samples.forEach(function(x){print(JSON.stringify(x));});
   }
 };
 
@@ -681,8 +689,12 @@ To enable this, we store the continuation for each sample so that we can resume 
 // language: javascript
 
 ///fold:
-var _sample = function(k, erp, params){
-  return sample({}, function(s, v){k(v)}, "addr", erp, params);
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
+var _sample = function(k, dist){
+  return k(dist.sample());
 }
 
 var copySample = function(s){
@@ -698,7 +710,7 @@ var resample = function(samples){
     function(sample){return Math.exp(sample.score);});
   var newSamples = [];
   for (var i=0; i<samples.length; i++){
-    var j = multinomialSample(weights);
+    var j = dists.discreteSample(weights);
     newSamples.push(copySample(samples[j]));
   }
   return newSamples;
@@ -718,8 +730,7 @@ var cpsHmm = function(k, states, observations){
         },
         (state == observations[0]) ? 0 : -1);
     },
-    bernoulliERP,
-    [prevState ? .9 : .1]);
+    Bernoulli({p: prevState ? .9 : .1}));
 }
 
 var runCpsHmm = function(k){
@@ -759,7 +770,7 @@ var pfExit = function(value){
     sampleIndex += 1;
     samples[sampleIndex].continuation(); // NEW
   } else {
-    samples.forEach(jsPrint);
+    samples.forEach(function(x){print(JSON.stringify(x));});
   }
 };
 
@@ -915,7 +926,7 @@ var transition = function(lastPos, secondLastPos){
 
 var observeConstrained = function(pos, trueObs){
   return map2(
-    function(x, obs){ return factor(gaussianERP.score([x, 5], obs)); },    
+    function(x, obs){ return factor(Gaussian({mu: x, sigma: 5}).score(obs)); },    
 	pos,
     trueObs
   );
