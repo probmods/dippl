@@ -103,9 +103,7 @@ function loadImage(s, k, a, drawObject, url){
     var raster = new drawObject.paper.Raster(imageObj);
     raster.position = drawObject.paper.view.center;
     drawObject.redraw();
-    var trampoline = k(s);
-    resumeTrampoline(trampoline)
+    resumeTrampoline(function() { return k(s) });
   };
   imageObj.src = url;
-  return false;
 }
