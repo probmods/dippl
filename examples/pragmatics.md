@@ -8,12 +8,14 @@ We start with a literal listener: a Bayesian agent who updates her prior beliefs
 
 ~~~
 var literalListener = function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    var m = meaning(utterance, world)
-    factor(m?0:-Infinity)
-    return world
-  })
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var world = worldPrior()
+      var m = meaning(utterance, world)
+      factor(m ? 0 : -Infinity)
+      return world
+    })
 }
 ~~~
 
@@ -51,7 +53,7 @@ var meaning = function(utt,world) {
          true
 }
 
-print(literalListener("some of the people are nice"))
+viz.auto(literalListener("some of the people are nice"))
 ~~~
 
 If you evaluate the above code box, you will see that the inferred meaning of "some of the people are nice" is uniform on all world states where at least one person is nice -- including the state in which all people are nice. This fails to capture the usual 'some but not all' scalar implicature.
@@ -84,29 +86,33 @@ var utterancePrior = function() {
 
 var meaning = function(utt,world) {
   return utt=="some of the people are nice"? world>0 :
-         utt=="all of the people are nice"? world==3 :
-         utt=="none of the people are nice"? world==0 :
-         true
+  utt=="all of the people are nice"? world==3 :
+  utt=="none of the people are nice"? world==0 :
+  true
 }
 ///
 
 var speaker = function(world) {
-  Enumerate(function(){
-    var utterance = utterancePrior()
-    factor(world == sample(literalListener(utterance)) ?0:-Infinity)
-    return utterance
-  })
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var utterance = utterancePrior()
+      factor(world == sample(literalListener(utterance)) ?0:-Infinity)
+      return utterance
+    })
 }
 
 var listener = function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    factor(utterance == sample(speaker(world)) ?0:-Infinity)
-    return world
-  })
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var world = worldPrior()
+      factor(utterance == sample(speaker(world)) ?0:-Infinity)
+      return world
+    })
 }
 
-print(listener("some of the people are nice"))
+viz.auto(listener("some of the people are nice"))
 ~~~
 
 If you evaluate the above code box you will see that it does capture the scalar implicature!
@@ -125,12 +131,14 @@ The search space in `speaker` and `literalListener` is needlessly big because th
 ~~~
 ///fold:
 var literalListener = function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    var m = meaning(utterance, world)
-    factor(m?0:-Infinity)
-    return world
-  })
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var world = worldPrior()
+      var m = meaning(utterance, world)
+      factor(m?0:-Infinity)
+      return world
+    })
 }
 
 var worldPrior = function() {
@@ -148,31 +156,35 @@ var utterancePrior = function() {
 
 var meaning = function(utt,world) {
   return utt=="some of the people are nice"? world>0 :
-         utt=="all of the people are nice"? world==3 :
-         utt=="none of the people are nice"? world==0 :
-         true
+  utt=="all of the people are nice"? world==3 :
+  utt=="none of the people are nice"? world==0 :
+  true
 }
 ///
 
 var speaker = function(world) {
-  Enumerate(function(){
-    var utterance = utterancePrior()
-    var L = literalListener(utterance)
-    factor(L.score([],world))
-    return utterance
-  })
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var utterance = utterancePrior()
+      var L = literalListener(utterance)
+      factor(L.score(world))
+      return utterance
+    })
 }
 
 var listener = function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    var S = speaker(world)
-    factor(S.score([],utterance))
-    return world
-  })
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var world = worldPrior()
+      var S = speaker(world)
+      factor(S.score(utterance))
+      return world
+    })
 }
 
-print(listener("some of the people are nice"))
+viz.auto(listener("some of the people are nice"))
 ~~~
 
 
@@ -195,40 +207,46 @@ var utterancePrior = function() {
 
 var meaning = function(utt,world) {
   return utt=="some of the people are nice"? world>0 :
-         utt=="all of the people are nice"? world==3 :
-         utt=="none of the people are nice"? world==0 :
-         true
+  utt=="all of the people are nice"? world==3 :
+  utt=="none of the people are nice"? world==0 :
+  true
 }
 ///
 
 var literalListener = cache(function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    var m = meaning(utterance, world)
-    factor(m?0:-Infinity)
-    return world
-  })
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var world = worldPrior()
+      var m = meaning(utterance, world)
+      factor(m?0:-Infinity)
+      return world
+    })
 })
 
 var speaker = cache(function(world) {
-  Enumerate(function(){
-    var utterance = utterancePrior()
-    var L = literalListener(utterance)
-    factor(L.score([],world))
-    return utterance
-  })
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var utterance = utterancePrior()
+      var L = literalListener(utterance)
+      factor(L.score(world))
+      return utterance
+    })
 })
 
 var listener = function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    var S = speaker(world)
-    factor(S.score([],utterance))
-    return world
-  })
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var world = worldPrior()
+      var S = speaker(world)
+      factor(S.score(utterance))
+      return world
+    })
 }
 
-print(listener("some of the people are nice"))
+viz.auto(listener("some of the people are nice"))
 ~~~
 
 
