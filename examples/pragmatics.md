@@ -126,7 +126,7 @@ This simple Rational Speech Acts model was introduced in Frank and Goodman (2012
 
 ### Combining factor and sample
 
-The search space in `speaker` and `literalListener` is needlessly big because the factors provide hard constraints on what the embedded listener/speaker can return. Indeed, `factor( v == sample(e) ?0:-Infinity)` for an ERP `e` is equivalent to `factor(e.score(v))`.
+The search space in `speaker` and `literalListener` is needlessly big because the factors provide hard constraints on what the embedded listener/speaker can return. Indeed, `factor( v == sample(d) ?0:-Infinity)` for a distribution `d` is equivalent to `factor(d.score(v))`.
 
 ~~~
 ///fold:
