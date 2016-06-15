@@ -55,7 +55,7 @@ Functions from the Javascript environment that WebPPL is called from can be used
 
 WebPPL is not just a subset of Javascript: is is a subset augmented with the ability to represent and manipulate probability distributions. We will distinguish between *distributions* and *distribution types*. 
 
-A istribution type (or constructor) takes parameters and returns a distribution. Under the hood, a distribution `d` has a method `d.sample` that returns a sample from the distribution, a method `d.score` that returns the log-probability of a possible sampled value, and (optionally) a method `d.support` that returns the support of the distribution. Of these, `d.sample` should not be called directly -- in order for inference operators (described later) to work correctly, use the `sample` operator.
+A distribution type (or constructor) takes parameters and returns a distribution. Under the hood, a distribution `d` has a method `d.sample` that returns a sample from the distribution, a method `d.score` that returns the log-probability of a possible sampled value, and (optionally) a method `d.support` that returns the support of the distribution. Of these, `d.sample` should not be called directly -- in order for inference operators (described later) to work correctly, use the `sample` operator.
 
 For example, using the built-in `Bernoulli` type:
 
