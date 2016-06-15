@@ -31,7 +31,7 @@ var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
 
 var meaning = function(utterance) {
   return combine_meanings(filter(function(m){return !(m.sem==undefined)},
-                          map(lexical_meaning, utterance.split(" "))))
+                                 map(lexical_meaning, utterance.split(" "))))
 }
 
 var lexical_meaning = function(word) {
@@ -39,44 +39,44 @@ var lexical_meaning = function(word) {
   var wordMeanings = {
 
     "blond" : {
-    sem: function(world){return function(obj){return obj.blond}},
+      sem: function(world){return function(obj){return obj.blond}},
       syn: {dir:'L', int:'NP', out:'S'} },
 
     "nice" : {
-    sem: function(world){return function(obj){return obj.nice}},
+      sem: function(world){return function(obj){return obj.nice}},
       syn: {dir:'L', int:'NP', out:'S'} },
 
     "tall" : {
-    sem: function(world){return function(obj){return obj.tall}},
+      sem: function(world){return function(obj){return obj.tall}},
       syn: {dir:'L', int:'NP', out:'S'} },
 
     "Bob" : {
-    sem: function(world){return find(function(obj){return obj.name=="Bob"}, world)},
+      sem: function(world){return find(function(obj){return obj.name=="Bob"}, world)},
       syn: 'NP' },
 
     "some" : {
-    sem: function(world){return function(P){return function(Q){return filter(Q, filter(P, world)).length>0}}},
-    syn: {dir:'R',
-    int:{dir:'L', int:'NP', out:'S'},
-    out:{dir:'R',
-    int:{dir:'L', int:'NP', out:'S'},
-      out:'S'}} },
+      sem: function(world){return function(P){return function(Q){return filter(Q, filter(P, world)).length>0}}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} },
 
     "all" : {
-    sem: function(world){return function(P){return function(Q){return filter(neg(Q), filter(P, world)).length==0}}},
-    syn: {dir:'R',
-    int:{dir:'L', int:'NP', out:'S'},
-    out:{dir:'R',
-    int:{dir:'L', int:'NP', out:'S'},
-      out:'S'}} },
+      sem: function(world){return function(P){return function(Q){return filter(neg(Q), filter(P, world)).length==0}}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} },
 
     "none" : {
-    sem: function(world){return function(P){return function(Q){return filter(Q, filter(P, world)).length==0}}},
-    syn: {dir:'R',
-    int:{dir:'L', int:'NP', out:'S'},
-    out:{dir:'R',
-    int:{dir:'L', int:'NP', out:'S'},
-      out:'S'}} }
+      sem: function(world){return function(P){return function(Q){return filter(Q, filter(P, world)).length==0}}},
+      syn: {dir:'R',
+            int:{dir:'L', int:'NP', out:'S'},
+            out:{dir:'R',
+                 int:{dir:'L', int:'NP', out:'S'},
+                 out:'S'}} }
   }
 
   var meaning = wordMeanings[word];
@@ -119,7 +119,7 @@ var canApply = function(meanings,i) {
   var s = meanings[i].syn
   if (s.hasOwnProperty('dir')){ //a functor
     var a = ((s.dir == 'L')?syntaxMatch(s.int, meanings[i-1].syn):false) |
-    ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
+        ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
     if(a){return [i].concat(canApply(meanings,i+1))}
   }
   return canApply(meanings,i+1)
@@ -157,36 +157,36 @@ var utterancePrior = function() {
 var isall = function(world){return world.length==0 ?1: (world[0].blond?world[0].nice:1)&isall(world.slice(1))}
 
 var literalListener = cache(function(utterance) {
-  Enumerate(function(){
-            var m = meaning(utterance)
-            var world = worldPrior(2,m)
-            factor(m(world)?0:-Infinity)
-            return world
-            }, 100)
+  Infer({ method: 'enumerate' }, function(){
+    var m = meaning(utterance)
+    var world = worldPrior(2,m)
+    factor(m(world)?0:-Infinity)
+    return world
+  })
 })
 
 var speaker = cache(function(world) {
-  Enumerate(function(){
+  Infer({ method: 'enumerate' }, function(){
     var utterance = utterancePrior()
     var L = literalListener(utterance)
-    factor(L.score([],world))
+    factor(L.score(world))
     return utterance
   }, 100)
 })
 
 
 var listener = function(utterance) {
-  Enumerate(function(){
+  Infer({ method: 'enumerate' }, function(){
     var world = worldPrior(2, function(w){return 1}) //use vacuous meaning to avoid any guide...
-//    var world = worldPrior(2, meaning(utterance)) //guide by literal meaning
+    //    var world = worldPrior(2, meaning(utterance)) //guide by literal meaning
     var S = speaker(world)
-    factor(S.score([],utterance))
+    factor(S.score(utterance))
     return isall(world)
-  }, 100)
+  })
 }
 
 // literalListener("some of the blond people are nice")
 // speaker([{blond: true, nice: true, tall: false}])
 
-print(listener("some of the blond people are nice"))
+viz.auto(listener("some of the blond people are nice"))
 ~~~
