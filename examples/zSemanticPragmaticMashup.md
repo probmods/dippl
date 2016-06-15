@@ -14,7 +14,7 @@ var makeObj = function() {
 var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
   var worldSoFar = worldSoFar==undefined ? [] : worldSoFar
   var prevFactor = prevFactor==undefined ? 0 : prevFactor
-  if(nObjLeft==0) {
+  if (nObjLeft==0) {
     factor(-prevFactor)
     return worldSoFar
   } else {
@@ -27,14 +27,12 @@ var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
 }
 
 
-////////////////
-
 var meaning = function(utterance) {
   return combine_meanings(filter(function(m){return !(m.sem==undefined)},
                                  map(lexical_meaning, utterance.split(" "))))
 }
 
-var lexical_meaning = function(word) {
+var lexicalMeaning = function(word) {
 
   var wordMeanings = {
 
@@ -93,7 +91,7 @@ var applyWorldPassing = function(f,a) {
   return function(w){return f(w)(a(w))}
 }
 
-var combine_meaning = function(meanings) {
+var combineMeaning = function(meanings) {
   var possibleComb = canApply(meanings,0)
   var i = possibleComb[randomInteger(possibleComb.length)]
   var s = meanings[i].syn
@@ -136,12 +134,10 @@ var syntaxMatch = function(s,t) {
 
 // Recursively do the above until only one meaning is
 // left, return it's semantics.
-var combine_meanings = function(meanings){
-  return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
+var combineMeanings = function(meanings){
+  return meanings.length==1 ? meanings[0].sem : combineMeanings(combineMeaning(meanings))
 }
 
-
-//////////////
 
 var utterancePrior = function() {
   var utterances = ["some of the blond people are nice",
@@ -152,9 +148,9 @@ var utterancePrior = function() {
 }
 
 
-//////////////
-
-var isall = function(world){return world.length==0 ?1: (world[0].blond?world[0].nice:1)&isall(world.slice(1))}
+var isall = function(world){
+  return world.length==0 ? true : (world[0].blond?world[0].nice:true)&&isall(world.slice(1))
+}
 
 var literalListener = cache(function(utterance) {
   Infer({ method: 'enumerate' }, function(){
@@ -171,7 +167,7 @@ var speaker = cache(function(world) {
     var L = literalListener(utterance)
     factor(L.score(world))
     return utterance
-  }, 100)
+  })
 })
 
 

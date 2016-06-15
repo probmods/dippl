@@ -11,7 +11,6 @@ function euclideanDistance(v1, v2){
   return Math.sqrt(d);
 };
 
-
 // Code boxes
 
 function setupCodeBoxes(){
