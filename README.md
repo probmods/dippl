@@ -12,7 +12,6 @@ Installation:
 
     git clone https://github.com/probmods/dippl.git
     cd dippl
-    git submodule update --init --recursive
     npm install
     npm install -g browserify bower uglifyjs
     bower install
@@ -21,13 +20,9 @@ Run local webserver:
 
     jekyll serve --watch
 
-Update webppl:
-
-    cd /PATH/TO/webppl
-    grunt compile
-    mv compiled/webppl.min.js /PATH/TO/dippl/assets/js/webppl.min.js
-
 ## Assets
+
+To update webppl, webppl-viz, and webppl-editor, simply copy the minified Javascript files (`webppl-editor.min.js`, `webppl-viz.min.js`, `webppl.min.js`) and CSS files (`webppl-editor.css`, `webppl-viz.css`) to `assets/js` and `assets/css` respectively.
 
 - webppl: f24238e (v0.7.0+ dev)
 - webppl-editor: d888aa2
