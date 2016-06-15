@@ -144,7 +144,7 @@ var binomial = function(){
   return a + b + c
 }
 
-viz.auto(Infer({ method: 'enumerate', maxExecutions: 3 }, binomial))
+viz.auto(Infer({ method: 'enumerate', maxExecutions: 4 }, binomial))
 ~~~
 
 First of all, we can clearly move the factor up, to the point when it's first dependency is bound. In general, factor statements can be moved anywhere in the same control scope in which they started (i.e., they must be reached in the same program executions and not cross a marginalization boundary). In this case:
@@ -158,7 +158,7 @@ var binomial = function(){
   return a + b + c
 }
 
-viz.auto(Infer({ method: 'enumerate', maxExecutions: 3 }, binomial))
+viz.auto(Infer({ method: 'enumerate', maxExecutions: 4 }, binomial))
 ~~~
 
 But we can do much better by noticing that this factor can be broken into an equivalent two factors, and again one can be moved up:
@@ -173,7 +173,7 @@ var binomial = function(){
   return a + b + c
 }
 
-viz.auto(Infer({ method: 'enumerate', maxExecutions: 2 }, binomial))
+viz.auto(Infer({ method: 'enumerate', maxExecutions: 4 }, binomial))
 ~~~
 
 Notice that this version will find the best execution very early!
