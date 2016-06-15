@@ -157,7 +157,8 @@ var makeLines = function(n, lines){
   return (n==1) ? newLines : makeLines(n-1, newLines);
 }
 
-var finalImgSampler = MH(
+var finalImgSampler = Infer(
+  { method: 'MCMC', samples: 500},
   function(){
     var lines = makeLines(4, []);
     var finalGeneratedImage = Draw(50, 50, true);
@@ -166,7 +167,7 @@ var finalImgSampler = MH(
     factor(newScore);
     // print(newScore);
     return lines
-   }, 1000)
+   });
 ///
 
 var finalImage = Draw(100, 100, false);
