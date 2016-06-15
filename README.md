@@ -12,7 +12,6 @@ Installation:
 
     git clone https://github.com/probmods/dippl.git
     cd dippl
-    git submodule update --init --recursive
     npm install
     npm install -g browserify bower uglifyjs
     bower install
@@ -21,13 +20,10 @@ Run local webserver:
 
     jekyll serve --watch
 
-Update webppl:
+## Assets
 
-    cd /PATH/TO/webppl
-    browserify -t [./src/bundle.js --require webppl-viz] -g brfs ./src/browser.js > compiled/webppl.js
-    uglifyjs compiled/webppl.js -b ascii_only=true,beautify=false > compiled/webppl.min.js
-    mv compiled/webppl.min.js /PATH/TO/dippl/assets/js/webppl.min.js
+To update webppl, webppl-viz, and webppl-editor, simply copy the minified Javascript files (`webppl-editor.min.js`, `webppl-viz.min.js`, `webppl.min.js`) and CSS files (`webppl-editor.css`, `webppl-viz.css`) to `assets/js` and `assets/css` respectively.
 
-This requires the `webppl-viz` package to be available. To install it globally, run:
-
-    npm install --prefix ~/.webppl erindb/webppl-viz
+- webppl: f24238e (v0.7.0+ dev)
+- webppl-editor: d888aa2
+- webppl-viz: 2450784

@@ -2,6 +2,8 @@
 layout: chapter
 title: Markov Chain Monte Carlo
 description: Trace-based implementation of MCMC.
+custom_js:
+  /assets/js/transform.js
 ---
 
 A popular way to estimate a difficult distribution is to sample from it by constructing a random walk that will visit each state in proportion to its probability -- this is called [Markov chain Monte Carlo](http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo). 
@@ -14,6 +16,10 @@ Imagine doing a random walk in the space of execution traces of a computation. B
 // language: javascript
 
 ///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
 function cpsBinomial(k){
   _sample(
     function(a){
@@ -23,27 +29,27 @@ function cpsBinomial(k){
             function(c){
               k(a + b + c);
             },
-            bernoulliERP, [0.5])
+            Bernoulli({p: 0.5}))
         },
-        bernoulliERP, [0.5])
+        Bernoulli({p: 0.5}))
     }, 
-    bernoulliERP, [0.5])
+    Bernoulli({p: 0.5}))
 }
 ///
 
-trace = []
-iterations = 1000
+var trace = []
+var iterations = 1000
 
 //function _factor(s) { currScore += s}
 
-function _sample(cont, erp, params) {
-  var val = erp.sample(params)
+function _sample(cont, dist) {
+  var val = dist.sample()
   trace.push({k: cont, val: val,
-              erp: erp, params: params})
+              dist: dist})
   cont(val)
 }
 
-returnHist = {}
+var returnHist = {}
 
 function exit(val) {
   returnHist[val] = (returnHist[val] || 0) + 1
@@ -55,7 +61,7 @@ function exit(val) {
     var regen = trace[regenFrom]
     trace = trace.slice(0,regenFrom)
     
-    _sample(regen.k, regen.erp, regen.params)
+    _sample(regen.k, regen.dist, regen.params)
   }
 }
 
@@ -82,14 +88,14 @@ Before we give the code, here's an example we'd like to compute:
 
 ~~~
 var skewBinomial = function(){
-  var a = sample(bernoulliERP, [0.5])
-  var b = sample(bernoulliERP, [0.5])
-  var c = sample(bernoulliERP, [0.5])
+  var a = sample(Bernoulli({p: 0.5}))
+  var b = sample(Bernoulli({p: 0.5}))
+  var c = sample(Bernoulli({p: 0.5}))
   factor( (a|b)?0:-1 )
   return a + b + c
 }
 
-print(Enumerate(skewBinomial))
+viz.auto(Infer({method: 'enumerate'}, skewBinomial))
 ~~~
 
 Now the Metropolis-Hastings sampler: we add to the earlier algorithm a step which accepts or rejects the new state. The probability of acceptance is given by:
@@ -111,6 +117,10 @@ This somewhat cryptic probability is constructed to guarantee that, in the limit
 // language: javascript
 
 ///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
 function cpsSkewBinomial(k){
   _sample(
     function(a){
@@ -124,38 +134,37 @@ function cpsSkewBinomial(k){
                 },
                 (a|b)?0:-1)
             },
-            bernoulliERP, [0.5])
+            Bernoulli({p: 0.5}))
         },
-        bernoulliERP, [0.5])
+        Bernoulli({p: 0.5}))
     }, 
-    bernoulliERP, [0.5])
+    Bernoulli({p: 0.5}))
 }
 ///
 
-trace = []
-oldTrace = []
-currScore = 0
-oldScore = -Infinity
-oldVal = undefined
-regenFrom = 0
+var trace = []
+var oldTrace = []
+var currScore = 0
+var oldScore = -Infinity
+var oldVal = undefined
+var regenFrom = 0
 
-iterations = 1000
+var iterations = 1000
 
-function _factor(k,s) { 
+function _factor(k, s) { 
   currScore += s
   k()
 }
 
-function _sample(cont, erp, params) {
-  var val = erp.sample(params)
-  var choiceScore = erp.score(params,val)
-  trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
-              erp: erp, params: params})
+function _sample(cont, dist) {
+  var val = dist.sample()
+  var choiceScore = dist.score(val)
+  trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val, dist: dist})
   currScore += choiceScore
   cont(val)
 }
 
-returnHist = {}
+var returnHist = {}
 
 function MHacceptProb(trace, oldTrace, regenFrom){
   var fw = -Math.log(oldTrace.length)
@@ -187,12 +196,12 @@ function exit(val) {
     regenFrom = Math.floor(Math.random() * trace.length)
     var regen = trace[regenFrom]
     oldTrace = trace
-    trace = trace.slice(0,regenFrom)
+    trace = trace.slice(0, regenFrom)
     oldScore = currScore
     currScore = regen.score
     oldVal = val
     
-    _sample(regen.k, regen.erp, regen.params)
+    _sample(regen.k, regen.dist)
   }
 }
 
@@ -216,16 +225,16 @@ MH(cpsSkewBinomial)
 
 ## Reusing more of the trace
 
-Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. If we knew which sampled value was which, then we could look into the previous trace as the execution runs and reuse its values. That is, imagine that each call to `sample` was passed a (unique) name: `sample(name, erp, params)`. Then the sample function could try to look up and reuse values:
+Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. If we knew which sampled value was which, then we could look into the previous trace as the execution runs and reuse its values. That is, imagine that each call to `sample` was passed a (unique) name: `sample(name, dist)`. Then the sample function could try to look up and reuse values:
 
 ~~~
-function _sample(cont, name, erp, params, forceSample) {
+function _sample(cont, name, dist, forceSample) {
   var prev = findChoice(oldTrace, name)
-  var reuse = ! (prev==undefined | forceSample)
-  var val = reuse ? prev.val : erp.sample(params) 
-  var choiceScore = erp.score(params,val)
+  var reuse = ! (prev==undefined || forceSample)
+  var val = reuse ? prev.val : dist.sample() 
+  var choiceScore = dist.score(val)
   trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
-              erp: erp, params: params, name: name, reused: reuse})
+              dist: dist, name: name, reused: reuse})
   currScore += choiceScore
   cont(val)
 }
@@ -252,6 +261,10 @@ Putting these pieces together (and adding names to the `_sample` calls in `cpsSk
 // language: javascript
 
 ///fold:
+var Bernoulli = function(params) {
+  return new dists.Bernoulli(params);
+}
+
 function cpsSkewBinomial(k){
   _sample(
     function(a){
@@ -263,37 +276,37 @@ function cpsSkewBinomial(k){
                 function(){
                   k(a + b + c);
                 },
-                (a|b)?0:-1)
+                (a||b)?0:-1)
             }, 'alice',
-            bernoulliERP, [0.5])
+            Bernoulli({p: 0.5}))
         }, 'bob',
-        bernoulliERP, [0.5])
+        Bernoulli({p: 0.5}))
     }, 'andreas',
-    bernoulliERP, [0.5])
+    Bernoulli({p: 0.5}))
 }
 ///
 
-trace = []
-oldTrace = []
-currScore = 0
-oldScore = -Infinity
-oldVal = undefined
-regenFrom = 0
+var trace = []
+var oldTrace = []
+var currScore = 0
+var oldScore = -Infinity
+var oldVal = undefined
+var regenFrom = 0
 
-iterations = 1000
+var iterations = 1000
 
-function _factor(k,s) { 
+function _factor(k, s) { 
   currScore += s
   k()
 }
 
-function _sample(cont, name, erp, params, forceSample) {
+function _sample(cont, name, dist, forceSample) {
   var prev = findChoice(oldTrace, name)
-  var reuse = ! (prev==undefined | forceSample)
-  var val = reuse ? prev.val : erp.sample(params) 
-  var choiceScore = erp.score(params,val)
+  var reuse = ! (prev==undefined || forceSample)
+  var val = reuse ? prev.val : dist.sample() 
+  var choiceScore = dist.score(val)
   trace.push({k: cont, score: currScore, choiceScore: choiceScore, val: val,
-              erp: erp, params: params, name: name, reused: reuse})
+              dist: dist, name: name, reused: reuse})
   currScore += choiceScore
   cont(val)
 }
@@ -305,7 +318,7 @@ function findChoice(trace, name) {
   return undefined  
 }
 
-returnHist = {}
+var returnHist = {}
 
 function MHacceptProb(trace, oldTrace, regenFrom){
   var fw = -Math.log(oldTrace.length)
@@ -319,13 +332,13 @@ function MHacceptProb(trace, oldTrace, regenFrom){
 }
 
 function exit(val) {
-  if( iterations > 0 ) {
+  if (iterations > 0) {
     iterations -= 1
     
     //did we like this proposal?
     var acceptance = MHacceptProb(trace, oldTrace, regenFrom)
-    acceptance = oldVal==undefined ?1:acceptance //just for init
-    if(!(Math.random()<acceptance)){
+    acceptance = oldVal===undefined ? 1 : acceptance //just for init
+    if (!(Math.random()<acceptance)){
       //if rejected, roll back trace, etc:
       trace = oldTrace
       currScore = oldScore
@@ -344,7 +357,7 @@ function exit(val) {
     currScore = regen.score
     oldVal = val
     
-    _sample(regen.k, regen.name, regen.erp, regen.params, true)
+    _sample(regen.k, regen.name, regen.dist, true)
   }
 }
 
@@ -415,6 +428,6 @@ WebPPL uses this addressing transform to make names available for MH. Overall, t
 
 ## Particle filters with rejuvenation
 
-One flaw with [particle filtering](05-particlefilter.html) is that there is no way to adjust the 'past' of the particles. This can result in poor performance for some models. MCMC in contrast is all about local adjustment to the execution history. These methods can be combined in what is often called particle filtering with *rejuvenation*: after each time the particles are resampled the MH operator is applied to each particle, adjusting the 'history so far' of the particle. To do so we must keep track of the trace of each particle, and we must change the above implementation of MH to stop when the latest point executed by the particle is reached. WebPPL provides this algorithm as `ParticleFilterRejuv`.
+One flaw with [particle filtering](05-particlefilter.html) is that there is no way to adjust the 'past' of the particles. This can result in poor performance for some models. MCMC in contrast is all about local adjustment to the execution history. These methods can be combined in what is often called particle filtering with *rejuvenation*: after each time the particles are resampled the MH operator is applied to each particle, adjusting the 'history so far' of the particle. To do so we must keep track of the trace of each particle, and we must change the above implementation of MH to stop when the latest point executed by the particle is reached. WebPPL provides this algorithm as part of its `SMC` method.
 
 <!-- TODO: mixture model.. -->

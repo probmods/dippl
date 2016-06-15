@@ -2,6 +2,10 @@
 layout: example
 title: Computer vision
 description: Finding latent structure that renders to a target image.
+custom_js:
+  /assets/js/draw.js
+custom_css:
+  /assets/css/draw.css
 ---
 
 Drawing a line:
@@ -103,12 +107,13 @@ var makeLines = function(n, lines, prevScore){
   return (n==1) ? newLines : makeLines(n-1, newLines, newScore);
 }
 
-ParticleFilter(
+Infer(
+  {method: 'SMC', particles: 100},
   function(){
     var lines = makeLines(4, [], 0);
     var finalGeneratedImage = Draw(50, 50, true);
 	drawLines(finalGeneratedImage, lines);
-   }, 100)
+   })
 ~~~~
 
 Inference using MCMC and with a model that can manipulate opacity and stroke width:
@@ -152,7 +157,8 @@ var makeLines = function(n, lines){
   return (n==1) ? newLines : makeLines(n-1, newLines);
 }
 
-var finalImgSampler = MH(
+var finalImgSampler = Infer(
+  { method: 'MCMC', samples: 500},
   function(){
     var lines = makeLines(4, []);
     var finalGeneratedImage = Draw(50, 50, true);
@@ -161,7 +167,7 @@ var finalImgSampler = MH(
     factor(newScore);
     // print(newScore);
     return lines
-   }, 1000)
+   });
 ///
 
 var finalImage = Draw(100, 100, false);
@@ -235,10 +241,11 @@ var makeLines = function(n, lines){
 
 var counter = [];
 
-MH(
+Infer(
+  {method: 'MCMC', samples: 2500},
   function(){
     var lines = makeLines(8, []);
-    
+
 
     var showOutputImage = (counter.length % 100 == 0);
     var finalGeneratedImage = Draw(50, 50, showOutputImage);
@@ -246,15 +253,15 @@ MH(
     drawLines(finalGeneratedImage, lines);
     var newScore = -targetImage.distance(finalGeneratedImage)/1000; // Increase to 10000 to see more diverse samples
     factor(newScore);
-    
+
     if (!showOutputImage) {
       finalGeneratedImage.destroy()
     }
-    
+
     counter.push(1);
-    
+
     return lines
-   }, 2500);
+  });
 
 // show target image for comparison
 loadImage(Draw(50, 50, true), "/assets/img/beach.png")

@@ -27,15 +27,6 @@ pre {
    margin-top: .5em;
 }
 
-.drawCanvas {
-   border: 1px solid #ccc;
-   border-radius: 4px;
-   padding: .5em;
-   margin-bottom: .5em;
-   margin-right: .5em;
-   margin-top: .5em;
-}
-
 p code, li code {
    color: #333;
    background-color: #fafafa;
@@ -197,4 +188,12 @@ svg.barChart {
 rect.dimple-bar {
    fill: #357594;
    stroke: #224E61;
+}
+
+
+.drawCanvas {
+   border: 1px solid #ccc;
+   border-radius: 4px;
+   padding: .5em;
+   margin: .5em;
 }

@@ -28,8 +28,8 @@ var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
 
 
 var meaning = function(utterance) {
-  return combineMeanings(filter(function(m){return !(m.sem==undefined)},
-                                map(lexicalMeaning, utterance.split(" "))))
+  return combine_meanings(filter(function(m){return !(m.sem==undefined)},
+                                 map(lexical_meaning, utterance.split(" "))))
 }
 
 var lexicalMeaning = function(word) {
@@ -153,38 +153,32 @@ var isall = function(world){
 }
 
 var literalListener = cache(function(utterance) {
-  return Infer(
-    {method: 'enumerate'},
-    function(){
-      var m = meaning(utterance)
-      var world = worldPrior(2,m)
-      factor(m(world)?0:-Infinity)
-      return world
-    })
+  Infer({ method: 'enumerate' }, function(){
+    var m = meaning(utterance)
+    var world = worldPrior(2,m)
+    factor(m(world)?0:-Infinity)
+    return world
+  })
 })
 
 var speaker = cache(function(world) {
-  return Infer(
-    {method: 'enumerate'},
-    function(){
-      var utterance = utterancePrior()
-      var L = literalListener(utterance)
-      factor(L.score(world))
-      return utterance
-    })
+  Infer({ method: 'enumerate' }, function(){
+    var utterance = utterancePrior()
+    var L = literalListener(utterance)
+    factor(L.score(world))
+    return utterance
+  })
 })
 
 
 var listener = function(utterance) {
-  return Infer(
-    {method: 'enumerate'},
-    function(){
-      var world = worldPrior(2, function(w){return 1}) //use vacuous meaning to avoid any guide...
-      //    var world = worldPrior(2, meaning(utterance)) //guide by literal meaning
-      var S = speaker(world)
-      factor(S.score(utterance))
-      return { allBlondPeopleAreNice: isall(world) }
-    })
+  Infer({ method: 'enumerate' }, function(){
+    var world = worldPrior(2, function(w){return 1}) //use vacuous meaning to avoid any guide...
+    //    var world = worldPrior(2, meaning(utterance)) //guide by literal meaning
+    var S = speaker(world)
+    factor(S.score(utterance))
+    return isall(world)
+  })
 }
 
 // literalListener("some of the blond people are nice")

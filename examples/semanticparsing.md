@@ -12,12 +12,14 @@ The literal listener simply infers likely worlds assuming the meaning is true in
 
 ~~~
 var literalListener = function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    var m = meaning(utterance, world)
-    factor(m?0:-Infinity)
-    return world
-  }, 100)
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var world = worldPrior()
+      var m = meaning(utterance, world)
+      factor(m?0:-Infinity)
+      return world
+    })
 }
 ~~~
 
@@ -38,7 +40,6 @@ var worldPrior = function(objs) {
 
 Notice that we have written the `meaning` function as taking the utterance and world and returning a (model-theoretic) denotation -- a truth value when the utterance is a sentence. The motivation for doing things this way, rather than breaking it up into a meaning function that builds an 'LF' form which is then separately applied to the world, is well described by the introduction to Jacobson (1999):
 
-
 >The point of departure for this paper is the hypothesis of "direct compositionality"
 (see, e.g., Montague 1974): the syntax and the model-theoretic semantics work in
 tandem. Thus the syntax "builds" (i.e. proves the well-formedness of)
@@ -52,28 +53,26 @@ no need to for any kind of abstract level like LF mediating between the surface
 syntax and the model-theoretic interpretation, and hence no need for an additional
 set of rules mapping one "level" of syntactic representation into another.
 
-
-
 For our system, the `meaning` function is a *stochastic* map from utterances to truth values, with the different return values corresponding (non-uniquely) to different parses or lexical choices.
 
 First we get a lexical meaning for each word and filter out the undefined meanings, then we recursively apply meaning fragments to each other until only one meaning fragment is left.
 
 ~~~
 // Split the string into words, lookup lexical meanings,
-// delete words with vacuous meaning, then call combine_meanings..
+// delete words with vacuous meaning, then call combineMeanings..
 
 var meaning = function(utterance, world) {
-  return combine_meanings(
+  return combineMeanings(
     filter(map(utterance.split(" "),
-               function(w){return lexical_meaning(w, world)}),
+               function(w){return lexicalMeaning(w, world)}),
            function(m){return !(m.sem==undefined)}))
 }
 ~~~
 
-The lexicon is captured in a function `lexical_meaning` which looks up the meaning of a word. A meaning is an object with semantics and syntax.
+The lexicon is captured in a function `lexicalMeaning` which looks up the meaning of a word. A meaning is an object with semantics and syntax.
 
 ~~~
-var lexical_meaning = function(word, world) {
+var lexicalMeaning = function(word, world) {
 
   var wordMeanings = {
 
@@ -118,12 +117,12 @@ var neg = function(Q){
 }
 ~~~
 
-Note that the `lexical_meaning` mapping could be stochastic, allowing us to capture polysemy. It can also depend on auxiliary elements of the world that play the role of semantically-free context variables.
+Note that the `lexicalMeaning` mapping could be stochastic, allowing us to capture polysemy. It can also depend on auxiliary elements of the world that play the role of semantically-free context variables.
 
 To make a parsing step, we randomly choose a word such that the syntactic rules claim an application is possible, and do this application (reducing the set of meaning fragments). We do this until only one meaning fragment is left.
 
 ~~~
-var combine_meaning = function(meanings) {
+var combineMeaning = function(meanings) {
   var possibleComb = canApply(meanings,0)
   display(possibleComb)
   var i = possibleComb[randomInteger(possibleComb.length)]
@@ -167,8 +166,8 @@ var syntaxMatch = function(s,t) {
 
 // Recursively do the above until only one meaning is
 // left, return it's semantics.
-var combine_meanings = function(meanings){
-  return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
+var combineMeanings = function(meanings){
+  return meanings.length==1 ? meanings[0].sem : combineMeanings(combineMeaning(meanings))
 }
 ~~~
 
@@ -179,13 +178,16 @@ To allow fancy movement and binding we would mix this with type-shifting operato
 ///fold:
 
 var literalListener = function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    var m = meaning(utterance, world)
-    factor(m?0:-Infinity)
-    return world
-  }, 100)
+  return Infer(
+    {method: 'enumerate'},
+    function(){
+      var world = worldPrior()
+      var m = meaning(utterance, world)
+      factor(m?0:-Infinity)
+      return world
+    })
 }
+
 
 var makeObj = function(name) {
   return {name: name, blond: flip(0.5), nice: flip(0.5)}
@@ -196,16 +198,16 @@ var worldPrior = function(objs) {
 }
 
 // Split the string into words, lookup lexical meanings,
-// delete words with vacuous meaning, then call combine_meanings..
+// delete words with vacuous meaning, then call combineMeanings..
 
 var meaning = function(utterance, world) {
-  return combine_meanings(
+  return combineMeanings(
     filter(function(m){return !(m.sem==undefined)},
-	       map(function(w){return lexical_meaning(w, world)},
-		       utterance.split(" "))))
+           map(function(w){return lexicalMeaning(w, world)},
+               utterance.split(" "))))
 }
 
-var lexical_meaning = function(word, world) {
+var lexicalMeaning = function(word, world) {
 
   var wordMeanings = {
 
@@ -249,7 +251,7 @@ var neg = function(Q){
   return function(x){return !Q(x)}
 }
 
-var combine_meaning = function(meanings) {
+var combineMeaning = function(meanings) {
   var possibleComb = canApply(meanings,0)
   display(possibleComb)
   var i = possibleComb[randomInteger(possibleComb.length)]
@@ -276,7 +278,7 @@ var canApply = function(meanings,i) {
   var s = meanings[i].syn
   if (s.hasOwnProperty('dir')){ //a functor
     var a = ((s.dir == 'L')?syntaxMatch(s.int, meanings[i-1].syn):false) |
-            ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
+        ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
     if(a){return [i].concat(canApply(meanings,i+1))}
   }
   return canApply(meanings,i+1)
@@ -293,8 +295,8 @@ var syntaxMatch = function(s,t) {
 
 // Recursively do the above until only one meaning is
 // left, return it's semantics.
-var combine_meanings = function(meanings){
-  return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
+var combineMeanings = function(meanings){
+  return meanings.length==1 ? meanings[0].sem : combineMeanings(combineMeaning(meanings))
 }
 
 ///
@@ -303,7 +305,7 @@ var combine_meanings = function(meanings){
 //literalListener("some blond are nice")
 //literalListener("some blond people are nice")
 
-print(literalListener("all blond people are nice"))
+viz.table(literalListener("all blond people are nice"))
 ~~~
 
 
@@ -319,12 +321,14 @@ First a slightly modified `literalListener` and world model, without added facto
 
 ~~~
 var literalListener = function(utterance) {
-  Enumerate(function(){
-            var m = meaning(utterance)
-            var world = worldPrior(3,m)
-            factor(m(world)?0:-Infinity)
-            return world
-            }, 100)
+  return Infer(
+    {method: 'enumerate'},
+    function(){
+      var m = meaning(utterance)
+      var world = worldPrior(3,m)
+      factor(m(world)?0:-Infinity)
+      return world
+    })
 }
 
 
@@ -387,14 +391,14 @@ The remainder of the model is similar to the above, but with delayed denotations
 
 ~~~
 var meaning = function(utterance) {
-  return combine_meanings(
+  return combineMeanings(
     filter(function(m){return !(m.sem==undefined)},
-	       map(function(w){return lexical_meaning(w)},
+	       map(function(w){return lexicalMeaning(w)},
 		       utterance.split(" "))))
 }
 
 
-var lexical_meaning = function(word) {
+var lexicalMeaning = function(word) {
 
   var wordMeanings = {
 
@@ -442,7 +446,7 @@ var applyWorldPassing = function(f,a) {
   return function(w){return f(w)(a(w))}
 }
 
-var combine_meaning = function(meanings) {
+var combineMeaning = function(meanings) {
   var possibleComb = canApply(meanings,0)
   var i = possibleComb[randomInteger(possibleComb.length)]
   var s = meanings[i].syn
@@ -485,8 +489,8 @@ var syntaxMatch = function(s,t) {
 
 // Recursively do the above until only one meaning is
 // left, return it's semantics.
-var combine_meanings = function(meanings){
-  return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
+var combineMeanings = function(meanings){
+  return meanings.length==1 ? meanings[0].sem : combineMeanings(combineMeaning(meanings))
 }
 ~~~
 
@@ -494,12 +498,14 @@ var combine_meanings = function(meanings){
 ///fold:
 
 var literalListener = function(utterance) {
-  Enumerate(function(){
-            var m = meaning(utterance)
-            var world = worldPrior(3,m)
-            factor(m(world)?0:-Infinity)
-            return world
-            }, 100)
+  Infer(
+    {method: 'enumerate'},
+    function(){
+      var m = meaning(utterance)
+      var world = worldPrior(3,m)
+      factor(m(world)?0:-Infinity)
+      return world
+    })
 }
 
 
@@ -523,14 +529,14 @@ var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
 }
 
 var meaning = function(utterance) {
-  return combine_meanings(
+  return combineMeanings(
     filter(function(m){return !(m.sem==undefined)},
-	       map(function(w){return lexical_meaning(w)},
-		       utterance.split(" "))))
+           map(function(w){return lexicalMeaning(w)},
+               utterance.split(" "))))
 }
 
 
-var lexical_meaning = function(word) {
+var lexicalMeaning = function(word) {
 
   var wordMeanings = {
 
@@ -543,7 +549,7 @@ var lexical_meaning = function(word) {
       syn: {dir:'L', int:'NP', out:'S'} },
 
     "Bob" : {
-    sem: function(world){return find(function(obj){return obj.name=="Bob"}, world)},
+      sem: function(world){return find(function(obj){return obj.name=="Bob"}, world)},
       syn: 'NP' },
 
     "some" : {
@@ -578,7 +584,7 @@ var applyWorldPassing = function(f,a) {
   return function(w){return f(w)(a(w))}
 }
 
-var combine_meaning = function(meanings) {
+var combineMeaning = function(meanings) {
   var possibleComb = canApply(meanings,0)
   var i = possibleComb[randomInteger(possibleComb.length)]
   var s = meanings[i].syn
@@ -604,7 +610,7 @@ var canApply = function(meanings,i) {
   var s = meanings[i].syn
   if (s.hasOwnProperty('dir')){ //a functor
     var a = ((s.dir == 'L')?syntaxMatch(s.int, meanings[i-1].syn):false) |
-            ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
+        ((s.dir == 'R')?syntaxMatch(s.int, meanings[i+1].syn):false)
     if(a){return [i].concat(canApply(meanings,i+1))}
   }
   return canApply(meanings,i+1)
@@ -621,12 +627,12 @@ var syntaxMatch = function(s,t) {
 
 // Recursively do the above until only one meaning is
 // left, return it's semantics.
-var combine_meanings = function(meanings){
-  return meanings.length==1 ? meanings[0].sem : combine_meanings(combine_meaning(meanings))
+var combineMeanings = function(meanings){
+  return meanings.length==1 ? meanings[0].sem : combineMeanings(combineMeaning(meanings))
 }
 ///
 
-print(literalListener("all blond people are nice"))
+viz.table(literalListener("all blond people are nice"))
 ~~~
 
 You can see that this version finds possible interpretations much sooner that the previous version.
