@@ -53,7 +53,7 @@ Functions from the Javascript environment that WebPPL is called from can be used
 
 ## With random sampling
 
-WebPPL is not just a subset of Javascript: is is a subset augmented with the ability to represent and manipulate probability distributions. We will distinguish between *distributions* and *distribution types*. 
+WebPPL is not just a subset of Javascript: it is a subset augmented with the ability to represent and manipulate probability distributions. We will distinguish between *distributions* and *distribution types*. 
 
 A distribution type (or constructor) takes parameters and returns a distribution. Under the hood, a distribution `d` has a method `d.sample` that returns a sample from the distribution, a method `d.score` that returns the log-probability of a possible sampled value, and (optionally) a method `d.support` that returns the support of the distribution. Of these, `d.sample` should not be called directly -- in order for inference operators (described later) to work correctly, use the `sample` operator.
 
@@ -69,7 +69,7 @@ We can also visualize the distribution:
 viz.auto(Bernoulli({p: 0.5}))
 ~~~~
 
-There is a set of pre-defined distribution types including `Bernoulli`, `RandomInteger`, etc. (Since `sample(Bernoulli({p: p}))` is very common it is aliased to `flip(p)`. Similarly `randomInteger`, and so on.) It is also possible to define new distribution types, but most distribution you will use will be either built in or built as the marginal distribution of some computation, via inference functions (see below).
+There is a set of pre-defined distribution types including `Bernoulli`, `RandomInteger`, etc. (Since `sample(Bernoulli({p: p}))` is very common it is aliased to `flip(p)`. Similarly `randomInteger`, and so on.) It is also possible to define new distribution types, but most distributions you will use will be either built-in or built as the marginal distribution of some computation, via inference functions (see below).
 
 With only the ability to sample from primitive distributions and perform deterministic computations, the language is already universal! This is due to the ability to construct *stochastically recursive* functions. For instance we can define a geometric distribution in terms of a bernoulli distribution:
 
