@@ -153,36 +153,42 @@ var isall = function(world){
 }
 
 var literalListener = cache(function(utterance) {
-  Infer({ method: 'enumerate' }, function(){
-    var m = meaning(utterance)
-    var world = worldPrior(2,m)
-    factor(m(world)?0:-Infinity)
-    return world
+  Infer({ 
+    model() {
+      var m = meaning(utterance)
+      var world = worldPrior(2,m)
+      factor(m(world)?0:-Infinity)
+      return world
+    }
   })
 })
 
 var speaker = cache(function(world) {
-  Infer({ method: 'enumerate' }, function(){
-    var utterance = utterancePrior()
-    var L = literalListener(utterance)
-    factor(L.score(world))
-    return utterance
+  Infer({ 
+    model() {
+      var utterance = utterancePrior()
+      var L = literalListener(utterance)
+      factor(L.score(world))
+      return utterance
+    }
   })
 })
 
 
 var listener = function(utterance) {
-  Infer({ method: 'enumerate' }, function(){
-    var world = worldPrior(2, function(w){return 1}) //use vacuous meaning to avoid any guide...
-    //    var world = worldPrior(2, meaning(utterance)) //guide by literal meaning
-    var S = speaker(world)
-    factor(S.score(utterance))
-    return isall(world)
+  Infer({ 
+    model() {
+      var world = worldPrior(2, function(w){return 1}) //use vacuous meaning to avoid any guide...
+      //    var world = worldPrior(2, meaning(utterance)) //guide by literal meaning
+      var S = speaker(world)
+      factor(S.score(utterance))
+      return isall(world)
+    }
   })
 }
 
 // literalListener("some of the blond people are nice")
 // speaker([{blond: true, nice: true, tall: false}])
 
-viz.auto(listener("some of the blond people are nice"))
+viz(listener("some of the blond people are nice"))
 ~~~

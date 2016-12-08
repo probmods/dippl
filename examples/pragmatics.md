@@ -8,14 +8,14 @@ We start with a literal listener: a Bayesian agent who updates her prior beliefs
 
 ~~~
 var literalListener = function(utterance) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model() {
       var world = worldPrior()
       var m = meaning(utterance, world)
       factor(m ? 0 : -Infinity)
       return world
-    })
+    }
+  })
 }
 ~~~
 
@@ -53,7 +53,7 @@ var meaning = function(utt,world) {
          true
 }
 
-viz.auto(literalListener("some of the people are nice"))
+viz(literalListener("some of the people are nice"))
 ~~~
 
 If you evaluate the above code box, you will see that the inferred meaning of "some of the people are nice" is uniform on all world states where at least one person is nice -- including the state in which all people are nice. This fails to capture the usual 'some but not all' scalar implicature.
@@ -93,26 +93,26 @@ var meaning = function(utt,world) {
 ///
 
 var speaker = function(world) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model(){
       var utterance = utterancePrior()
       factor(world == sample(literalListener(utterance)) ?0:-Infinity)
       return utterance
-    })
+    }
+  })
 }
 
 var listener = function(utterance) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model() {
       var world = worldPrior()
       factor(utterance == sample(speaker(world)) ?0:-Infinity)
       return world
-    })
+    }
+  })
 }
 
-viz.auto(listener("some of the people are nice"))
+viz(listener("some of the people are nice"))
 ~~~
 
 If you evaluate the above code box you will see that it does capture the scalar implicature!
@@ -131,14 +131,14 @@ The search space in `speaker` and `literalListener` is needlessly big because th
 ~~~
 ///fold:
 var literalListener = function(utterance) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model() {
       var world = worldPrior()
       var m = meaning(utterance, world)
       factor(m?0:-Infinity)
       return world
-    })
+    }
+  })
 }
 
 var worldPrior = function() {
@@ -163,28 +163,28 @@ var meaning = function(utt,world) {
 ///
 
 var speaker = function(world) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model() {
       var utterance = utterancePrior()
       var L = literalListener(utterance)
       factor(L.score(world))
       return utterance
-    })
+    }
+  })
 }
 
 var listener = function(utterance) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model(){
       var world = worldPrior()
       var S = speaker(world)
       factor(S.score(utterance))
       return world
-    })
+    }
+  })
 }
 
-viz.auto(listener("some of the people are nice"))
+viz(listener("some of the people are nice"))
 ~~~
 
 
@@ -214,39 +214,39 @@ var meaning = function(utt,world) {
 ///
 
 var literalListener = cache(function(utterance) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model() {
       var world = worldPrior()
       var m = meaning(utterance, world)
       factor(m?0:-Infinity)
       return world
-    })
+    }
+  })
 })
 
 var speaker = cache(function(world) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model() {
       var utterance = utterancePrior()
       var L = literalListener(utterance)
       factor(L.score(world))
       return utterance
-    })
+    }
+  })
 })
 
 var listener = function(utterance) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model() {
       var world = worldPrior()
       var S = speaker(world)
       factor(S.score(utterance))
       return world
-    })
+    }
+  })
 }
 
-viz.auto(listener("some of the people are nice"))
+viz(listener("some of the people are nice"))
 ~~~
 
 

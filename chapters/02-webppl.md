@@ -60,13 +60,13 @@ A distribution type (or constructor) takes parameters and returns a distribution
 For example, using the built-in `Bernoulli` type:
 
 ~~~~
-sample(Bernoulli({p: 0.5}))
+sample(Bernoulli({ p: 0.5 }))
 ~~~~
 
 We can also visualize the distribution:
 
 ~~~~
-viz.auto(Bernoulli({p: 0.5}))
+viz(Bernoulli({ p: 0.5 }))
 ~~~~
 
 There is a set of pre-defined distribution types including `Bernoulli`, `RandomInteger`, etc. (Since `sample(Bernoulli({p: p}))` is very common it is aliased to `flip(p)`. Similarly `randomInteger`, and so on.) It is also possible to define new distribution types, but most distributions you will use will be either built-in or built as the marginal distribution of some computation, via inference functions (see below).
@@ -90,15 +90,15 @@ As an example, consider a simple binomial distribution: the number of times that
 
 ~~~
 var binomial = function() {
-  var a = sample(Bernoulli({p: 0.5}))
-  var b = sample(Bernoulli({p: 0.5}))
-  var c = sample(Bernoulli({p: 0.5}))
+  var a = sample(Bernoulli({ p: 0.5 }))
+  var b = sample(Bernoulli({ p: 0.5 }))
+  var c = sample(Bernoulli({ p: 0.5 }))
   return a + b + c
 }
 
-var binomialDist = Infer({method: 'enumerate'}, binomial)
+var binomialDist = Infer({ model: binomial })
 
-viz.auto(binomialDist)
+viz(binomialDist)
 ~~~
 
 The distribution on return values from `binomial()` and `sample(binomialDist)` are the same -- but `binomialDist` has already collapsed out the intermediate random choices to represent this distribution as a primitive.
@@ -107,15 +107,15 @@ What if we wanted to adjust the above `binomial` computation to favor executions
 
 ~~~
 var funnyBinomial = function(){
-  var a = sample(Bernoulli({p: 0.5}))
-  var b = sample(Bernoulli({p: 0.5}))
-  var c = sample(Bernoulli({p: 0.5}))
+  var a = sample(Bernoulli({ p: 0.5 }))
+  var b = sample(Bernoulli({ p: 0.5 }))
+  var c = sample(Bernoulli({ p: 0.5 }))
   factor( (a || b) ? 0 : -2)
   return a + b + c}
 
-var funnyBinomialDist = Infer({method: 'enumerate'}, funnyBinomial)
+var funnyBinomialDist = Infer({ model: funnyBinomial })
 
-viz.auto(funnyBinomialDist)
+viz(funnyBinomialDist)
 ~~~
 
 It is easier to build useful models (that, for instance, condition on data) with `factor`. But `factor` by itself doesn't do anything -- it interacts with *marginalization* functions that normalize the computation they are applied to. For this reason running a computation with `factor` in it at the top level -- that is, not inside a marginalization operator -- results in an error. Try running `funnyBinomial` directly....

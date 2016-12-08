@@ -12,14 +12,14 @@ The literal listener simply infers likely worlds assuming the meaning is true in
 
 ~~~
 var literalListener = function(utterance) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model() {
       var world = worldPrior()
       var m = meaning(utterance, world)
       factor(m?0:-Infinity)
       return world
-    })
+    }
+  })
 }
 ~~~
 
@@ -178,14 +178,14 @@ To allow fancy movement and binding we would mix this with type-shifting operato
 ///fold:
 
 var literalListener = function(utterance) {
-  return Infer(
-    {method: 'enumerate'},
-    function(){
+  return Infer({
+    model() {
       var world = worldPrior()
       var m = meaning(utterance, world)
       factor(m?0:-Infinity)
       return world
-    })
+    }
+  })
 }
 
 
@@ -321,14 +321,14 @@ First a slightly modified `literalListener` and world model, without added facto
 
 ~~~
 var literalListener = function(utterance) {
-  return Infer(
-    {method: 'enumerate'},
-    function(){
+  return Infer({
+    model() {
       var m = meaning(utterance)
       var world = worldPrior(3,m)
       factor(m(world)?0:-Infinity)
       return world
-    })
+    }
+  })
 }
 
 
@@ -498,14 +498,14 @@ var combineMeanings = function(meanings){
 ///fold:
 
 var literalListener = function(utterance) {
-  Infer(
-    {method: 'enumerate'},
-    function(){
+  Infer({
+    model() {
       var m = meaning(utterance)
       var world = worldPrior(3,m)
       factor(m(world)?0:-Infinity)
       return world
-    })
+    }
+  })
 }
 
 

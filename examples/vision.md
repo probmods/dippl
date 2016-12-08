@@ -107,13 +107,15 @@ var makeLines = function(n, lines, prevScore){
   return (n==1) ? newLines : makeLines(n-1, newLines, newScore);
 }
 
-Infer(
-  {method: 'SMC', particles: 100},
-  function(){
+Infer({
+  method: 'SMC', 
+  particles: 100,
+  model() {
     var lines = makeLines(4, [], 0);
     var finalGeneratedImage = Draw(50, 50, true);
 	drawLines(finalGeneratedImage, lines);
-   })
+   }
+})
 ~~~~
 
 Inference using MCMC and with a model that can manipulate opacity and stroke width:
@@ -157,9 +159,10 @@ var makeLines = function(n, lines){
   return (n==1) ? newLines : makeLines(n-1, newLines);
 }
 
-var finalImgSampler = Infer(
-  { method: 'MCMC', samples: 500},
-  function(){
+var finalImgSampler = Infer({ 
+  method: 'MCMC', 
+  samples: 500,
+  model() {
     var lines = makeLines(4, []);
     var finalGeneratedImage = Draw(50, 50, true);
     drawLines(finalGeneratedImage, lines);
@@ -167,7 +170,8 @@ var finalImgSampler = Infer(
     factor(newScore);
     // print(newScore);
     return lines
-   });
+   }
+});
 ///
 
 var finalImage = Draw(100, 100, false);
@@ -241,9 +245,10 @@ var makeLines = function(n, lines){
 
 var counter = [];
 
-Infer(
-  {method: 'MCMC', samples: 2500},
-  function(){
+Infer({
+  method: 'MCMC', 
+  samples: 2500,
+  model() {
     var lines = makeLines(8, []);
 
 
@@ -261,7 +266,8 @@ Infer(
     counter.push(1);
 
     return lines
-  });
+  }
+})
 
 // show target image for comparison
 loadImage(Draw(50, 50, true), "/assets/img/beach.png")

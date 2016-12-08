@@ -95,7 +95,7 @@ var skewBinomial = function(){
   return a + b + c
 }
 
-viz.auto(Infer({method: 'enumerate'}, skewBinomial))
+viz(Infer({ model: skewBinomial }))
 ~~~
 
 Now the Metropolis-Hastings sampler: we add to the earlier algorithm a step which accepts or rejects the new state. The probability of acceptance is given by:

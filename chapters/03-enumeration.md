@@ -14,15 +14,15 @@ Consider the simple binomial example from [earlier](WebPPL.html).
 
 ~~~
 var binomial = function(){
-  var a = sample(Bernoulli({p: 0.5}))
-  var b = sample(Bernoulli({p: 0.5}))
-  var c = sample(Bernoulli({p: 0.5}))
+  var a = sample(Bernoulli({ p: 0.5 }))
+  var b = sample(Bernoulli({ p: 0.5 }))
+  var c = sample(Bernoulli({ p: 0.5 }))
   return a + b + c
 }
 
-var binomialDist = Infer({method: 'enumerate'}, binomial)
+var binomialDist = Infer({ model: binomial })
 
-viz.auto(binomialDist)
+viz(binomialDist)
 ~~~
 
 We can view `sample` and `factor` as simple 'side-computations' for exploring the main `binomial` computation. To make this concrete, let's implement `sample` as an ordinary function that always chooses the first element of the support of any random choice. We will kick-off this exploration by calling `ExploreFirst`, which simply calls the computation. (In the following we rename `sample` to `_sample` to avoid conflicting with the built-in WebPPL `sample` function.)
@@ -37,9 +37,9 @@ var ExploreFirst = function(comp) {
 }
 
 var binomial = function(){
-  var a = _sample(Bernoulli({p: 0.5}))
-  var b = _sample(Bernoulli({p: 0.5}))
-  var c = _sample(Bernoulli({p: 0.5}))
+  var a = _sample(Bernoulli({ p: 0.5 }))
+  var b = _sample(Bernoulli({ p: 0.5 }))
+  var c = _sample(Bernoulli({ p: 0.5 }))
   return a + b + c
 }
 
@@ -170,9 +170,9 @@ As a final example, let's write our earlier binomial function in CPS:
 ~~~
 // Standard version:
 var binomial = function(){
-  var a = sample(Bernoulli({p: 0.5}))
-  var b = sample(Bernoulli({p: 0.5}))
-  var c = sample(Bernoulli({p: 0.5}))
+  var a = sample(Bernoulli({ p: 0.5 }))
+  var b = sample(Bernoulli({ p: 0.5 }))
+  var c = sample(Bernoulli({ p: 0.5 }))
   return a + b + c
 }
 
@@ -190,11 +190,11 @@ var cpsBinomial = function(k){
             function(c){
               k(a + b + c);
             },
-            Bernoulli({p: 0.5}))
+            Bernoulli({ p: 0.5 }))
         },
-        Bernoulli({p: 0.5}))
+        Bernoulli({ p: 0.5 }))
     },
-    Bernoulli({p: 0.5}))
+    Bernoulli({ p: 0.5 }))
 }
 
 cpsBinomial(print)
@@ -228,11 +228,11 @@ var cpsBinomial = function(k){
             function(c){
               k(a + b + c);
             },
-            Bernoulli({p: 0.5}))
+            Bernoulli({ p: 0.5 }))
         },
-        Bernoulli({p: 0.5}))
+        Bernoulli({ p: 0.5 }))
     },
-    Bernoulli({p: 0.5}))
+    Bernoulli({ p: 0.5 }))
 }
 ///
 
@@ -281,11 +281,11 @@ function cpsBinomial(k){
             function(c){
               k(a + b + c);
             },
-            Bernoulli({p: 0.5}))
+            Bernoulli({ p: 0.5 }))
         },
-        Bernoulli({p: 0.5}))
+        Bernoulli({ p: 0.5 }))
     },
-    Bernoulli({p: 0.5}))
+    Bernoulli({ p: 0.5 }))
 }
 ///
 
@@ -339,11 +339,11 @@ function cpsBinomial(k){
             function(c){
               k(a + b + c);
             },
-            Bernoulli({p: 0.5}))
+            Bernoulli({ p: 0.5 }))
         },
-        Bernoulli({p: 0.5}))
+        Bernoulli({ p: 0.5 }))
     },
-    Bernoulli({p: 0.5}))
+    Bernoulli({ p: 0.5 }))
 }
 ///
 
@@ -470,37 +470,31 @@ Here we compare different enumeration orders for a simple computation. The argum
 
 ~~~
 var binomial = function(){
-    var a = sample(Bernoulli({p: 0.1}))
-    var b = sample(Bernoulli({p: 0.9}))
-    var c = sample(Bernoulli({p: 0.1}))
+    var a = sample(Bernoulli({ p: 0.1 }))
+    var b = sample(Bernoulli({ p: 0.9 }))
+    var c = sample(Bernoulli({ p: 0.1 }))
     return a + b + c
 }
 
 var maxExec = 10
 
-viz.auto(Infer(
-  {
-    method: 'enumerate', 
-    maxExecutions: maxExec, 
-    strategy: 'depthFirst'
-  }, 
-  binomial));
+viz(Infer({
+  model: binomial,
+  maxExecutions: maxExec, 
+  strategy: 'depthFirst'
+}));
 
-viz.auto(Infer(
-  {
-    method: 'enumerate', 
-    maxExecutions: maxExec, 
-    strategy: 'breadthFirst'
-  }, 
-  binomial));
+viz(Infer({
+  model: binomial,
+  maxExecutions: maxExec, 
+  strategy: 'breadthFirst'
+}));
 
-viz.auto(Infer(
-  {
-    method: 'enumerate', 
-    maxExecutions: maxExec, 
-    strategy: 'likelyFirst'
-  }, 
-  binomial));
+viz(Infer({
+  model: binomial,
+  maxExecutions: maxExec, 
+  strategy: 'likelyFirst',
+}));
 ~~~
 
 

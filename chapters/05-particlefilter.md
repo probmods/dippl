@@ -57,14 +57,15 @@ var makeLines = function(n, lines, prevScore){
   return (n==1) ? newLines : makeLines(n-1, newLines, newScore);
 }
 
-var lineDist = Infer(
-  { method: 'enumerate', strategy: 'depthFirst', maxExecutions: 10 },
-  function(){
+var lineDist = Infer({ 
+  model() {
     var lines = makeLines(4, [], 0);
     var finalGeneratedImage = Draw(50, 50, true);
     drawLines(finalGeneratedImage, lines);
     return lines;
-  })
+  },
+  strategy: 'depthFirst', 
+  maxExecutions: 10 })
 
 viz.table(lineDist)
 ~~~~
@@ -173,7 +174,7 @@ var init = function(dim){
   return repeat(dim, function(){ return gaussian(200, 1) });
 }
 
-var observe = function(pos){
+var observeState = function(pos){
   return map(
     function(x){ return gaussian(x, 5); },
 	pos
@@ -194,7 +195,7 @@ var transition = function(lastPos, secondLastPos){
 var semiMarkovWalk = function(n, dim) {
   var prevStates = (n==2) ? [init(dim), init(dim)] : semiMarkovWalk(n-1, dim);
   var newState = transition(last(prevStates), secondLast(prevStates));
-  var newObservation = observe(newState);
+  var newObservation = observeState(newState);
   canvas.circle(newObservation[0], newObservation[1], 2, "red", "white");
   return prevStates.concat([newState]);
 };
@@ -280,12 +281,11 @@ var hmm = function(states, observations){
 var observations = [true, true, true, true];
 var startState = false;
 
-viz.table(Infer(
-  {method: 'enumerate'},
-  function(){
+viz.table(Infer({
+  model() {
     return hmm([startState], observations)
   }
-))
+}))
 ~~~~
 
 This HMM prefers subsequent states to be similar, and it prefers observations to be similar to the latent state. By far the most likely explanation for the observations `[true, true, true, true]` is that most of the latent states are `true` as well.
@@ -381,7 +381,7 @@ var _sample = function(k, dist){
 }
 ///
 
-runCpsHmm(print);
+runCpsHmm(console.log);
 ~~~~
 
 Let's write some scaffolding so that we can more easily take multiple samples from the prior, that is, without taking into account factors:
@@ -816,7 +816,7 @@ var drawPoints = function(canvas, positions){
   drawPoints(canvas, positions.slice(1));
 }
 
-var observe = function(pos){
+var observeState = function(pos){
   return map(
     function(x){ return gaussian(x, 5); },
 	pos
@@ -827,7 +827,7 @@ var init = function(dim){
   var state1 = repeat(dim, function(){ return gaussian(200, 1) });
   var state2 = repeat(dim, function(){ return gaussian(200, 1) });
   var states = [state1, state2];
-  var observations = map(observe, states);
+  var observations = map(observeState, states);
   return {
     states: states,
     observations: observations
@@ -850,7 +850,7 @@ var semiMarkovWalk = function(n, dim) {
   var prevStates = prevData.states;
   var prevObservations = prevData.observations;
   var newState = transition(last(prevStates), secondLast(prevStates));
-  var newObservation = observe(newState);
+  var newObservation = observeState(newState);
   return {
     states: prevStates.concat([newState]),
     observations: prevObservations.concat([newObservation])
@@ -881,7 +881,7 @@ var drawPoints = function(canvas, positions){
   drawPoints(canvas, positions.slice(1));
 }
 
-var observe = function(pos){
+var observeState = function(pos){
   return map(
     function(x){ return gaussian(x, 5); },
 	pos
@@ -892,7 +892,7 @@ var init = function(dim){
   var state1 = repeat(dim, function(){ return gaussian(200, 1) });
   var state2 = repeat(dim, function(){ return gaussian(200, 1) });
   var states = [state1, state2];
-  var observations = map(observe, states);
+  var observations = map(observeState, states);
   return {
     states: states,
     observations: observations
@@ -904,7 +904,7 @@ var semiMarkovWalk = function(n, dim) {
   var prevStates = prevData.states;
   var prevObservations = prevData.observations;
   var newState = transition(last(prevStates), secondLast(prevStates));
-  var newObservation = observe(newState);
+  var newObservation = observeState(newState);
   return {
     states: prevStates.concat([newState]),
     observations: prevObservations.concat([newObservation])
