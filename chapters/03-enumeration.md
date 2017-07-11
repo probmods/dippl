@@ -178,7 +178,7 @@ var binomial = function(){
 
 // CPS version:
 var cpsSample = function(k, dist){
-  return k(sample(dist))
+  k(sample(dist))
 }
 
 var cpsBinomial = function(k){
