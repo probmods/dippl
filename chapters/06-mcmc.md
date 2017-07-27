@@ -149,7 +149,7 @@ var oldScore = -Infinity
 var oldVal = undefined
 var regenFrom = 0
 
-var iterations = 1000
+var iterations = 800
 
 function _factor(k, s) { 
   currScore += s

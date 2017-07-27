@@ -82,7 +82,7 @@ var model = function(){
   return r.states
 };
 
-viz.table(Infer({ model, maxExecutions: 100}))
+viz.table(Infer({ model }))
 ~~~
 
 Notice that if we allow enumeration only a few executions, it will not find the correct state. It doesn't realize until 'the end' that the observations must match the `trueObs`. Hence, the hidden state is likely to have been `[false, false, false]`.
@@ -129,7 +129,7 @@ var model = function(){
   return y[2] ? y[2] : "" // distribution on next word?
 }
 
-viz.table(Infer({ model, maxExecutions: 20}))
+viz.table(Infer({ model, method: 'enumerate', maxExecutions: 20}))
 ~~~
 
 This program computes the probability distribution on the next word of a sentence that starts 'tall John....' It finds a few parses that start this way. However, this grammar was specially chosen to place the highest probability on such sentences. Try looking for completions of 'salty soup...' and you will be less happy.
@@ -148,7 +148,7 @@ var binomial = function(){
   return a + b + c
 }
 
-viz(Infer({ model: binomial, maxExecutions: 4 }))
+viz(Infer({ model: binomial }))
 ~~~
 
 First of all, we can clearly move the factor up, to the point when it's first dependency is bound. In general, factor statements can be moved anywhere in the same control scope in which they started (i.e., they must be reached in the same program executions and not cross a marginalization boundary). In this case:
@@ -162,7 +162,7 @@ var binomial = function(){
   return a + b + c
 }
 
-viz(Infer({ model: binomial, maxExecutions: 4 }))
+viz(Infer({ model: binomial }))
 ~~~
 
 But we can do much better by noticing that this factor can be broken into an equivalent two factors, and again one can be moved up:
@@ -177,7 +177,7 @@ var binomial = function(){
   return a + b + c
 }
 
-viz(Infer({ model: binomial, maxExecutions: 4 }))
+viz(Infer({ model: binomial, method: 'enumerate', maxExecutions: 4 }))
 ~~~
 
 Notice that this version will find the best execution very early!
@@ -259,7 +259,7 @@ var model = function(){
   return y[2]?y[2]:"" //distribution on next word?
 }
 
-viz.table(Infer({ model, maxExecutions: 20}))
+viz.table(Infer({ model, method: 'enumerate', maxExecutions: 20}))
 ~~~
 
 
@@ -347,7 +347,7 @@ var model = function(){
   return y[2]?y[2]:"" //distribution on next word?
 }
 
-viz.table(Infer({ model, maxExecutions: 20}))
+viz.table(Infer({ model, method: 'enumerate', maxExecutions: 20}))
 ~~~
 
 ### sampleWithFactor
@@ -364,7 +364,7 @@ var binomial = function(){
   return a + b + c
 }
 
-viz(Infer({ model: binomial, maxExecutions: 2 }))
+viz(Infer({ model: binomial, method: 'enumerate', maxExecutions: 2 }))
 ~~~
 
 More usefully, for the HMM, this trick allows us to ensure that each `newObs` will be equal to the observed `trueObs`. We first marginalize out `observeState(..)` to get an immediate distribution from which to sample, and then use `sampleWithFactor(..)` to simultaneously sample and incorporate the factor:
@@ -403,7 +403,7 @@ var model = function(){
   return r.states
 }
 
-viz.table(Infer({ model, maxExecutions: 500 }))
+viz.table(Infer({ model, method: 'enumerate', maxExecutions: 500 }))
 ~~~
 
 (There is one more optimization for the HMM: We could achieve dynamic programming by inserting additional marginal operators at the boundary of `hmmRecur` and caching them.)
@@ -423,7 +423,7 @@ var binomial = function(){
   return a + b + c
 }
 
-viz(Infer({ model: binomial, maxExecutions: 2}))
+viz(Infer({ model: binomial, method: 'enumerate', maxExecutions: 2}))
 ~~~
 
 We can still insert 'heuristic' factors that will help the inference algorithm explore more effectively, as long as they cancel by the end. That is, `factor(s); factor(-s)` has no effect on the meaning of the model, and so is always allowed (even if the two factors are separated, as long as they aren't separated by a marginalization operator). For instance:
@@ -439,7 +439,7 @@ var binomial = function(){
   return a + b + c
 }
 
-viz(Infer({ model: binomial, maxExecutions: 2 }))
+viz(Infer({ model: binomial, method: 'enumerate', maxExecutions: 2 }))
 ~~~
 
 This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For examples of this technique, see the [incremental semantic parsing example](semanticparsing.html#incremental-world-building) and the [vision example](vision.html).

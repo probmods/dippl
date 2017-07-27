@@ -480,18 +480,21 @@ var maxExec = 10
 
 viz(Infer({
   model: binomial,
+  method: 'enumerate',
   maxExecutions: maxExec, 
   strategy: 'depthFirst'
 }));
 
 viz(Infer({
   model: binomial,
+  method: 'enumerate',
   maxExecutions: maxExec, 
   strategy: 'breadthFirst'
 }));
 
 viz(Infer({
   model: binomial,
+  method: 'enumerate',  
   maxExecutions: maxExec, 
   strategy: 'likelyFirst',
 }));

@@ -116,6 +116,8 @@ Infer({
 	drawLines(finalGeneratedImage, lines);
    }
 })
+
+'done'
 ~~~~
 
 Inference using MCMC and with a model that can manipulate opacity and stroke width:

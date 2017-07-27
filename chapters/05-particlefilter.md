@@ -64,6 +64,7 @@ var lineDist = Infer({
     drawLines(finalGeneratedImage, lines);
     return lines;
   },
+  method: 'enumerate',
   strategy: 'depthFirst', 
   maxExecutions: 10 })
 
