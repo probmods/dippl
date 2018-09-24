@@ -28,8 +28,8 @@ var worldPrior = function(nObjLeft, meaningFn, worldSoFar, prevFactor) {
 
 
 var meaning = function(utterance) {
-  return combine_meanings(filter(function(m){return !(m.sem==undefined)},
-                                 map(lexical_meaning, utterance.split(" "))))
+  return combineMeanings(filter(function(m){return !(m.sem==undefined)},
+                                 map(lexicalMeaning, utterance.split(" "))))
 }
 
 var lexicalMeaning = function(word) {
@@ -153,7 +153,7 @@ var isall = function(world){
 }
 
 var literalListener = cache(function(utterance) {
-  Infer({ 
+  Infer({
     model() {
       var m = meaning(utterance)
       var world = worldPrior(2,m)
@@ -164,7 +164,7 @@ var literalListener = cache(function(utterance) {
 })
 
 var speaker = cache(function(world) {
-  Infer({ 
+  Infer({
     model() {
       var utterance = utterancePrior()
       var L = literalListener(utterance)
@@ -176,7 +176,7 @@ var speaker = cache(function(world) {
 
 
 var listener = function(utterance) {
-  Infer({ 
+  Infer({
     model() {
       var world = worldPrior(2, function(w){return 1}) //use vacuous meaning to avoid any guide...
       //    var world = worldPrior(2, meaning(utterance)) //guide by literal meaning
