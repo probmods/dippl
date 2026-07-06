@@ -101,6 +101,8 @@ viz(Infer({ model: skewBinomial }))
 Now the Metropolis-Hastings sampler: we add to the earlier algorithm a step which accepts or rejects the new state. The probability of acceptance is given by:
 
 ~~~
+// static
+
 function MHacceptProb(trace, oldTrace, regenFrom){
   var fw = -Math.log(oldTrace.length)
   trace.slice(regenFrom).map(function(s){fw += s.choiceScore})
@@ -228,6 +230,8 @@ MH(cpsSkewBinomial)
 Above we only reused the random choices made before the point of regeneration. It is generally better to make 'smaller' steps, reusing as many choices as possible. If we knew which sampled value was which, then we could look into the previous trace as the execution runs and reuse its values. That is, imagine that each call to `sample` was passed a (unique) name: `sample(name, dist)`. Then the sample function could try to look up and reuse values:
 
 ~~~
+// static
+
 function _sample(cont, name, dist, forceSample) {
   var prev = findChoice(oldTrace, name)
   var reuse = ! (prev==undefined || forceSample)
@@ -243,6 +247,8 @@ function _sample(cont, name, dist, forceSample) {
 Notice that, in addition to reusing existing sampled choices, we add the name and mark whether this choice has been resampled. We must account for this in the MH acceptance calculation:
 
 ~~~
+// static
+
 function MHacceptProb(trace, oldTrace, regenFrom){
   var fw = -Math.log(oldTrace.length)
   trace.slice(regenFrom).map(function(s){fw += s.reused?0:s.choiceScore})

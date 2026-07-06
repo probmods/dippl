@@ -24,11 +24,13 @@ To flesh out this model, we need the `worldPrior`, the `utterancePrior`, and the
 ~~~
 ///fold:
 var literalListener = function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    var m = meaning(utterance, world)
-    factor(m?0:-Infinity)
-    return world
+  Infer({
+    model() {
+      var world = worldPrior()
+      var m = meaning(utterance, world)
+      factor(m?0:-Infinity)
+      return world
+    }
   })
 }
 ///
@@ -63,11 +65,13 @@ We can move to a more Gricean listener who assumes that the speaker has chosen a
 ~~~
 ///fold:
 var literalListener = function(utterance) {
-  Enumerate(function(){
-    var world = worldPrior()
-    var m = meaning(utterance, world)
-    factor(m?0:-Infinity)
-    return world
+  Infer({
+    model() {
+      var world = worldPrior()
+      var m = meaning(utterance, world)
+      factor(m?0:-Infinity)
+      return world
+    }
   })
 }
 

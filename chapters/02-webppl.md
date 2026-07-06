@@ -11,7 +11,7 @@ This page documents the language, illustrating with some very simple examples. F
 
 ## The language: A subset of Javascript
 
-Following the notation from the [Mozilla Parser API](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API), our language consists of the subset of Javascript that can be built from the following syntax elements, each shown with an `example`:
+Following the notation from the [ESTree spec](https://github.com/estree/estree), our language consists of the subset of Javascript that can be built from the following syntax elements, each shown with an `example`:
 
 - *Program* - a complete program, consisting of a sequence of statements
 - *BlockStatement* - a sequence of statements surrounded by braces, `{ var x=1; var y=2; }`

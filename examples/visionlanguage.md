@@ -2,6 +2,8 @@
 layout: default
 title: Computer vision and language
 description: Combining vision with semantics and pragmatics
+custom_js:
+  /assets/js/draw.js
 ---
 
 Combining vision with semantics and pragmatics
@@ -30,7 +32,7 @@ var maxF = function(f,ar) {
 
 ///
 
-// language: ccg
+// static
 
 var lexical_meaning = function(word) {
 
@@ -282,7 +284,7 @@ var speaker = function(img) {
     var score = expectation(w, function(s) {
       // for stack size issues
       var match = function(){ return worldMatch(pw,s) }
-      return withEmptyStack(match)
+      return match()
     })
     factor(score)
     return utterance
@@ -307,4 +309,4 @@ print(speaker(_f[0]))
    accommodate such. (I like foxes and hens)
     - google for foxes and hens
     - google for knights and dragons
-    - [MS Abstract Scenes](http://research.microsoft.com/en-us/um/people/larryz/clipart/abstract_scenes.html)
+    - [MS Abstract Scenes](https://github.com/GT-Vision-Lab/abstract_scenes_v002)

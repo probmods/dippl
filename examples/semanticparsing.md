@@ -63,9 +63,9 @@ First we get a lexical meaning for each word and filter out the undefined meanin
 
 var meaning = function(utterance, world) {
   return combineMeanings(
-    filter(map(utterance.split(" "),
-               function(w){return lexicalMeaning(w, world)}),
-           function(m){return !(m.sem==undefined)}))
+    filter(function(m){return !(m.sem==undefined)},
+           map(function(w){return lexicalMeaning(w, world)},
+               utterance.split(" "))))
 }
 ~~~
 
@@ -313,7 +313,7 @@ viz.table(literalListener("all blond people are nice"))
 
 ## Incremental world building
 
-The above version of semantic parsing constructs an entire world *and* an entire meaning before trying to enforce that the meaning is true of the world. We would like to make either the world construction or the parsing more incremental... Below we give a version that uses the [canceling heuristic factors](04-factorseq.html#inserting-canceling-heuristic-factors) trick to encourage the world to be one in which the constructed meaning is true, incrementally as we add objects to the world.
+The above version of semantic parsing constructs an entire world *and* an entire meaning before trying to enforce that the meaning is true of the world. We would like to make either the world construction or the parsing more incremental... Below we give a version that uses the [canceling heuristic factors](../chapters/04-factorseq.html#inserting-canceling-heuristic-factors) trick to encourage the world to be one in which the constructed meaning is true, incrementally as we add objects to the world.
 
 Two changes are involved. First we adapt the `worldPrior` to allow canceling factors. Second, this version constructs a function from world to truth value, which can then be used several times while the world is constructed. That is, we depart from direct compositionality, in building 'delayed' denotations that await the world.
 

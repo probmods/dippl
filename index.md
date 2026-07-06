@@ -64,5 +64,5 @@ N. D. Goodman and A. Stuhlmüller (electronic). The Design and Implementation of
 The construction of this tutorial was made possible by grants from DARPA, under agreement number FA8750-14-2-0009, and the Office of Naval Research, grant number N00014-13-1-0788. 
 (The views and conclusions contained herein are those of the authors and should not be interpreted as necessarily representing the official policies or endorsements, either expressed or implied, of DARPA or the U.S. Government.)
 
-This book is based on notes from the [ESSLLI 2014](http://www.esslli2014.info) class on Probabilistic Programming Languages, taught by the authors.
+This book is based on notes from the [ESSLLI 2014](http://web.archive.org/web/20141223191117/http://www.esslli2014.info/) class on Probabilistic Programming Languages, taught by the authors.
 

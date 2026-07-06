@@ -266,7 +266,7 @@ viz.table(Infer({ model, method: 'enumerate', maxExecutions: 20}))
 
 ### Incrementalizing the HMM and PCFG
 
-We can now decompose and move factors. In the HMM, we first observe that the factor `factor( arrayEq(r.observations, trueObs) ? 0 : -Infinity )` can be seen as `factor(r.observations[0]==trueObs[0] ? 0 : -Infinity); factor(r.observations[1]==trueObs[1] ? 0 : -Infinity); ...`. Then we observe that these factors can be moved 'up' into the recursion to give:
+We can now decompose and move factors. In the HMM, we first observe that the factor `factor( _.isEqual(r.observations, trueObs) ? 0 : -Infinity )` can be seen as `factor(r.observations[0]==trueObs[0] ? 0 : -Infinity); factor(r.observations[1]==trueObs[1] ? 0 : -Infinity); ...`. Then we observe that these factors can be moved 'up' into the recursion to give:
 
 ~~~
 ///fold:
@@ -352,7 +352,7 @@ viz.table(Infer({ model, method: 'enumerate', maxExecutions: 20}))
 
 ### sampleWithFactor
 
-It is fairly common to end up with a factor that provides some evidence just after the sampled value it depends on. If we separate `sample` and `factor`, we will often try to explore sample paths that the factor will shortly tell us are very bad. To account for this, we introduce a compound operator `sampleWithFactor`, that takes a distribution, like `sample`, and also takes a function that is applied to the sampled value to compute a score for `factor`. By default, marginalization functions will simply treat `sampleWithFactor(dist,params,scoreFn)` as `var v = sample(dist,params); factor(scoreFn(v))`; however, some implementations will use this information more efficiently. The WebPPL `enumerate` inference method immediately adds the additional score to the score for the state as it is added to the queue -- this means that the additional score is included when prioritizing which states to explore next.
+It is fairly common to end up with a factor that provides some evidence just after the sampled value it depends on. If we separate `sample` and `factor`, we will often try to explore sample paths that the factor will shortly tell us are very bad. To account for this, we introduce a compound operator `sampleWithFactor`, that takes a distribution, like `sample`, and also takes a function that is applied to the sampled value to compute a score for `factor`. By default, marginalization functions will simply treat `sampleWithFactor(dist,scoreFn)` as `var v = sample(dist); factor(scoreFn(v))`; however, some implementations will use this information more efficiently. The WebPPL `enumerate` inference method immediately adds the additional score to the score for the state as it is added to the queue -- this means that the additional score is included when prioritizing which states to explore next.
 
 The binomial example becomes:
 
@@ -442,7 +442,7 @@ var binomial = function(){
 viz(Infer({ model: binomial, method: 'enumerate', maxExecutions: 2 }))
 ~~~
 
-This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For examples of this technique, see the [incremental semantic parsing example](semanticparsing.html#incremental-world-building) and the [vision example](vision.html).
+This will work pretty much any time you have 'guesses' about what the final factor will be, while you are executing your program. Especially if these guesses improve incrementally and steadily. For examples of this technique, see the [incremental semantic parsing example](../examples/semanticparsing.html#incremental-world-building) and the [vision example](../examples/vision.html).
 
 There is no reason not to *learn* heuristic factors that help guide search, as long as they cancel by the end they won't compromise the correctness of the computed distribution (in the limit). While it wouldn't be worth the expense to learn heuristic factors for a single marginalization, it may be very useful to do so across multiple related marginal distributions -- this is an example of *amortized* or *meta-* inference. (Note this is a topic of ongoing research by the authors....)
 

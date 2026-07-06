@@ -10,7 +10,7 @@ All inference techniques involve exploring the space of executions of a random c
 
 ## Exploring a random computation
 
-Consider the simple binomial example from [earlier](WebPPL.html).
+Consider the simple binomial example from [earlier](02-webppl.html).
 
 ~~~
 var binomial = function(){
@@ -466,7 +466,7 @@ f(3);</textarea>
 
 Above we have maintained a first-in-last-out queue of continuations; this results in a depth-first search strategy over program executions. Often a more useful approach is to enumerate the highest priority continuation first, based on some heuristic notion of priority. For instance, using the score-so-far as priority results in a most-likely-first strategy. We can achieve this by simply changing the above code to use a priority queue (instead of `push` and `pop`).
 
-Here we compare different enumeration orders for a simple computation. The argument to the `Enumerate` methods indicates how many executions to complete before stopping. Try reducing it to 1, 2, and 3 to see what each method finds in the first few executions.
+Here we compare different enumeration orders for a simple computation. The `maxExecutions` option to `Infer` indicates how many executions to complete before stopping. Try reducing it to 1, 2, and 3 to see what each strategy finds in the first few executions.
 
 ~~~
 var binomial = function(){

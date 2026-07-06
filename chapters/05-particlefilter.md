@@ -314,7 +314,7 @@ var cpsHmm = function(k, states, observations){
             return cpsHmm(k, states.concat([state]), observations.slice(1));
           }
         },
-        (state == observations[0]) ? 0 : -1);
+        (state == observations[0]) ? 0 : -2);
     },
     Bernoulli({p: prevState ? .9 : .1}));
 }
@@ -362,7 +362,7 @@ var cpsHmm = function(k, states, observations){
             return cpsHmm(k, states.concat([state]), observations.slice(1));
           }
         },
-        (state == observations[0]) ? 0 : -1);
+        (state == observations[0]) ? 0 : -2);
     },
     Bernoulli({p: prevState ? .9 : .1}));
 }
@@ -407,7 +407,7 @@ var cpsHmm = function(k, states, observations){
             return cpsHmm(k, states.concat([state]), observations.slice(1));
           }
         },
-        (state == observations[0]) ? 0 : -1);
+        (state == observations[0]) ? 0 : -2);
     },
     Bernoulli({p: prevState ? .9 : .1}));
 }
@@ -492,7 +492,7 @@ var cpsHmm = function(k, states, observations){
             return cpsHmm(k, states.concat([state]), observations.slice(1));
           }
         },
-        (state == observations[0]) ? 0 : -1);
+        (state == observations[0]) ? 0 : -2);
     },
     Bernoulli({p: prevState ? .9 : .1}));
 }
@@ -573,7 +573,7 @@ var resample = function(samples){
     function(sample){return Math.exp(sample.score);});
   var newSamples = [];
   for (var i=0; i<samples.length; i++){
-    var j = multinomialSample(weights);
+    var j = dists.discreteSample(weights);
     newSamples.push(samples[j]);
   }
   return newSamples;
@@ -602,7 +602,7 @@ var cpsHmm = function(k, states, observations){
             return cpsHmm(k, states.concat([state]), observations.slice(1));
           }
         },
-        (state == observations[0]) ? 0 : -1);
+        (state == observations[0]) ? 0 : -2);
     },
     Bernoulli({p: prevState ? .9 : .1}));
 }
@@ -729,7 +729,7 @@ var cpsHmm = function(k, states, observations){
             return cpsHmm(k, states.concat([state]), observations.slice(1));
           }
         },
-        (state == observations[0]) ? 0 : -1);
+        (state == observations[0]) ? 0 : -2);
     },
     Bernoulli({p: prevState ? .9 : .1}));
 }
@@ -965,11 +965,13 @@ var semiMarkovWalkConstrained = function(n, dim, trueObs) {
 var numSteps = 80;
 var trueObservations = semiMarkovWalk(numSteps, 2).observations;
 
-var posteriorSampler = ParticleFilter(
-  function(){
+var posteriorSampler = Infer({
+  method: 'SMC',
+  particles: 10, // Try reducing the number of particles to 1!
+  model() {
     return semiMarkovWalkConstrained(numSteps, 2, trueObservations);
-  },
-  10) // Try reducing the number of samples to 1!
+  }
+})
 
 var inferredStates = sample(posteriorSampler).states;
 
