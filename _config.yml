@@ -1,1 +1,4 @@
 markdown: kramdown
+exclude:
+  - README.md
+  - bower_components/paper/examples

@@ -1,29 +1,21 @@
 ## The Design and Implementation of Probabilistic Programming Languages
 
-A web book, available online at [dippl.org](http://dippl.org/)
+A web book, available online at [dippl.org](https://dippl.org/)
 
 Requirements:
 
 - [git](http://git-scm.com/)
-- [nodejs](http://nodejs.org)
 - [jekyll](http://jekyllrb.com/)
 
-Installation:
+Run a local webserver:
 
     git clone https://github.com/probmods/dippl.git
     cd dippl
-    npm install
-    npm install -g browserify bower uglifyjs
-    bower install
-
-Run local webserver:
-
     jekyll serve --watch
 
-## Assets
+All JavaScript and CSS dependencies are vendored in the repo, so no package manager is needed:
 
-To update webppl, webppl-viz, and webppl-editor, simply copy the minified Javascript files (`webppl-editor.min.js`, `webppl-viz.min.js`, `webppl.min.js`) and CSS files (`webppl-editor.css`, `webppl-viz.css`) to `assets/js` and `assets/css` respectively.
+- The webppl runtime, editor, and visualization library live in `assets/js` and `assets/css` (currently webppl v0.9.9, webppl-editor 1.0.9, webppl-viz 0.7.11). To upgrade, replace those files with new builds and update the references in `_layouts/default.html`.
+- Third-party browser libraries (jQuery, Bootstrap, d3, etc.) live in `bower_components`. The directory name is historical; bower itself is no longer used.
 
-- webppl: f24238e (v0.7.0+ dev)
-- webppl-editor: d888aa2
-- webppl-viz: 2450784
+The site deploys via GitHub Pages from the `gh-pages` branch.
